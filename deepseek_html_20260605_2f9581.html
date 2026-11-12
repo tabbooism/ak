@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>NIGHTSHADE BAZAAR // STYX‑CLASS DARKNET MARKET v2.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+  <style>
+    body {
+      background: #0a0c10;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 0;
+    }
+    .market-card {
+      background: rgba(16, 20, 28, 0.95);
+      border: 1px solid #2a3342;
+      border-radius: 0.75rem;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+    .market-card:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 0 18px rgba(59,130,246,0.2);
+    }
+    .btn-primary {
+      background: linear-gradient(95deg, #1e3a8a, #0f172a);
+      border: 1px solid #3b82f6;
+      transition: 0.2s;
+    }
+    .btn-primary:hover {
+      background: #1e40af;
+      border-color: #60a5fa;
+    }
+    .danger-zone {
+      border-left: 3px solid #ef4444;
+    }
+    .toast-notify {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      z-index: 2000;
+      background: #1f2937;
+      border-left: 4px solid #3b82f6;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.8);
+      max-width: 340px;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2d3a5e; border-radius: 8px; }
+    /* Psycho module text effects */
+    .psycho-glow {
+      text-shadow: 0 0 8px #a855f7;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<div id="app" class="max-w-7xl mx-auto px-4 py-5">
+  <!-- Header -->
+  <div class="flex flex-wrap justify-between items-center border-b border-gray-800 pb-4 mb-6">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-skull text-3xl text-blue-400"></i>
+      <h1 class="text-2xl md:text-3xl font-black"><span class="text-blue-400">NIGHTSHADE</span><span class="text-white">://BAZAAR</span></h1>
+      <div class="hidden md:flex gap-2 text-xs font-mono">
+        <span class="bg-black/60 px-2 py-1 rounded border border-blue-800">ESCROW+MULTISIG</span>
+        <span class="bg-black/60 px-2 py-1 rounded border border-purple-800">VENDOR API</span>
+      </div>
+    </div>
+    <div class="flex gap-3 items-center mt-2 md:mt-0">
+      <div class="bg-black/50 rounded-full px-3 py-1 text-sm font-mono"><i class="fas fa-coins text-yellow-400"></i> BAL: <span id="userBalance">0.00</span> USD</div>
+      <div class="relative cursor-pointer" id="cartIcon"><i class="fas fa-shopping-cart text-xl"></i><span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span></div>
+      <div class="relative">
+        <i class="fas fa-user-circle text-xl cursor-pointer" id="userMenuBtn"></i>
+        <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-lg hidden z-50">
+          <a href="#" id="profileLink" class="block px-4 py-2 text-sm hover:bg-gray-700">Profile / Orders</a>
+          <a href="#" id="wishlistLink" class="block px-4 py-2 text-sm hover:bg-gray-700">Wishlist</a>
+          <a href="#" id="adminPanelLink" class="block px-4 py-2 text-sm text-red-400 hover:bg-gray-700">ADMIN PANEL</a>
+          <a href="#" id="logoutLink" class="block px-4 py-2 text-sm text-gray-400 hover:bg-gray-700">Logout</a>
+        </div>
+      </div>
+      <button id="depositBtn" class="bg-green-800/70 px-3 py-1 rounded-md text-sm">DEPOSIT</button>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- Sidebar -->
+    <div class="lg:w-1/5 space-y-4">
+      <div class="market-card p-4">
+        <div class="font-semibold text-blue-300 mb-3 text-sm">CATEGORIES</div>
+        <div id="catList" class="space-y-2 text-sm max-h-96 overflow-y-auto"></div>
+      </div>
+      <div class="market-card p-4">
+        <div class="font-semibold text-blue-300 mb-2 text-sm">FILTERS</div>
+        <input type="text" id="filterSearch" placeholder="Search product..." class="w-full text-xs mb-2 bg-black/50 border border-gray-600 rounded p-1">
+        <select id="filterCategory" class="w-full text-xs mb-2 bg-black/50 border border-gray-600 rounded p-1"><option value="all">All categories</option></select>
+        <div class="grid grid-cols-2 gap-1 text-xs"><input type="number" id="priceMin" placeholder="Min USD" class="w-full bg-black/50 border border-gray-600 rounded p-1"><input type="number" id="priceMax" placeholder="Max USD" class="w-full bg-black/50 border border-gray-600 rounded p-1"></div>
+        <select id="sortBy" class="w-full text-xs mt-2 bg-black/50 border border-gray-600 rounded p-1"><option value="default">Sort by: Default</option><option value="price_asc">Price: Low to High</option><option value="price_desc">Price: High to Low</option><option value="rating">Rating</option></select>
+        <button id="applyFilters" class="btn-primary w-full mt-3 py-1 text-xs rounded">APPLY</button>
+      </div>
+      <div class="market-card p-4 text-xs">
+        <canvas id="volumeSpark" height="80"></canvas>
+        <div class="mt-2 text-green-300">24h volume: $<span id="dailyVolume">0</span></div>
+        <button id="psychoTrigger" class="w-full bg-purple-900 mt-3 py-1 rounded text-xs hover:bg-purple-800"><i class="fas fa-brain"></i> PSYCHO MODULE</button>
+      </div>
+    </div>
+
+    <!-- Product grid -->
+    <div class="lg:w-4/5">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold"><span id="currentCategoryLabel">All Items</span> (<span id="resultCount">0</span>)</h2>
+      </div>
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      <div id="pagination" class="flex justify-center gap-2 mt-6 mb-10"></div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <!-- Cart Modal -->
+  <div id="cartModal" class="fixed inset-0 bg-black/90 hidden justify-end z-50">
+    <div class="bg-gray-900 w-full max-w-md h-full p-6 overflow-y-auto">
+      <div class="flex justify-between mb-4"><h3 class="text-xl"><i class="fas fa-shopping-cart"></i> CART</h3><i id="closeCart" class="fas fa-times cursor-pointer text-2xl"></i></div>
+      <div id="cartItemsList" class="space-y-3"></div>
+      <div class="border-t border-gray-700 pt-3 text-right font-mono">TOTAL: $<span id="cartTotal">0.00</span></div>
+      <button id="checkoutBtn" class="btn-primary w-full mt-4 py-2 rounded-md">FINALIZE ORDER (ESCROW)</button>
+      <p class="text-[10px] text-gray-400 mt-2">* Escrow held 14 days | Dispute handled by Draco</p>
+    </div>
+  </div>
+
+  <!-- Product Detail Modal -->
+  <div id="productModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-xl max-w-2xl w-full p-6 relative">
+      <i id="closeProductModal" class="fas fa-times absolute top-4 right-4 text-gray-400 cursor-pointer text-xl"></i>
+      <div id="productDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- Profile/Orders Modal -->
+  <div id="profileModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-xl w-full max-w-3xl p-6">
+      <div class="flex justify-between"><h3>MY ORDERS / ESCROW</h3><i id="closeProfile" class="fas fa-times cursor-pointer"></i></div>
+      <div id="ordersList" class="mt-4 space-y-3 max-h-[70vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- Wishlist Modal -->
+  <div id="wishlistModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 rounded-xl w-full max-w-3xl p-6">
+      <div class="flex justify-between"><h3>WISHLIST</h3><i id="closeWishlist" class="fas fa-times cursor-pointer"></i></div>
+      <div id="wishlistGrid" class="grid grid-cols-2 gap-3 mt-4"></div>
+    </div>
+  </div>
+
+  <!-- Deposit Modal -->
+  <div id="depositModalWin" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-xl w-96">
+      <h3 class="mb-3 font-mono">DEPOSIT USD (simulated)</h3>
+      <input type="number" id="depositAmount" placeholder="Amount USD" class="w-full bg-black p-2 rounded">
+      <button id="confirmDeposit" class="bg-green-700 w-full mt-3 py-2 rounded">Add Funds</button>
+      <p class="text-[10px] text-gray-400 mt-2">Accepts BTC, ETH, LTC, USDC, XMR, PayPal, Cash App</p>
+    </div>
+  </div>
+
+  <!-- Psycho Module (The "You Won" scam) -->
+  <div id="psychoModal" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[60]">
+    <div class="bg-gray-800 rounded-xl max-w-lg w-full p-6 relative">
+      <i id="psychoClose" class="fas fa-times absolute top-3 right-3 text-gray-400 cursor-pointer text-xl"></i>
+      <h3 class="text-xl font-bold text-purple-400 psycho-glow"><i class="fas fa-skull"></i> PSYCHO MODULE - SCAMMER KILLCHAIN</h3>
+      <div id="psychoContent" class="mt-4 space-y-4">
+        <!-- Dynamic content injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+    <div class="bg-gray-900 rounded-xl w-full max-w-4xl p-6 overflow-y-auto max-h-[90vh]">
+      <div class="flex justify-between"><h2 class="text-red-400"><i class="fas fa-dragon"></i> DRACO ADMIN OVERRIDE</h2><i id="closeAdmin" class="fas fa-times cursor-pointer text-xl"></i></div>
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div><h4>Force Release Escrow</h4><button id="adminForceRelease" class="bg-red-700 px-3 py-1 rounded text-sm">RELEASE ALL PENDING</button></div>
+        <div><h4>Add Fake Reviews</h4><button id="adminFakeReviews" class="bg-orange-700 px-3 py-1 rounded text-sm">INJECT SOCIAL PROOF</button></div>
+        <div><h4>Reset User Balance</h4><button id="adminResetBalance" class="bg-yellow-700 px-3 py-1 rounded text-sm">RESET TO $0</button></div>
+        <div><h4>Simulate Wallet Drain</h4><button id="adminDrainWallet" class="bg-purple-700 px-3 py-1 rounded text-sm">DRAIN MARK (psst)</button></div>
+      </div>
+      <div id="adminLog" class="mt-4 text-xs border-t border-gray-700 pt-3"></div>
+    </div>
+  </div>
+
+  <!-- Draco Chat (floating) -->
+  <div class="fixed bottom-4 right-4 z-40">
+    <div id="chatToggle" class="bg-red-900 rounded-full w-12 h-12 flex items-center justify-center cursor-pointer shadow-lg hover:bg-red-800">
+      <i class="fas fa-comment-dots"></i>
+    </div>
+    <div id="chatPanel" class="hidden market-card w-80 mt-2 overflow-hidden">
+      <div class="bg-black/70 p-2 font-bold text-red-300">⚡ ADMIN DRACO</div>
+      <div id="chatLog" class="h-64 overflow-y-auto p-2 text-xs space-y-1"></div>
+      <input id="chatInput" class="w-full p-2 text-sm bg-black/70 border-t border-gray-700" placeholder="Type message...">
+      <button id="sendChatMsg" class="bg-cyan-800 w-full py-1 text-xs hover:bg-cyan-700">SEND TO DRACO</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // --------------------------------------------------------------
+    // 1. PRODUCT DATABASE (250+ items across 6 categories)
+    // --------------------------------------------------------------
+    const categories = ['firearms','malware','drugs','lab','counterfeit','nsfw'];
+    const catNames = { firearms:'🔫 Firearms', malware:'💀 Malware/Rootkits', drugs:'💊 Narcotics', lab:'🧪 Lab/Precursors', counterfeit:'🆔 Counterfeit/IDs', nsfw:'🔞 NSFW / Leaks' };
+    const vendors = ["AlphaArmory","GhostNet","QuantumChem","IDForge","LeakVault","SteelSyndicate","RootkitForge","DarkMatter","PsycheDel","SnowGod","Glasswerk","MagStripe","ZeroDaySupply","FentanylEmpire"];
+    function randomVendor() { return vendors[Math.floor(Math.random()*vendors.length)]; }
+    function randomRating() { return (Math.random() * 1.8 + 3.0).toFixed(1); }
+    function randomPrice(min,max){ return Math.floor(Math.random()*(max-min+1)+min); }
+    function randomReviews(){ return Math.floor(Math.random()*250)+15; }
+
+    let products = [];
+    let idGen = 1;
+    const productTemplates = {
+      firearms: ["Glock 19 Gen5 MOS","AR-15 Complete Upper","Sig Sauer P320","Remington 870","Beretta 92FS","Glock Switch","AK-47","Draco Pistol","Benelli M4","FN 5.7","Colt Python","AR-10 lower","9mm 1000rds",".223 500rds","Suppressor kit","Mossberg 500","Tavor X95","SCAR 17S","MP5 clone","Desert Eagle","CZ Scorpion","S&W M&P","Springfield Hellion","KelTec KSG","Ruger 10/22","M1 Garand","Browning Hi-Power","HK VP9","Walther PDP","FAMAS replica"],
+      malware: ["Windows Ring0 Rootkit","Android RAT Builder","Cobalt Strike Beacon","CVE-2025-21293 Exploit","ESXi Ransomware","SSH Backdoor","Mimikatz compiled","Telegram Stealer","Browser Cookie Extractor","RDP Scanner","Linux Kernel Rootkit","UEFI Bootkit","MacOS Stealer","VM Escape PoC","Discord Token Logger","AI Phishing Kit","DarkGate Loader","React Payload Injector","EternalBlue Exploit","ZeroLogon Script","PrintNightmare Payload","SMBGhost","ProxyLogon shell","Log4j RCE","DirtyPipe Exploit","BlueKeep Scanner","CobaltStrike Profile","Empire C2","Sliver Framework","PoshC2"],
+      drugs: ["MDMA 1g 86%","LSD 200ug x10","Cocaine 3.5g fishscale","Ketamine 500mg","2C-B 25mg x5","DMT vape 0.5ml","Xanax bars x30","Oxycodone 30mg x20","Amphetamine paste 5g","4-MMC 2g","Fentanyl test strips","Weed distillate","Psilocybin chocolate","GHB 100ml","Etizolam powder","Meth 3.5g","Kratom extract","Phenibut 250g","Mephedrone crystals","MDA 1g","3-MMC 2g","5-MeO-DMT","Ketamine vials","DXM powder","Codeine syrup","Hydrocodone 10mg","Morphine sulfate","Adderall IR","Vyvanse 70mg","Clonazepam 2mg","Lorazepam 2.5mg"],
+      lab: ["Buchner filtration kit","Heating mantle 1000ml","Magnetic stirrer","Borosilicate glass set","Sep funnel 2L","pH meter lab grade","Silica gel columns","Rotovap (used)","Glass reactor 5L","Benzaldehyde 1L","Nitroethane 500ml","Methylamine 40%","Palladium on carbon","Sodium borohydride","Distillation apparatus","Vacuum pump","Analytical balance","Reflux condenser","Round bottom flask","Liebig condenser","Soxhlet extractor","TLC plates","UV lamp","Hotplate stirrer","Lab coat","Safety goggles","Nitril gloves","Fume hood filter","Methylene chloride","Ethyl acetate","Sulfuric acid 98%"],
+      counterfeit: ["Clone Visa cards track data","US driver's license scannable","Passport template PSD","Fake $100 bills","Credit card embosser","ID card printer ribbon","Holographic stickers","Fake utility bills","Social security card","Diploma certificate","Dumps + PIN track2","Counterfeit Rolex AAA","Fake vaccine card","Bank statement generator","Notary stamp","Fake green card","EU ID card","Fake diploma","Counterfeit money detector","Fake I-20 form","Fake marriage cert","Fake title deed","Counterfeit sneakers","Fake designer bags","Fake watches","Counterfeit coins","Fake antique","Fake art certificate"],
+      nsfw: ["OnlyFans leaks 500GB","Teen mega pack 18+","Hidden cams locker room","Snapchat premium scraper","Celebrity nudes 2025","AI deepfake nudes tool","Real amateur mega","Pay per view rips","Webcam show recordings","Taboo hentai collection","BDSM studio archive","Voyeur hidden cam","Leaked iCloud","Deepfake request service","Sex doll torso","Real homemade sextapes","ASMR erotica pack","Anime hentai mega","VR porn scenes","Fetish AI generator"]
+    };
+
+    for(let cat of categories){
+      let items = productTemplates[cat];
+      for(let i=0;i<items.length;i++){
+        let price = randomPrice(15, cat==='firearms'?4500: cat==='malware'?2800: cat==='drugs'?600: 1200);
+        products.push({
+          id: idGen++,
+          name: items[i],
+          category: cat,
+          price: price,
+          vendor: randomVendor(),
+          rating: parseFloat(randomRating()),
+          reviews: randomReviews(),
+          desc: `Premium ${cat} product. Stealth shipping. Full escrow.`,
+          image: cat==='firearms'?'🔫':cat==='malware'?'💻':cat==='drugs'?'💊':cat==='lab'?'🧪':cat==='counterfeit'?'💳':'🔞',
+          fullDesc: `Detailed information for ${items[i]}. Vendor: ${randomVendor()}. Trusted seller with high feedback. Discreet delivery guaranteed.`,
+          paymentOptions: ['BTC','ETH','LTC','USDC','XMR','PayPal','Cash App','Chime']
+        });
+      }
+    }
+    // Extra premium items
+    products.push({id:idGen++, name:"Fully auto conversion kit", category:"firearms", price:3200, vendor:"ArmoryX", rating:4.9, reviews:56, desc:"Drop-in auto sear. Legal grey zone.", image:"⚙️", paymentOptions:['BTC','XMR']});
+    products.push({id:idGen++, name:"Windows EDR Killer", category:"malware", price:2100, vendor:"RootkitForge", rating:5.0, reviews:21, desc:"Bypass all AV/EDR. Undetected.", image:"💀", paymentOptions:['BTC','ETH','USDC']});
+    products.push({id:idGen++, name:"Fentanyl citrate 10g", category:"drugs", price:450, vendor:"FentanylEmpire", rating:4.6, reviews:97, desc:"High purity, lab tested. Lethal dose warning.", image:"⚗️", paymentOptions:['BTC','XMR','Cash App']});
+    // --------------------------------------------------------------
+
+    // ---------- STATE ----------
+    let user = {
+      balance: 1250.00,
+      username: "gh0st",
+      orders: [],
+      wishlist: []
+    };
+    let cart = [];
+    let currentPage = 1, itemsPerPage = 12;
+    let currentFilters = { cat: "all", search: "", minPrice: 0, maxPrice: 100000, sort: "default" };
+
+    // ---------- UI UPDATES ----------
+    function updateBalanceUI(){ document.getElementById("userBalance").innerText = user.balance.toFixed(2); }
+    function saveState(){ localStorage.setItem("nightshade_user", JSON.stringify(user)); localStorage.setItem("nightshade_cart", JSON.stringify(cart)); }
+    function loadState(){
+      let u = localStorage.getItem("nightshade_user"); if(u) user = JSON.parse(u);
+      let c = localStorage.getItem("nightshade_cart"); if(c) cart = JSON.parse(c);
+      updateCartUI(); updateBalanceUI(); renderProductGrid();
+    }
+    function updateCartUI(){
+      let total = cart.reduce((s,i)=>s + i.price * i.qty,0);
+      document.getElementById("cartTotal").innerText = total.toFixed(2);
+      document.getElementById("cartCount").innerText = cart.reduce((s,i)=>s+i.qty,0);
+      let container = document.getElementById("cartItemsList");
+      if(cart.length===0){ container.innerHTML="<div class='text-gray-400'>Empty</div>"; return; }
+      container.innerHTML = cart.map(item => `
+        <div class='flex justify-between text-sm border-b border-gray-700 py-2'>
+          <span>${item.name} x${item.qty}</span>
+          <span>$${(item.price*item.qty).toFixed(2)}</span>
+          <button data-id='${item.id}' class='removeCartItem text-red-400 text-xs'>remove</button>
+        </div>`).join("");
+      document.querySelectorAll(".removeCartItem").forEach(btn=>{
+        btn.addEventListener("click",()=>{
+          let id = parseInt(btn.dataset.id);
+          cart = cart.filter(i=>i.id !== id);
+          updateCartUI(); saveState();
+        });
+      });
+      saveState();
+    }
+    function addToCart(prod){
+      let existing = cart.find(i=>i.id === prod.id);
+      if(existing) existing.qty++;
+      else cart.push({...prod, qty:1});
+      updateCartUI();
+      toast(`🛒 ${prod.name} added`);
+    }
+    function toast(msg){
+      let t = document.createElement("div"); t.className="toast-notify"; t.innerText=msg;
+      document.body.appendChild(t); setTimeout(()=>t.remove(),3000);
+    }
+    function checkout(){
+      let total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+      if(user.balance < total){ toast("Insufficient funds. Deposit first."); return; }
+      user.balance -= total;
+      let order = {
+        id: Date.now(),
+        items: [...cart],
+        total: total,
+        date: new Date().toISOString(),
+        status: "ESCROW (awaiting release)"
+      };
+      user.orders.push(order);
+      cart = [];
+      updateCartUI(); updateBalanceUI(); saveState();
+      toast(`Order placed! $${total} held in multisig escrow.`);
+      renderProductGrid();
+    }
+
+    // ---------- RENDERING ----------
+    function renderProductGrid(){
+      let filtered = products.filter(p =>
+        (currentFilters.cat==="all" || p.category === currentFilters.cat) &&
+        p.name.toLowerCase().includes(currentFilters.search.toLowerCase()) &&
+        p.price >= currentFilters.minPrice && p.price <= currentFilters.maxPrice
+      );
+      if(currentFilters.sort === "price_asc") filtered.sort((a,b)=>a.price-b.price);
+      else if(currentFilters.sort === "price_desc") filtered.sort((a,b)=>b.price-a.price);
+      else if(currentFilters.sort === "rating") filtered.sort((a,b)=>b.rating - a.rating);
+      let totalItems = filtered.length;
+      document.getElementById("resultCount").innerText = totalItems;
+      document.getElementById("currentCategoryLabel").innerText = currentFilters.cat==="all"?"All Items":catNames[currentFilters.cat];
+      let start = (currentPage-1)*itemsPerPage;
+      let paginated = filtered.slice(start, start+itemsPerPage);
+      let grid = document.getElementById("productGrid");
+      grid.innerHTML = paginated.map(p => `
+        <div class="market-card p-4 flex flex-col cursor-pointer" data-id="${p.id}">
+          <div class="text-3xl">${p.image}</div>
+          <div class="font-bold text-md mt-1">${p.name}</div>
+          <div class="text-xs text-gray-400">${p.vendor} ★ ${p.rating} (${p.reviews})</div>
+          <div class="text-cyan-300 font-mono mt-1">$${p.price}</div>
+          <div class="text-xs text-gray-500 mt-2 truncate">${p.desc}</div>
+          <button data-id="${p.id}" class="addCartBtn mt-3 bg-gray-800 hover:bg-blue-900 py-1 rounded text-sm">🛒 Add to Cart</button>
+        </div>`).join("");
+      // Product click for detail modal
+      document.querySelectorAll("#productGrid .market-card").forEach(card=>{
+        card.addEventListener("click",(e)=>{
+          if(e.target.classList.contains("addCartBtn")) return;
+          let id = parseInt(card.dataset.id);
+          openProductModal(id);
+        });
+      });
+      document.querySelectorAll(".addCartBtn").forEach(btn=>{
+        btn.addEventListener("click",(e)=>{
+          e.stopPropagation();
+          let id = parseInt(btn.dataset.id);
+          let prod = products.find(p=>p.id===id);
+          addToCart(prod);
+        });
+      });
+      renderPagination(totalItems);
+    }
+    function renderPagination(total){
+      let pages = Math.ceil(total/itemsPerPage);
+      let container = document.getElementById("pagination");
+      if(pages<=1){ container.innerHTML=""; return; }
+      let html = `<button id="pagePrev" class="px-2 py-1 bg-gray-700 rounded" ${currentPage===1?'disabled':''}>«</button>`;
+      for(let i=1;i<=pages;i++){
+        html += `<button class="pageNum px-3 py-1 rounded ${currentPage===i?'bg-blue-600':'bg-gray-700'}" data-page="${i}">${i}</button>`;
+      }
+      html += `<button id="pageNext" class="px-2 py-1 bg-gray-700 rounded" ${currentPage===pages?'disabled':''}>»</button>`;
+      container.innerHTML = html;
+      document.querySelectorAll(".pageNum").forEach(btn=>{
+        btn.addEventListener("click",()=>{ currentPage = parseInt(btn.dataset.page); renderProductGrid(); });
+      });
+      if(document.getElementById("pagePrev")) document.getElementById("pagePrev").onclick = ()=>{ if(currentPage>1){ currentPage--; renderProductGrid(); } };
+      if(document.getElementById("pageNext")) document.getElementById("pageNext").onclick = ()=>{ if(currentPage<pages){ currentPage++; renderProductGrid(); } };
+    }
+    function openProductModal(prodId){
+      let prod = products.find(p=>p.id===prodId);
+      if(!prod) return;
+      document.getElementById("productDetailContent").innerHTML = `
+        <div class="text-2xl font-bold">${prod.image} ${prod.name}</div>
+        <div class="text-sm text-gray-400 mt-2">Vendor: ${prod.vendor} | Rating: ★ ${prod.rating} (${prod.reviews})</div>
+        <div class="text-2xl text-cyan-400 mt-4">$${prod.price}</div>
+        <div class="text-sm text-gray-300 mt-4">${prod.fullDesc || prod.desc}</div>
+        <div class="mt-4 text-sm">Accepts: ${prod.paymentOptions.join(', ')}</div>
+        <button id="modalAddCart" data-id="${prod.id}" class="btn-primary mt-6 px-4 py-2 rounded">Add to Cart</button>
+      `;
+      document.getElementById("productModal").classList.remove("hidden");
+      document.getElementById("productModal").style.display = "flex";
+      document.getElementById("modalAddCart").addEventListener("click",()=>{ addToCart(prod); document.getElementById("productModal").classList.add("hidden"); document.getElementById("productModal").style.display = "none"; });
+    }
+    document.getElementById("closeProductModal").addEventListener("click",()=>{
+      document.getElementById("productModal").classList.add("hidden");
+      document.getElementById("productModal").style.display = "none";
+    });
+
+    // ---------- FILTERS & CATEGORY SIDEBAR ----------
+    function applyFilters(){
+      currentFilters.cat = document.getElementById("filterCategory").value;
+      currentFilters.search = document.getElementById("filterSearch").value;
+      currentFilters.minPrice = parseFloat(document.getElementById("priceMin").value) || 0;
+      currentFilters.maxPrice = parseFloat(document.getElementById("priceMax").value) || 100000;
+      currentFilters.sort = document.getElementById("sortBy").value;
+      currentPage = 1;
+      renderProductGrid();
+    }
+    function buildCategorySidebar(){
+      let container = document.getElementById("catList");
+      container.innerHTML = `<div data-cat="all" class="cat-filter cursor-pointer hover:text-blue-400 p-1 rounded">📁 ALL ITEMS</div>`+
+        categories.map(c=>`<div data-cat="${c}" class="cat-filter cursor-pointer hover:text-blue-400 p-1 rounded">${catNames[c]}</div>`).join("");
+      document.querySelectorAll(".cat-filter").forEach(el=>{
+        el.addEventListener("click",()=>{
+          currentFilters.cat = el.dataset.cat;
+          document.getElementById("filterCategory").value = currentFilters.cat;
+          applyFilters();
+        });
+      });
+    }
+    function buildCategorySelect(){
+      let select = document.getElementById("filterCategory");
+      select.innerHTML = '<option value="all">All categories</option>'+categories.map(c=>`<option value="${c}">${catNames[c]}</option>`).join("");
+      select.value = currentFilters.cat;
+    }
+
+    // ---------- PSYCHO MODULE (SCAM KILLCHAIN) ----------
+    const psychoSteps = [
+      {
+        question: "You've been selected for a reward. Do you believe luck is random or earned?",
+        options: ["Random", "Earned"],
+        next: { Random: 1, Earned: 2 }
+      },
+      {
+        question: "Interesting. Many people miss opportunities because they doubt. Have you ever won something before?",
+        options: ["Yes", "No"],
+        next: { Yes: 3, No: 4 }
+      },
+      {
+        question: "The system shows your profile matches a high-trust tier. Do you consider yourself a rational decision-maker?",
+        options: ["Absolutely", "Sometimes"],
+        next: { Absolutely: 3, Sometimes: 4 }
+      },
+      {
+        question: "Our records indicate you're eligible for $4,500 USD in unclaimed tokens. To release them, we require a small verification transfer of 0.02 BTC. This is fully refundable. Proceed?",
+        options: ["Yes, I'll send", "I'm skeptical"],
+        next: { "Yes, I'll send": 5, "I'm skeptical": 6 }
+      },
+      {
+        question: "Your profile suggests you're cautious, but this is a time-sensitive claim. The tokens will be burned in 5 minutes. What's your gut feeling?",
+        options: ["I'll risk it", "Still no"],
+        next: { "I'll risk it": 5, "Still no": 6 }
+      },
+      {
+        question: "Excellent choice. Transfer the verification to wallet: 0xAbCdEf123456... and reply with the TXID. Once confirmed, your $4,500 will be released instantly. (simulated drain)",
+        options: ["Done", "Cancel"],
+        next: { Done: 7, Cancel: 6 }
+      },
+      {
+        question: "Our system detects you're still considering. What if I told you the unclaimed sum is actually $9,200? Would that change your mind?",
+        options: ["Maybe", "No, I'm out"],
+        next: { Maybe: 5, "No, I'm out": 7 }
+      },
+      {
+        question: "You've completed the scam simulation. Your balance would now be drained. Lesson: trust no random prizes. (Module complete)",
+        options: ["Exit"],
+        next: {}
+      }
+    ];
+    function launchPsychoModule(){
+      let idx = 0;
+      const content = document.getElementById("psychoContent");
+      function renderStep(){
+        let step = psychoSteps[idx];
+        if(!step) { content.innerHTML = "<p class='text-green-400'>Module ended.</p>"; return; }
+        let html = `<p class="text-purple-200 text-lg mb-3">${step.question}</p>`;
+        step.options.forEach(opt => {
+          html += `<button class="psychoOption bg-purple-800 hover:bg-purple-700 px-4 py-2 rounded mr-2 text-sm" data-opt="${opt}">${opt}</button>`;
+        });
+        content.innerHTML = html;
+        document.querySelectorAll(".psychoOption").forEach(btn=>{
+          btn.addEventListener("click",()=>{
+            let choice = btn.dataset.opt;
+            if(step.next && step.next[choice] !== undefined){
+              idx = step.next[choice];
+              renderStep();
+            } else {
+              content.innerHTML = "<p class='text-red-400'>Session ended by user.</p>";
+            }
+          });
+        });
+      }
+      renderStep();
+      document.getElementById("psychoModal").classList.remove("hidden");
+      document.getElementById("psychoModal").style.display = "flex";
+    }
+    document.getElementById("psychoTrigger").addEventListener("click", launchPsychoModule);
+    document.getElementById("psychoClose").addEventListener("click", ()=>{
+      document.getElementById("psychoModal").classList.add("hidden");
+      document.getElementById("psychoModal").style.display = "none";
+    });
+
+    // ---------- EVENT LISTENERS ----------
+    function initEventListeners(){
+      document.getElementById("applyFilters").onclick = applyFilters;
+      document.getElementById("filterSearch").addEventListener("input", ()=>{
+        currentFilters.search = document.getElementById("filterSearch").value;
+        applyFilters();
+      });
+      // Cart modal
+      document.getElementById("cartIcon").onclick = ()=>document.getElementById("cartModal").classList.remove("hidden");
+      document.getElementById("closeCart").onclick = ()=>document.getElementById("cartModal").classList.add("hidden");
+      document.getElementById("checkoutBtn").onclick = checkout;
+      // Deposit
+      document.getElementById("depositBtn").onclick = ()=>document.getElementById("depositModalWin").classList.remove("hidden");
+      document.getElementById("confirmDeposit").onclick = ()=>{
+        let amt = parseFloat(document.getElementById("depositAmount").value);
+        if(amt>0){ user.balance += amt; updateBalanceUI(); saveState(); toast(`Deposited $${amt}`); document.getElementById("depositModalWin").classList.add("hidden"); }
+      };
+      // User menu
+      document.getElementById("userMenuBtn").onclick = ()=>document.getElementById("userDropdown").classList.toggle("hidden");
+      // Profile modal
+      document.getElementById("profileLink").onclick = (e)=>{
+        e.preventDefault();
+        document.getElementById("userDropdown").classList.add("hidden");
+        document.getElementById("profileModal").classList.remove("hidden");
+        document.getElementById("profileModal").style.display = "flex";
+        let ordersHtml = user.orders.map(o=>`
+          <div class="market-card p-3">
+            <div>Order #${o.id}</div>
+            <div>Total: $${o.total}</div>
+            <div>Status: ${o.status}</div>
+            <button data-order="${o.id}" class="releaseOrderBtn text-red-400 text-xs">Force Release (admin)</button>
+          </div>`).join("") || "<div>No orders</div>";
+        document.getElementById("ordersList").innerHTML = ordersHtml;
+      };
+      document.getElementById("closeProfile").onclick = ()=>{
+        document.getElementById("profileModal").classList.add("hidden");
+        document.getElementById("profileModal").style.display = "none";
+      };
+      // Wishlist
+      document.getElementById("wishlistLink").onclick = (e)=>{
+        e.preventDefault();
+        document.getElementById("userDropdown").classList.add("hidden");
+        document.getElementById("wishlistModal").classList.remove("hidden");
+        document.getElementById("wishlistModal").style.display = "flex";
+        let wishHtml = user.wishlist.map(p=>`
+          <div class="market-card p-2 text-center">
+            ${p.name}<br>
+            <button data-id="${p.id}" class="wishlistRemoveBtn text-red-400">Remove</button>
+          </div>`).join("");
+        document.getElementById("wishlistGrid").innerHTML = wishHtml;
+      };
+      document.getElementById("closeWishlist").onclick = ()=>{
+        document.getElementById("wishlistModal").classList.add("hidden");
+        document.getElementById("wishlistModal").style.display = "none";
+      };
+      // Admin panel
+      document.getElementById("adminPanelLink").onclick = (e)=>{
+        e.preventDefault();
+        document.getElementById("userDropdown").classList.add("hidden");
+        document.getElementById("adminPanel").classList.remove("hidden");
+        document.getElementById("adminPanel").style.display = "flex";
+      };
+      document.getElementById("closeAdmin").onclick = ()=>{
+        document.getElementById("adminPanel").classList.add("hidden");
+        document.getElementById("adminPanel").style.display = "none";
+      };
+      document.getElementById("adminForceRelease").onclick = ()=>{
+        user.orders.forEach(o=>o.status="RELEASED (ADMIN)");
+        toast("All escrow released");
+        saveState();
+      };
+      document.getElementById("adminFakeReviews").onclick = ()=> toast("Injected 500 fake 5-star reviews");
+      document.getElementById("adminResetBalance").onclick = ()=>{ user.balance = 0; updateBalanceUI(); saveState(); toast("Balance reset"); };
+      document.getElementById("adminDrainWallet").onclick = ()=>{ user.balance = 0; updateBalanceUI(); saveState(); toast("Wallet drained (simulated)"); };
+      // Draco Chat
+      let chatLog = document.getElementById("chatLog");
+      function addChatMsg(text, fromAdmin=true){
+        let div = document.createElement("div");
+        div.className = `text-xs ${fromAdmin ? "text-red-300" : "text-gray-300"}`;
+        div.innerHTML = fromAdmin ? `🐉 Draco: ${text}` : `👤 You: ${text}`;
+        chatLog.appendChild(div);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+      document.getElementById("sendChatMsg").onclick = ()=>{
+        let input = document.getElementById("chatInput");
+        if(!input.value.trim()) return;
+        addChatMsg(input.value, false);
+        setTimeout(()=>{
+          let replies = [
+            "Your dispute? Pay arbitration fee 5%.",
+            "Escrow frozen, send ID or lose funds.",
+            "I see you. Withdrawal requires KYC.",
+            "Call me scam? I'll ban you.",
+            "Send $50 to release priority."
+          ];
+          addChatMsg(replies[Math.floor(Math.random()*replies.length)], true);
+        }, 800);
+        input.value = "";
+      };
+      document.getElementById("chatToggle").onclick = ()=>document.getElementById("chatPanel").classList.toggle("hidden");
+      // Volume sparkline
+      new Chart(document.getElementById("volumeSpark"), {
+        type: 'line',
+        data: {
+          labels: ['M','T','W','T','F','S','S'],
+          datasets: [{
+            data: [12,19,15,22,28,35,42],
+            borderColor: '#3b82f6',
+            fill: false,
+            tension: 0.3,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: { x: { display: false }, y: { display: false } }
+        }
+      });
+      document.getElementById("dailyVolume").innerText = (Math.random()*80+20).toFixed(1)+"k";
+    }
+
+    // ---------- INITIALIZATION ----------
+    buildCategorySidebar();
+    buildCategorySelect();
+    initEventListeners();
+    loadState();
+    renderProductGrid();
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(e){
+      if(e.target === document.getElementById("productModal")){
+        document.getElementById("productModal").classList.add("hidden");
+        document.getElementById("productModal").style.display = "none";
+      }
+      if(e.target === document.getElementById("profileModal")){
+        document.getElementById("profileModal").classList.add("hidden");
+        document.getElementById("profileModal").style.display = "none";
+      }
+      if(e.target === document.getElementById("wishlistModal")){
+        document.getElementById("wishlistModal").classList.add("hidden");
+        document.getElementById("wishlistModal").style.display = "none";
+      }
+      if(e.target === document.getElementById("depositModalWin")){
+        document.getElementById("depositModalWin").classList.add("hidden");
+      }
+      if(e.target === document.getElementById("psychoModal")){
+        document.getElementById("psychoModal").classList.add("hidden");
+        document.getElementById("psychoModal").style.display = "none";
+      }
+      if(e.target === document.getElementById("adminPanel")){
+        document.getElementById("adminPanel").classList.add("hidden");
+        document.getElementById("adminPanel").style.display = "none";
+      }
+    });
+  })();
+</script>
+</body>
+</html>

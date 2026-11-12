@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPERATOR'S COOKBOOK v6.0 – Absolute Max Simulation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root{--bg:#0b0f14;--surface:#131a22;--border:#1f2a36;--text:#bcc6cf;--accent:#00e5ff;--accent2:#ff0055;--success:#00e676;--warn:#ffaa00;--radius:8px;--shadow:0 4px 24px rgba(0,229,255,0.08);}*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Inter,system-ui,sans-serif;display:flex;min-height:100vh}.sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;display:flex;flex-direction:column;height:100vh;position:fixed;z-index:100;overflow-y:auto}.logo{font-size:1.3rem;font-weight:700;padding:0 1.5rem 1.5rem;color:var(--accent);border-bottom:1px solid var(--border);letter-spacing:1px;display:flex;align-items:center;gap:0.5rem}.sidebar nav{flex:1}.sidebar nav .tab{display:flex;align-items:center;gap:0.8rem;padding:0.85rem 1.5rem;color:var(--text);cursor:pointer;border-left:3px solid transparent;transition:0.2s;font-size:0.9rem}.sidebar nav .tab i{width:20px;text-align:center}.sidebar nav .tab:hover{background:rgba(0,229,255,0.05);color:#fff}.sidebar nav .tab.active{background:rgba(0,229,255,0.1);border-left:3px solid var(--accent);color:var(--accent);font-weight:600}.main{margin-left:280px;flex:1;padding:2rem;overflow-y:auto;height:100vh}h2{font-size:1.6rem;color:#fff;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow);transition:0.2s}.card:hover{transform:translateY(-2px);border-color:var(--accent)}.stat-val{font-size:2rem;font-weight:700;color:var(--accent)}.stat-lab{font-size:0.8rem;text-transform:uppercase;color:#7b8c9d;margin-top:0.25rem}.btn{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:0.5rem 1.2rem;border-radius:4px;cursor:pointer;font-size:0.85rem;transition:0.2s;display:inline-flex;align-items:center;gap:0.4rem}.btn:hover{background:var(--accent);color:#000}.btn-danger{border-color:var(--accent2);color:var(--accent2)}.btn-danger:hover{background:var(--accent2);color:#fff}.btn-success{border-color:var(--success);color:var(--success)}.btn-success:hover{background:var(--success);color:#000}.input,select,textarea{width:100%;padding:0.7rem;background:#0b0f14;border:1px solid var(--border);border-radius:4px;color:#fff;font-size:0.9rem;margin-bottom:1rem}.input:focus,select:focus{outline:none;border-color:var(--accent)}.progress-bar{height:8px;background:#1f2a36;border-radius:4px;margin:0.5rem 0;overflow:hidden}.progress-fill{height:100%;background:var(--accent);width:0%;transition:width 0.5s}.log{background:#0b0f14;border:1px solid var(--border);border-radius:var(--radius);padding:1rem;max-height:300px;overflow-y:auto;font-family:'Fira Code',monospace;font-size:0.8rem;color:#a0b0c0}.log .entry{margin-bottom:0.5rem;border-bottom:1px solid #1f2a36;padding-bottom:0.5rem}.table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{padding:0.75rem;text-align:left;border-bottom:1px solid var(--border)}th{color:var(--accent);font-size:0.85rem;text-transform:uppercase}.pagination{display:flex;gap:0.5rem;margin-top:1rem;align-items:center}.pagination button{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:0.25rem 0.75rem;border-radius:4px;cursor:pointer}.pagination button:disabled{opacity:0.5;cursor:default}.badge{display:inline-block;padding:0.25rem 0.6rem;border-radius:12px;font-size:0.75rem;font-weight:600;margin:0 0.2rem}.badge-open{background:var(--success);color:#000}.badge-click{background:var(--accent);color:#000}.badge-submit{background:var(--accent2);color:#fff}.accordion{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:1rem}.accordion-header{padding:1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}.accordion-header:hover{background:rgba(0,229,255,0.05)}.accordion-body{padding:1rem;display:none;border-top:1px solid var(--border)}.accordion-body.active{display:block}pre{background:#0b0f14;padding:1rem;border-radius:4px;overflow-x:auto;font-family:'Fira Code',monospace;font-size:0.85rem;white-space:pre-wrap}@media(max-width:768px){.sidebar{width:200px}.main{margin-left:200px;padding:1rem}}
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div class="logo"><i class="fas fa-skull"></i> COOKBOOK v6.0</div>
+    <nav>
+        <div class="tab active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</div>
+        <div class="tab" data-tab="killchain"><i class="fas fa-crosshairs"></i> Kill Chain</div>
+        <div class="tab" data-tab="phishing"><i class="fas fa-envelope"></i> Phishing</div>
+        <div class="tab" data-tab="vishing"><i class="fas fa-phone-alt"></i> Vishing</div>
+        <div class="tab" data-tab="payloads"><i class="fas fa-biohazard"></i> Payloads</div>
+        <div class="tab" data-tab="recon"><i class="fas fa-search"></i> Recon</div>
+        <div class="tab" data-tab="mobile"><i class="fas fa-mobile-alt"></i> Mobile</div>
+        <div class="tab" data-tab="scams"><i class="fas fa-book"></i> Scam Library</div>
+        <div class="tab" data-tab="vectors"><i class="fas fa-vector-square"></i> SE Vectors</div>
+        <div class="tab" data-tab="narrative"><i class="fas fa-feather-alt"></i> Narrative Gen</div>
+        <div class="tab" data-tab="voip"><i class="fas fa-headset"></i> VoIP Script</div>
+        <div class="tab" data-tab="darkweb"><i class="fas fa-mask"></i> DarkWeb Sim</div>
+        <div class="tab" data-tab="analytics"><i class="fas fa-chart-line"></i> Analytics</div>
+        <div class="tab" data-tab="training"><i class="fas fa-graduation-cap"></i> Training</div>
+        <div class="tab" data-tab="simulation"><i class="fas fa-user-secret"></i> Simulation</div>
+        <div class="tab" data-tab="campaignsim"><i class="fas fa-rocket"></i> Campaign Sim</div>
+        <div class="tab" data-tab="dataex"><i class="fas fa-database"></i> Data Exfil</div>
+        <div class="tab" data-tab="ransom"><i class="fas fa-lock"></i> Ransom Sim</div>
+        <div class="tab" data-tab="export"><i class="fas fa-download"></i> Export Tools</div>
+    </nav>
+</aside>
+<main class="main" id="mainContent"></main>
+
+<script>
+// ==================== ENGINE ====================
+const DB = {
+    campaigns: JSON.parse(localStorage.getItem('cb_camps')||'[]'),
+    payloads: JSON.parse(localStorage.getItem('cb_payloads')||'[]'),
+    sims: JSON.parse(localStorage.getItem('cb_sims')||'[]'),
+    events: JSON.parse(localStorage.getItem('cb_events')||'[]'),
+    save(){ localStorage.setItem('cb_camps',JSON.stringify(this.campaigns)); localStorage.setItem('cb_payloads',JSON.stringify(this.payloads)); localStorage.setItem('cb_sims',JSON.stringify(this.sims)); localStorage.setItem('cb_events',JSON.stringify(this.events)); }
+};
+const State = { activeTab:'dashboard', activeSimId:null, charts:{}, scamPage:0, narPage:0, camSimRunning:false };
+
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1)+a);
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const ts=()=>new Date().toLocaleTimeString();
+const fakeHash=()=>Array.from({length:40},()=>Math.floor(Math.random()*16).toString(16)).join('');
+const addEvent=msg=>{ DB.events.unshift({time:ts(),msg}); if(DB.events.length>50)DB.events.length=50; DB.save(); if(State.activeTab==='dashboard')refreshDashboard(); };
+
+function switchTab(t){
+    document.querySelectorAll('.sidebar .tab').forEach(x=>x.classList.remove('active'));
+    const el=document.querySelector(`.sidebar .tab[data-tab="${t}"]`); if(el)el.classList.add('active');
+    State.activeTab=t; loadContent(t);
+}
+document.querySelectorAll('.sidebar .tab').forEach(t=>{ t.addEventListener('click',()=>switchTab(t.dataset.tab)); });
+
+function loadContent(tab){
+    const main=document.getElementById('mainContent');
+    switch(tab){
+        case 'dashboard': main.innerHTML=renderDashboard(); refreshDashboard(); break;
+        case 'killchain': main.innerHTML=renderKillChain(); break;
+        case 'phishing': main.innerHTML=renderPhishing(); loadPhishing(); break;
+        case 'vishing': main.innerHTML=renderVishing(); initVish(); break;
+        case 'payloads': main.innerHTML=renderPayloads(); loadPayloads(); break;
+        case 'recon': main.innerHTML=renderRecon(); break;
+        case 'mobile': main.innerHTML=renderMobile(); break;
+        case 'scams': main.innerHTML=renderScamLib(); break;
+        case 'vectors': main.innerHTML=renderVectors(); break;
+        case 'narrative': main.innerHTML=renderNarrative(); break;
+        case 'voip': main.innerHTML=renderVoip(); initVoip(); break;
+        case 'darkweb': main.innerHTML=renderDarkWeb(); break;
+        case 'analytics': main.innerHTML=renderAnalytics(); renderAnalyticsCharts(); break;
+        case 'training': main.innerHTML=renderTraining(); loadTraining(); break;
+        case 'simulation': main.innerHTML=renderSim(); loadActiveSim(); break;
+        case 'campaignsim': main.innerHTML=renderCamSim(); break;
+        case 'dataex': main.innerHTML=renderDataEx(); break;
+        case 'ransom': main.innerHTML=renderRansom(); break;
+        case 'export': main.innerHTML=renderExport(); break;
+        default: main.innerHTML='<p>Tab not found.</p>';
+    }
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard(){ return `<h2><i class="fas fa-chart-pie"></i> Live Dashboard</h2><div class="grid" id="dashStats"></div><div style="margin-top:1.5rem"><h3>Event Log</h3><div class="log" id="eventLog"></div></div>`; }
+function refreshDashboard(){
+    const s=document.getElementById('dashStats'); if(!s)return;
+    const active=DB.campaigns.filter(c=>c.status==='active').length;
+    const targets=DB.campaigns.reduce((a,c)=>a+(c.targets||0),1200);
+    const ev=DB.events.length+rnd(5,30);
+    const totalSent=DB.campaigns.reduce((a,c)=>a+c.sent,0);
+    const totalConv=DB.campaigns.reduce((a,c)=>a+c.converted,0);
+    const rate=totalSent?(totalConv/totalSent*100).toFixed(1):'0.0';
+    s.innerHTML=`<div class="card"><div class="stat-val">${active}</div><div class="stat-lab">Active Campaigns</div></div><div class="card"><div class="stat-val">${targets}</div><div class="stat-lab">Targets</div></div><div class="card"><div class="stat-val">${ev}</div><div class="stat-lab">Events Today</div></div><div class="card"><div class="stat-val">${rate}%</div><div class="stat-lab">Conv. Rate</div></div>`;
+    const log=document.getElementById('eventLog'); log.innerHTML=DB.events.slice(0,20).map(e=>`<div class="entry"><span style="color:var(--accent)">[${e.time}]</span> ${e.msg}</div>`).join('');
+}
+setInterval(()=>{ if(State.activeTab==='dashboard') addEvent(pick(['Email opened','Link clicked','Creds submitted','Call answered','Payload executed','Ransomware deployed'])+' by target '+rnd(100,999)); },5000);
+
+// ==================== KILL CHAIN ====================
+function renderKillChain(){ return `<h2><i class="fas fa-crosshairs"></i> Kill Chain Generator</h2><div class="card" style="margin-bottom:1.5rem"><h3>Target</h3><input class="input" placeholder="Name" id="kcName" value="John Smith"><input class="input" placeholder="Role" id="kcRole" value="CFO"><input class="input" placeholder="Company" id="kcCompany" value="Acme Corp"><input class="input" placeholder="Email" id="kcEmail" value="john@acme.com"><input class="input" placeholder="Phone" id="kcPhone" value="+1 555 0199"><select class="input" id="kcObj"><option>Credential Theft</option><option>Ransomware</option><option>Data Exfil</option></select><button class="btn" id="genKC"><i class="fas fa-play"></i> Generate</button></div><div id="kcOut"></div>`; }
+document.addEventListener('click',e=>{ if(e.target&&e.target.id==='genKC'){
+    const t={name:document.getElementById('kcName').value,role:document.getElementById('kcRole').value,company:document.getElementById('kcCompany').value,email:document.getElementById('kcEmail').value,phone:document.getElementById('kcPhone').value};
+    const chain=['Recon','Weaponization','Delivery','Exploitation','Installation','C2','Actions'].map((p,i)=>({phase:p,tech:pick(['OSINT','DNS enum','Subdomain scan','Email harvesting','Social profiling']),detail:`Full tactical detail for ${p} phase against ${t.name}: we will ${p==='Recon'?'gather social media and DNS intelligence':p==='Weaponization'?'create a polymorphic payload with <5% detection rate':p==='Delivery'?'use a spear-phishing email with malicious macro':'...'}`}));
+    let h='<h3>Kill Chain</h3>'; chain.forEach((s,i)=>{ h+=`<div class="accordion"><div class="accordion-header" onclick="this.parentElement.querySelector('.accordion-body').classList.toggle('active')"><span><strong>Phase ${i+1}: ${s.phase}</strong></span><i class="fas fa-chevron-down"></i></div><div class="accordion-body">${s.detail}</div></div>`; });
+    document.getElementById('kcOut').innerHTML=h; addEvent('Kill chain generated for '+t.name);
+}});
+
+// ==================== PHISHING ====================
+function renderPhishing(){ return `<h2><i class="fas fa-envelope"></i> Phishing Manager</h2><div class="card" style="margin-bottom:1.5rem"><h3>Launch</h3><form id="phForm"><input class="input" placeholder="Name" id="phName" required><select class="input" id="phTpl"><option>Password Reset</option><option>CEO Fraud</option><option>Invoice</option></select><input class="input" type="number" placeholder="Targets" id="phTargets" value="100" min="1"><button class="btn"><i class="fas fa-rocket"></i> Launch</button></form></div><div class="grid" id="phList"></div>`; }
+function loadPhishing(){
+    document.getElementById('phForm').addEventListener('submit',e=>{ e.preventDefault();
+        const n=document.getElementById('phName').value,tpl=document.getElementById('phTpl').value,targets=parseInt(document.getElementById('phTargets').value)||100;
+        DB.campaigns.push({id:Date.now(),name:n,type:'phishing',template:tpl,status:'active',sent:targets,opened:0,clicked:0,converted:0,targets}); DB.save(); renderPhishList(); addEvent(`Campaign "${n}" launched.`); document.getElementById('phForm').reset();
+    });
+    renderPhishList();
+}
+function renderPhishList(){
+    const g=document.getElementById('phList'); g.innerHTML=DB.campaigns.map(c=>`<div class="card"><strong>${c.name}</strong> <span class="badge badge-${c.status==='active'?'open':'click'}">${c.status}</span><p>Sent:${c.sent} Open:${c.opened} Click:${c.clicked} Conv:${c.converted}</p><button class="btn btn-success" onclick="simCamp(${c.id},'open')">Sim Open</button><button class="btn" onclick="simCamp(${c.id},'click')">Sim Click</button><button class="btn btn-danger" onclick="delCamp(${c.id})">Delete</button></div>`).join('');
+}
+window.simCamp=(id,act)=>{ const c=DB.campaigns.find(x=>x.id===id); if(!c)return; if(act==='open')c.opened=Math.min(c.sent,c.opened+rnd(5,20)); else if(act==='click')c.clicked=Math.min(c.opened,c.clicked+rnd(2,10)); c.converted=Math.floor(c.clicked*0.3); DB.save(); renderPhishList(); addEvent(`Sim ${act} on ${c.name}`); };
+window.delCamp=id=>{ DB.campaigns=DB.campaigns.filter(x=>x.id!==id); DB.save(); renderPhishList(); };
+
+// ==================== VISHING ====================
+function renderVishing(){ return `<h2><i class="fas fa-phone-alt"></i> Vishing Simulation</h2><div id="vishCont" class="sim-window"></div>`; }
+const vSteps={ start:{prompt:"They answer 'Hello?'", choices:[{text:"Authoritative (IT)",next:"verify"},{text:"Friendly (HR)",next:"survey"},{text:"Urgent (CEO)",next:"ceo"}]}, verify:{prompt:"'Who is this?'",choices:[{text:"Fake name",next:"cred"},{text:"Ref ID",next:"cred"}]}, survey:{prompt:"Survey?",choices:[{text:"Remote work",next:"extract"},{text:"Gift card",next:"phish"}]}, ceo:{prompt:"'What for?'",choices:[{text:"Wire transfer",next:"wire"},{text:"Credentials",next:"cred"}]}, cred:{prompt:"Comply?",choices:[{text:"Password",next:"end"},{text:"Link",next:"end"}]}, wire:{prompt:"Details?",choices:[{text:"Give",next:"end"},{text:"Callback",next:"end"}]}, phish:{prompt:"Push?",choices:[{text:"Urgency",next:"end"},{text:"Back off",next:"end"}]}, extract:{prompt:"Continue?",choices:[{text:"Creds",next:"cred"},{text:"End",next:"end"}]}, end:{prompt:"Simulation complete.",choices:[]} };
+function initVish(){ State.vishStep='start'; renderVishStep(); }
+function renderVishStep(){
+    const s=vSteps[State.vishStep]; const c=document.getElementById('vishCont'); if(!c)return;
+    c.innerHTML=`<p style="font-size:1.1rem">${s.prompt}</p>`;
+    if(s.choices.length){ const d=document.createElement('div'); d.className='sim-choices'; s.choices.forEach(ch=>{ const b=document.createElement('button'); b.className='choice-btn'; b.textContent=ch.text; b.onclick=()=>{ State.vishStep=ch.next; if(State.vishStep==='end')c.innerHTML+='<p class="highlight">Ended.</p><button class="btn" onclick="initVish()">Restart</button>'; else renderVishStep(); }; d.appendChild(b); }); c.appendChild(d); }
+    else c.innerHTML+='<button class="btn" onclick="initVish()">Restart</button>';
+}
+
+// ==================== PAYLOADS ====================
+function renderPayloads(){ return `<h2><i class="fas fa-biohazard"></i> Polymorphic Payloads</h2><div class="card" style="margin-bottom:1.5rem"><h3>Generate</h3><input class="input" id="plName" value="loader.exe"><select class="input" id="plType"><option>exe</option><option>dll</option><option>doc</option></select><select class="input" id="plObf"><option>low</option><option>medium</option><option>high</option></select><label><input type="checkbox" id="plPoly" checked> Polymorphic</label><button class="btn" id="genPl"><i class="fas fa-cog"></i> Generate</button></div><div id="plOut"></div>`; }
+function loadPayloads(){
+    document.getElementById('genPl').onclick=()=>{
+        const name=document.getElementById('plName').value,type=document.getElementById('plType').value,obf=document.getElementById('plObf').value,poly=document.getElementById('plPoly').checked;
+        const vars=poly?7:1; const list=[]; for(let i=0;i<vars;i++){ const det=obf==='low'?0.7+Math.random()*0.2:obf==='medium'?0.3+Math.random()*0.4:Math.random()*0.25; list.push({id:Date.now()+i,name:name.replace('.',`_v${i}.`),type,obf,det,hash:fakeHash(),size:rnd(50000,2000000)}); }
+        DB.payloads.push(...list); DB.save();
+        let h='<h4>Generated</h4><table class="table"><tr><th>Name</th><th>Hash</th><th>Detection</th><th>Size</th></tr>'; list.forEach(p=>h+=`<tr><td>${p.name}</td><td style="font-family:monospace">${p.hash}</td><td style="color:${p.det>0.5?'var(--accent2)':'var(--success)'}">${(p.det*100).toFixed(1)}%</td><td>${(p.size/1024).toFixed(0)}KB</td></tr>`); h+='</table>';
+        if(window.polyChart)window.polyChart.destroy(); h+='<canvas id="polyChart" height="100"></canvas>'; document.getElementById('plOut').innerHTML=h;
+        new Chart(document.getElementById('polyChart'),{type:'bar',data:{labels:list.map(p=>p.name),datasets:[{label:'Detection %',data:list.map(p=>p.det*100),backgroundColor:list.map(p=>p.det>0.5?'#ff0055':'#00e676')}]}});
+        addEvent(`Generated ${vars} payloads.`);
+    };
+}
+
+// ==================== RECON ====================
+function renderRecon(){ return `<h2><i class="fas fa-search"></i> Recon Drone</h2><div class="card" style="max-width:600px"><input class="input" id="recDom" value="megacorp.local"><button class="btn" id="startRec"><i class="fas fa-satellite"></i> Scan</button><div class="progress-bar"><div class="progress-fill" id="recProg" style="width:0%"></div></div><div id="recOut"></div></div>`; }
+document.addEventListener('click',e=>{ if(e.target&&e.target.id==='startRec'){ const p=document.getElementById('recProg'); let w=0; const int=setInterval(()=>{ w+=25; p.style.width=w+'%'; if(w>=100){ clearInterval(int); const d=document.getElementById('recDom').value; document.getElementById('recOut').innerHTML=`<h4>Scan Complete</h4><pre>DNS: A 192.168.1.10, MX mail.${d}\nSubdomains: dev.${d}, vpn.${d}\nPorts: 22 open, 80 open, 443 open</pre>`; addEvent(`Recon on ${d} done.`); }},400); }});
+
+// ==================== MOBILE ====================
+function renderMobile(){ return `<h2><i class="fas fa-mobile-alt"></i> Mobile Ops</h2><div class="grid"><div class="card"><h3>SMS</h3><input class="input" placeholder="Number" value="+1 555 0192"><textarea class="input" rows="2">Urgent: Verify: https://bit.ly/2FAKE</textarea><button class="btn" onclick="addEvent('SMS sent')">Send</button></div><div class="card"><h3>Call Log</h3><button class="btn" onclick="genCallLog()">Generate</button><div id="callLog"></div></div></div>`; }
+window.genCallLog=()=>{ const l=Array.from({length:3},()=>`${pick(['+1 555 1111','+1 555 2222'])} -> +1 555 ${rnd(1000,9999)} | ${pick(['Answered','Voicemail'])}`); document.getElementById('callLog').innerHTML=l.map(x=>`<p>${x}</p>`).join(''); };
+
+// ==================== SCAM LIBRARY 10K ====================
+const scamTypes = ['Phishing','Vishing','Smishing','BEC','Romance','Tech Support','IRS','Lottery','Charity','Job Scam'];
+const subs = ['Spear Phishing','Whaling','Clone Phishing','Vishing CEO Fraud','Vishing IT Support','Smishing Package','BEC Invoice','Romance Military','Tech Support Popup','IRS Tax Debt','Lottery Winner','Fake Charity','Fake Job Offer'];
+const pretextTemplates = ['${service} account compromised.','Urgent wire for ${amount}.','Package fee ${fee}.','Bank details updated.','Need ${amount} to come home.','IRS: owe ${amount}.','You won ${prize}! Send ${fee}.','Donate to ${cause}.','Job offer: pay ${fee} for training.'];
+const redFlags = ['Generic greeting','Urgency','Mismatched URL','Unsolicited','Request personal info','Gift card payment','Pressure','Email address off','Unusual request','No confirmation'];
+
+function generateScamVariant(i){
+    const type = scamTypes[i % scamTypes.length];
+    const sub = subs[i % subs.length];
+    const pretext = pretextTemplates[i % pretextTemplates.length].replace('${service}',pick(['email','bank'])).replace('${amount}',rnd(100,5000)).replace('${fee}',rnd(5,50)).replace('${prize}',rnd(10000,1000000)).replace('${cause}',pick(['children','veterans']));
+    const rf = pick(redFlags)+', '+pick(redFlags);
+    return { type, sub, pretext, redflags: rf };
+}
+
+let generatedScamVariants = [];
+function renderScamLib(){ return `<h2><i class="fas fa-book"></i> Scam Library (10K)</h2><div class="card"><button class="btn" id="gen10k">Generate 10,000 Variants</button> <button class="btn" id="exportScamCSV"><i class="fas fa-download"></i> Export CSV</button></div><div id="scamTableCont"><p>Click generate.</p></div>`; }
+function renderScamPage(page, perPage=50){
+    const start = page*perPage, chunk = generatedScamVariants.slice(start,start+perPage);
+    const total = Math.ceil(generatedScamVariants.length/perPage);
+    let h = `<table class="table"><tr><th>#</th><th>Type</th><th>Subtype</th><th>Pretext</th><th>Red Flags</th></tr>`;
+    chunk.forEach((v,i)=>h+=`<tr><td>${start+i+1}</td><td>${v.type}</td><td>${v.sub}</td><td>${v.pretext}</td><td>${v.redflags}</td></tr>`);
+    h+=`</table><div class="pagination"><button ${page===0?'disabled':''} onclick="changeScamPage(${page-1})">Prev</button><span>Page ${page+1} of ${total}</span><button ${page>=total-1?'disabled':''} onclick="changeScamPage(${page+1})">Next</button></div>`;
+    document.getElementById('scamTableCont').innerHTML=h;
+}
+window.changeScamPage = p => { State.scamPage=p; renderScamPage(p); };
+document.addEventListener('click', e => {
+    if(e.target&&e.target.id==='gen10k'){ generatedScamVariants=Array.from({length:10000},(_,i)=>generateScamVariant(i)); State.scamPage=0; renderScamPage(0); addEvent('Generated 10,000 scam variants.'); }
+    if(e.target&&e.target.id==='exportScamCSV'){ if(!generatedScamVariants.length)return; let csv='Index,Type,Subtype,Pretext,Red Flags\n'; generatedScamVariants.forEach((v,i)=>csv+=`${i+1},"${v.type}","${v.sub}","${v.pretext}","${v.redflags}"\n`); downloadFile('scam_10k.csv',csv,'text/csv'); }
+});
+
+function downloadFile(filename, content, mime){ const blob=new Blob([content],{type:mime}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href); }
+
+// ==================== SE VECTORS MATRIX ====================
+function renderVectors(){ return `<h2><i class="fas fa-vector-square"></i> Social Engineering Vectors</h2><table class="table"><thead><tr><th>Vector</th><th>Channel</th><th>Pretext</th><th>Success</th><th>Difficulty</th></tr></thead><tbody><tr><td>Spear Phish</td><td>Email</td><td>Security alert</td><td>High</td><td>Med</td></tr><tr><td>Vishing</td><td>Phone</td><td>CEO fraud</td><td>V.High</td><td>Low</td></tr><tr><td>Smishing</td><td>SMS</td><td>Delivery</td><td>Med</td><td>Med</td></tr><tr><td>USB Drop</td><td>Physical</td><td>Confidential</td><td>High</td><td>V.Low</td></tr><tr><td>Watering Hole</td><td>Web</td><td>Compromised</td><td>Med</td><td>High</td></tr><tr><td>Pretexting</td><td>In-Person</td><td>IT auditor</td><td>V.High</td><td>Med</td></tr><tr><td>QR Code</td><td>Physical/Email</td><td>Event</td><td>High</td><td>High</td></tr><tr><td>Voice Deepfake</td><td>Phone</td><td>CEO audio</td><td>V.High</td><td>V.Low</td></tr></tbody></table>`; }
+
+// ==================== DEEP NARRATIVE GENERATOR ====================
+const narDB = {
+    firstNames:['James','Linda','Robert','Patricia','Michael','Jennifer','William','Elizabeth','David','Sarah'],
+    lastNames:['Thompson','Martinez','Chen','Kowalski','Patel','Andersen','Mueller','Silva','Johansson','Williams'],
+    roles:['CFO','IT Admin','HR Director','Sales VP','General Counsel','Senior Engineer'],
+    companies:['Acme Corp','Globex','Initech','Umbrella','Stark Industries'],
+    psychProfiles:['High C, Low O – risk-averse, authority','High E, Low A – competitive, impulsive','High N, High A – anxious, eager to please','High O, Low C – creative, disorganised','High E, High A – sociable, trusting'],
+    darkTriad:['Narcissism','Machiavellianism','Psychopathy'],
+    biases:['Confirmation bias','Authority bias','Scarcity','Social proof','Liking','Reciprocity'],
+    vulnerabilities:['Financial stress','Desire for promotion','Loneliness','Overwhelmed','Gambling addiction'],
+    backstories:['Small-town upbringing','Military veteran','Recent divorce','Long-term employee','Tech-savvy early adopter'],
+    channels:['Email','Phone','SMS','LinkedIn','WhatsApp'],
+    plans:['Recon → Spoofed email → Phone guide to portal','LinkedIn rapport → Gift survey → CEO call → Wire transfer','Fake IT ticket → SMS link → Verification call → Remote access']
+};
+
+function generateDeepPersona(){
+    const fname = pick(narDB.firstNames), lname = pick(narDB.lastNames);
+    const role = pick(narDB.roles), company = pick(narDB.companies);
+    const psych = pick(narDB.psychProfiles);
+    const dark = pick(narDB.darkTriad);
+    const bias = pick(narDB.biases)+' & '+pick(narDB.biases);
+    const vuln = pick(narDB.vulnerabilities);
+    const backstory = pick(narDB.backstories);
+    const channel = pick(narDB.channels);
+    const plan = pick(narDB.plans);
+    const email = (fname+'.'+lname).toLowerCase()+'@'+company.toLowerCase().replace(/ /g,'')+'.com';
+    const phone = '+1 555 '+rnd(1000,9999);
+    const profile = {
+        name: `${fname} ${lname}`, role, company, email, phone,
+        psychometry: `Big5: ${psych}. Dark Triad: ${dark}. Biases: ${bias}.`,
+        vulnerability: vuln, backstory,
+        digitalFootprint: `LinkedIn: active. Password leaked: ${pick(['password123','qwerty','letmein'])}. Devices: Win10, iPhone.`,
+        recommendedVector: channel,
+        engagementPlan: plan,
+        sampleDialogue: `"Hi ${fname}, IT support. We need to verify your credentials to stop a security breach."`,
+        successProb: `${rnd(60,95)}%`
+    };
+    return profile;
+}
+
+let generatedPersonas = [];
+function renderNarrative(){ return `<h2><i class="fas fa-feather-alt"></i> Advanced Narrative Persona Generator</h2><div class="card"><button class="btn" id="genOne">Generate Single</button> <button class="btn" id="genBulk">Generate 100 Dossiers</button> <button class="btn" id="exportNarJSON"><i class="fas fa-download"></i> Export JSON</button></div><div id="narOut"></div>`; }
+
+document.addEventListener('click', e => {
+    if(e.target&&e.target.id==='genOne'){
+        const p = generateDeepPersona();
+        generatedPersonas.push(p);
+        document.getElementById('narOut').innerHTML = personaToHTML(p);
+    }
+    if(e.target&&e.target.id==='genBulk'){
+        generatedPersonas = Array.from({length:100}, generateDeepPersona);
+        renderPersonaGrid(0);
+    }
+    if(e.target&&e.target.id==='exportNarJSON'){
+        if(!generatedPersonas.length) return;
+        downloadFile('personas_deep.json', JSON.stringify(generatedPersonas,null,2), 'application/json');
+    }
+});
+
+function personaToHTML(p){
+    return `<div class="card" style="margin-bottom:1.5rem"><h3>${p.name} <span class="badge badge-open">${p.role}</span></h3><p><strong>Company:</strong> ${p.company} | <strong>Contact:</strong> ${p.email} / ${p.phone}</p><p><strong>Psychometry:</strong> ${p.psychometry}</p><p><strong>Vulnerability:</strong> ${p.vulnerability} | <strong>Backstory:</strong> ${p.backstory}</p><p><strong>Digital Footprint:</strong> ${p.digitalFootprint}</p><p><strong>Vector:</strong> ${p.recommendedVector} | <strong>Success Est.:</strong> ${p.successProb}</p><p><strong>Plan:</strong> ${p.engagementPlan}</p><p><strong>Dialogue:</strong> <em>${p.sampleDialogue}</em></p></div>`;
+}
+function renderPersonaGrid(page=0, perPage=20){
+    const start = page*perPage, chunk = generatedPersonas.slice(start,start+perPage);
+    const total = Math.ceil(generatedPersonas.length/perPage);
+    let h = '<div class="grid">'; chunk.forEach(p => h+=personaToHTML(p)); h+='</div>';
+    h+=`<div class="pagination"><button ${page===0?'disabled':''} onclick="changeNarPage(${page-1})">Prev</button><span>Page ${page+1} of ${total}</span><button ${page>=total-1?'disabled':''} onclick="changeNarPage(${page+1})">Next</button></div>`;
+    document.getElementById('narOut').innerHTML = h;
+}
+window.changeNarPage = p => renderPersonaGrid(p);
+
+// ==================== ADVANCED VOIP SCRIPT ====================
+function renderVoip(){ return `<h2><i class="fas fa-headset"></i> Advanced VoIP Script Generator</h2><div class="grid"><div class="card"><h3>Config</h3><select class="input" id="voipScen"><option>IT Password Reset</option><option>CEO Wire</option><option>Microsoft Security</option><option>IRS Tax</option><option>Bank Fraud Alert</option><option>Healthcare Verification</option><option>Utility Disconnect</option><option>Delivery Scam</option><option>Government Grant</option><option>Software Renewal</option></select><select class="input" id="voipCID"><option>IT Support (555-0192)</option><option>CEO Office (555-1001)</option><option>Microsoft (800-555-1234)</option><option>IRS (800-829-1040)</option></select><select class="input" id="voipVoice"><option>Natural Male (Auth)</option><option>Natural Female (Friendly)</option><option>Elderly Male</option><option>Robotic</option></select><input class="input" id="voipName" value="Sarah"><button class="btn" id="genVoipBtn"><i class="fas fa-file-alt"></i> Generate</button></div><div class="card" id="voipOut"><p>Configure and generate.</p></div></div>`; }
+
+const voipScripts = {
+    'IT Password Reset':{ intro:n=>`"Hello ${n}, IT Security. We've detected an anomaly on your account. Verify to prevent lockout."`, obj1:"I'm busy", resp1:"This will take 60 seconds.", obj2:"Can you email?", resp2:"Email is down. I'll text a secure link.", close:"Account secured. Thank you." },
+    'CEO Wire':{ intro:n=>`"${n}, it's Richard. I need an urgent wire of $48,500."`, obj1:"No PO", resp1:"Confidential, I'll take responsibility.", obj2:"Call back?", resp2:"No time – call from conference.", close:"Text confirmation." },
+    'Microsoft Security':{ intro:n=>`"Kevin from Microsoft Security. Your PC has ransomware."`, obj1:"How do I know?", resp1:"Employee ID KZ7892.", obj2:"I'll call Microsoft", resp2:"Lines overwhelmed. Let me help before data loss.", close:"Threat removed. $299 for protection." },
+    'IRS Tax':{ intro:n=>`"IRS Officer Daniels, badge 44521. Arrest warrant for $3,200."`, obj1:"I've paid", resp1:"Discrepancy. Pay now to suspend.", obj2:"Lawyer", resp2:"Warrant won't wait. Avoid public arrest.", close:"Buy gift cards, read codes." },
+    'Bank Fraud Alert':{ intro:n=>`"Bank fraud dept. $1,200 wire attempted. Confirm not you?"`, obj1:"Not me", resp1:"Freeze account. Last 4 digits of card?", obj2:"I'll call bank", resp2:"Case FR-${rnd(1000,9999)}. Transfer completes in 5 min." },
+    'Healthcare Verification':{ intro:n=>`"BlueCross Member Services. Policy lapsing. Verify member ID?"`, obj1:"Busy", resp1:"90 seconds to keep coverage." },
+    'Utility Disconnect':{ intro:n=>`"ConEd. 90 days overdue. Disconnect in 2 hours. Payment needed."`, obj1:"Paid", resp1:"Not cleared. Take payment now." },
+    'Delivery Scam':{ intro:n=>`"FedEx. Package needs $4.95 customs fee. Card details?"`, obj1:"No package", resp1:"Gift perhaps. Charge only if accepted." },
+    'Government Grant':{ intro:n=>`"Congratulations! $15,000 grant. Need account and $250 fee."`, obj1:"Didn't apply", resp1:"Automatic stimulus." },
+    'Software Renewal':{ intro:n=>`"Microsoft Licensing. Office 365 expires soon. Renewal payment?"`, obj1:"Not due", resp1:"Billing cycle changed." }
+};
+
+function initVoip(){
+    document.getElementById('genVoipBtn').onclick = ()=>{
+        const scenario = document.getElementById('voipScen').value;
+        const name = document.getElementById('voipName').value || 'there';
+        const cid = document.getElementById('voipCID').value;
+        const voice = document.getElementById('voipVoice').value;
+        const sc = voipScripts[scenario];
+        if(!sc) return;
+        const script = `**Scenario: ${scenario}**  | Caller ID: ${cid} | Voice: ${voice}\n**Intro:** ${sc.intro(name)}\n**Objection 1:** "${sc.obj1}" → ${sc.resp1}\n**Objection 2:** "${sc.obj2}" → ${sc.resp2}\n**Close:** ${sc.close}`;
+        document.getElementById('voipOut').innerHTML = `<pre>${script}</pre>`;
+        addEvent(`VoIP script: ${scenario}`);
+    };
+}
+
+// ==================== DARK WEB SIMULATOR ====================
+function renderDarkWeb(){ return `<h2><i class="fas fa-mask"></i> Dark Web Breach Simulator</h2><div class="card"><h3>Fake Data Leak</h3><p>Simulate a company data breach with random employee records.</p><input class="input" placeholder="Company name" id="dwCompany" value="Acme Corp"><button class="btn" id="genBreach"><i class="fas fa-skull"></i> Generate Leak</button><div id="dwOut"></div></div>`; }
+document.addEventListener('click',e=>{ if(e.target&&e.target.id==='genBreach'){
+    const company = document.getElementById('dwCompany').value;
+    let html = `<h4>Dark Web Post – ${company} Data Leak</h4><pre>User: ShadowBroker | Date: ${new Date().toISOString().slice(0,10)}
+Employees leaked: 500 | Price: 0.5 BTC
+Sample records (format: name, email, phone, SSN):
+`;
+    for(let i=0;i<5;i++){
+        const name = pick(['James Smith','Linda Johnson'])+' '+pick(['Thompson','Martinez']);
+        const email = name.toLowerCase().replace(' ','.')+'@'+company.toLowerCase().replace(/ /g,'')+'.com';
+        html += `${name}, ${email}, +1 555 ${rnd(1000,9999)}, ***-**-${rnd(1000,9999)}\n`;
+    }
+    html += `</pre><button class="btn" onclick="downloadFile('${company}_leak.txt',document.getElementById('dwOut').querySelector('pre').innerText,'text/plain')">Download Leak</button>`;
+    document.getElementById('dwOut').innerHTML = html;
+    addEvent('Dark web leak generated.');
+}});
+
+// ==================== ANALYTICS ====================
+function renderAnalytics(){ return `<h2><i class="fas fa-chart-line"></i> Analytics</h2><div class="grid"><div class="card"><canvas id="funnelChart"></canvas></div><div class="card"><canvas id="timelineChart"></canvas></div></div>`; }
+function renderAnalyticsCharts(){
+    if(window.funnel)window.funnel.destroy(); if(window.timeline)window.timeline.destroy();
+    const t=DB.campaigns.reduce((a,c)=>{ a.sent+=c.sent;a.opened+=c.opened;a.clicked+=c.clicked;a.converted+=c.converted; return a;},{sent:0,opened:0,clicked:0,converted:0});
+    window.funnel=new Chart(document.getElementById('funnelChart'),{type:'bar',data:{labels:['Sent','Opened','Clicked','Converted'],datasets:[{data:[t.sent,t.opened,t.clicked,t.converted],backgroundColor:['#555','#ffaa00','#00e5ff','#00e676']}]}});
+    window.timeline=new Chart(document.getElementById('timelineChart'),{type:'line',data:{labels:['Mon','Tue','Wed','Thu','Fri'],datasets:[{label:'Opens',data:[20,40,35,60,55],borderColor:'#00e5ff'},{label:'Clicks',data:[5,15,10,20,18],borderColor:'#ff0055'}]}});
+}
+
+// ==================== TRAINING ====================
+function renderTraining(){ return `<h2><i class="fas fa-graduation-cap"></i> Training</h2><div class="grid" id="trainGrid"></div>`; }
+function loadTraining(){
+    const sc=[{id:1,type:'vishing',name:'CEO Fraud',diff:'medium'},{id:2,type:'phishing',name:'Password Reset',diff:'easy'},{id:3,type:'payload',name:'USB Drop',diff:'hard'},{id:4,type:'recon',name:'Footprinting',diff:'easy'}];
+    document.getElementById('trainGrid').innerHTML=sc.map(s=>`<div class="card"><strong>${s.name}</strong> <span class="badge badge-${s.diff==='hard'?'submit':'open'}">${s.diff}</span><button class="btn" onclick="startTrain(${s.id})">Launch</button></div>`).join('');
+}
+window.startTrain=id=>{ const m={1:'vishing',2:'phishing',3:'payload',4:'recon'}; const s={id:Date.now(),type:m[id],diff:'medium',score:0,status:'active',step:0}; DB.sims.push(s); DB.save(); State.activeSimId=s.id; switchTab('simulation'); };
+
+// ==================== SIMULATION ====================
+function renderSim(){ return `<h2><i class="fas fa-user-secret"></i> Active Simulation</h2><div id="actSimCont"></div>`; }
+function loadActiveSim(){
+    const c=document.getElementById('actSimCont'); if(!State.activeSimId){c.innerHTML='<p>No active simulation. Launch from Training.</p>';return;}
+    const sim=DB.sims.find(s=>s.id===State.activeSimId); if(!sim){c.innerHTML='<p>Not found.</p>';return;}
+    if(sim.status==='completed'){c.innerHTML=`<div class="sim-window"><h3>Completed</h3><p>Score: ${sim.score}</p><button class="btn" onclick="State.activeSimId=null;loadActiveSim()">Close</button></div>`;return;}
+    c.innerHTML=`<div class="sim-window"><h3>${sim.type.toUpperCase()} Simulation</h3><p>Step ${sim.step+1}</p><div class="sim-choices"><button class="choice-btn" onclick="simAct('correct')">Correct</button><button class="choice-btn" onclick="simAct('neutral')">Neutral</button><button class="choice-btn" onclick="simAct('wrong')">Wrong</button></div><p>Score: ${sim.score}</p></div>`;
+}
+window.simAct=act=>{ const sim=DB.sims.find(s=>s.id===State.activeSimId); if(!sim)return; const pts={correct:20,neutral:5,wrong:-10}; sim.score+=pts[act]; sim.step++; if(sim.step>=3)sim.status='completed'; DB.save(); loadActiveSim(); };
+
+// ==================== CAMPAIGN SIM ====================
+function renderCamSim(){ return `<h2><i class="fas fa-rocket"></i> Campaign Simulator</h2><div class="card"><h3>Launch Campaign</h3><input class="input" type="number" id="simTargets" value="1000"><button class="btn" id="launchSim"><i class="fas fa-play"></i> Launch</button><div class="progress-bar"><div class="progress-fill" id="simProg" style="width:0%"></div></div><div id="simResults"></div></div>`; }
+document.addEventListener('click',e=>{ if(e.target&&e.target.id==='launchSim'){ if(State.camSimRunning)return; const total=parseInt(document.getElementById('simTargets').value)||1000; let sent=0,opened=0,clicked=0,conv=0; const prog=document.getElementById('simProg'), res=document.getElementById('simResults'); State.camSimRunning=true; const int=setInterval(()=>{ sent+=10;opened+=rnd(1,4);clicked+=rnd(0,2);conv+=rnd(0,1); if(sent>=total){sent=total;clearInterval(int);State.camSimRunning=false;} prog.style.width=(sent/total*100)+'%'; res.innerHTML=`Sent:${sent} Open:${opened} Click:${clicked} Conv:${conv}`; },100); }});
+
+// ==================== DATA EXFIL ====================
+function renderDataEx(){ return `<h2><i class="fas fa-database"></i> Data Exfil Simulator</h2><div class="card"><h3>Exfiltrate Files</h3><button class="btn" id="exfilBtn"><i class="fas fa-upload"></i> Start Exfil</button><div class="progress-bar"><div class="progress-fill" id="exfilProg" style="width:0%"></div></div><div id="exfilOut"></div></div>`; }
+document.addEventListener('click',e=>{ if(e.target&&e.target.id==='exfilBtn'){ let w=0; const prog=document.getElementById('exfilProg'), out=document.getElementById('exfilOut'); const int=setInterval(()=>{ w+=10; prog.style.width=w+'%'; if(w>=100){ clearInterval(int); out.innerHTML='<p>1.2 GB exfiltrated.</p><button class="btn" onclick="downloadFile(\'exfil_log.csv\',\'file,size,status\npasswords.txt,2KB,success\n\',\'text/csv\')">Download Log</button>'; } },200); }});
+
+// ==================== RANSOM SIMULATOR ====================
+function renderRansom(){ return `<h2><i class="fas fa-lock"></i> Ransomware Simulator</h2><div class="card"><h3>Deploy Ransomware</h3><p>Simulate encryption of files on a target network.</p><button class="btn btn-danger" id="startRansom"><i class="fas fa-skull"></i> Start Encryption</button><div class="progress-bar"><div class="progress-fill" id="ransomProg" style="width:0%"></div></div><div id="ransomOut"></div></div>`; }
+document.addEventListener('click',e=>{ if(e.target&&e.target.id==='startRansom'){ let w=0; const prog=document.getElementById('ransomProg'), out=document.getElementById('ransomOut'); const int=setInterval(()=>{ w+=5; prog.style.width=w+'%'; if(w>=100){ clearInterval(int); out.innerHTML=`<p>Ransomware deployed. 12,342 files encrypted. Ransom note: <pre>Your files are encrypted. Send 5 BTC to bc1q... or lose everything.</pre><button class="btn" onclick="downloadFile('ransom_note.txt','All your files have been encrypted...','text/plain')">Download Note</button></p>`; addEvent('Ransomware simulation complete.'); } },150); }});
+
+// ==================== EXPORT TOOLS ====================
+function renderExport(){ return `<h2><i class="fas fa-download"></i> Export Tools</h2><div class="grid"><div class="card"><h3>Campaigns</h3><button class="btn" onclick="exportJSON('campaigns',DB.campaigns)">JSON</button> <button class="btn" onclick="exportCSV('campaigns',DB.campaigns,['id','name','type','status','sent','opened','clicked','converted'])">CSV</button></div><div class="card"><h3>Payloads</h3><button class="btn" onclick="exportJSON('payloads',DB.payloads)">JSON</button></div><div class="card"><h3>Simulations</h3><button class="btn" onclick="exportJSON('simulations',DB.sims)">JSON</button></div><div class="card"><h3>Events</h3><button class="btn" onclick="exportJSON('events',DB.events)">JSON</button></div></div>`; }
+window.exportJSON=(name,data)=>{ downloadFile(`${name}.json`,JSON.stringify(data,null,2),'application/json'); };
+window.exportCSV=(name,data,cols)=>{ let csv=cols.join(',')+'\n'; data.forEach(r=>csv+=cols.map(c=>`"${r[c]||''}"`).join(',')+'\n'); downloadFile(`${name}.csv`,csv,'text/csv'); };
+
+// Initial load
+switchTab('dashboard');
+</script>
+</body>
+</html>

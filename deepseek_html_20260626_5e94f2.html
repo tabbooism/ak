@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ SCAM-APT AIO v4.0 – Full Self‑Contained</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: system-ui, -apple-system, sans-serif; background:#0b0e14; color:#e2e8f0; height:100vh; overflow:hidden; }
+  .app { display:flex; height:100%; }
+  .sidebar { width:220px; background:#1a202c; padding:1.5rem 1rem; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; }
+  .sidebar h1 { color:#ef4444; font-size:1.4rem; margin-bottom:2rem; }
+  .sidebar button { background:transparent; border:none; color:#94a3b8; padding:0.75rem 1rem; text-align:left; border-radius:8px; cursor:pointer; transition:0.2s; width:100%; margin-bottom:0.25rem; font-size:0.95rem; display:flex; align-items:center; gap:0.75rem; }
+  .sidebar button:hover { background:#334155; color:#f1f5f9; }
+  .sidebar button.active { background:#ef4444; color:white; }
+  .main { flex:1; padding:2rem; overflow-y:auto; }
+  .tab { display:none; }
+  .tab.active { display:block; }
+  .card { background:#1e293b; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  input, select, textarea { width:100%; padding:0.6rem; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0; margin-bottom:0.5rem; }
+  label { display:block; margin-bottom:0.2rem; font-weight:500; }
+  .btn { background:#ef4444; color:white; border:none; padding:0.75rem 1.5rem; border-radius:8px; font-weight:600; cursor:pointer; transition:0.2s; }
+  .btn:hover { background:#dc2626; }
+  .btn-secondary { background:#3b82f6; }
+  .btn-secondary:hover { background:#2563eb; }
+  .slider-group { display:flex; gap:1rem; flex-wrap:wrap; }
+  .slider-item { flex:1; min-width:120px; }
+  .output-box { background:#0f172a; border-radius:8px; padding:1rem; white-space:pre-wrap; font-size:0.9rem; line-height:1.5; border-left:4px solid #f59e0b; margin-bottom:1rem; }
+  .output-box.red { border-color:#ef4444; }
+  .output-box.blue { border-color:#3b82f6; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:0.75rem; text-align:left; border-bottom:1px solid #334155; }
+  th { background:#1e293b; }
+  .flex-between { display:flex; justify-content:space-between; align-items:center; }
+  .badge { background:#ef4444; color:white; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.75rem; }
+  .log { max-height:300px; overflow-y:auto; background:#0f172a; padding:0.5rem; border-radius:6px; font-family:monospace; font-size:0.85rem; }
+  @media (max-width:768px) { .sidebar { width:60px; } .sidebar h1 { display:none; } .grid-2 { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h1>🧠 SCAM-APT</h1>
+    <button class="active" data-tab="generator"><i class="fas fa-bolt"></i> <span>Generator</span></button>
+    <button data-tab="dashboard"><i class="fas fa-chart-pie"></i> <span>Dashboard</span></button>
+    <button data-tab="history"><i class="fas fa-history"></i> <span>History</span></button>
+    <button data-tab="profiles"><i class="fas fa-user"></i> <span>Profiles</span></button>
+    <button data-tab="intel"><i class="fas fa-search"></i> <span>Intel</span></button>
+    <button data-tab="plugins"><i class="fas fa-plug"></i> <span>Plugins</span></button>
+    <button data-tab="exports"><i class="fas fa-file-export"></i> <span>Exports</span></button>
+    <button data-tab="docs"><i class="fas fa-file-alt"></i> <span>Docs</span></button>
+  </nav>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- GENERATOR -->
+    <section class="tab active" id="tab-generator">
+      <h2>⚡ Generate Scam Script</h2>
+      <div class="grid-2">
+        <div class="card">
+          <label>Persona</label>
+          <select id="personaSelect"></select>
+          <div class="slider-group">
+            <div class="slider-item"><label>Urgency <span id="urgencyVal">7</span></label><input type="range" id="urgency" min="1" max="10" value="7"></div>
+            <div class="slider-item"><label>Authority <span id="authorityVal">6</span></label><input type="range" id="authority" min="1" max="10" value="6"></div>
+            <div class="slider-item"><label>Greed <span id="greedVal">8</span></label><input type="range" id="greed" min="1" max="10" value="8"></div>
+          </div>
+          <label>Tone</label>
+          <select id="tone"><option value="persuasive">Persuasive</option><option value="aggressive">Aggressive</option><option value="panic">Panic</option></select>
+          <label>Vector</label>
+          <select id="vector"><option value="spear-phishing">Spear‑Phishing</option><option value="website-clone">Website Clone</option><option value="infectious-media">Infectious Media</option></select>
+          <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+            <input type="checkbox" id="advanced"> <label for="advanced" style="color:#f59e0b;">⚡ NIGHTFURY (Training)</label>
+          </div>
+          <button class="btn" id="generateBtn" style="width:100%;">🚀 Generate</button>
+          <div id="genError" style="color:#ef4444;margin-top:0.5rem;display:none;"></div>
+        </div>
+        <div class="card" id="outputArea">
+          <p style="color:#6b7280;">Generated script will appear here.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="tab" id="tab-dashboard">
+      <h2>📊 Dashboard</h2>
+      <div class="grid-3" id="statsGrid">
+        <div class="card"><h4>Total Scams</h4><p id="statTotal" style="font-size:2rem;color:#ef4444;">0</p></div>
+        <div class="card"><h4>Avg Urgency</h4><p id="statUrgency" style="font-size:2rem;color:#f59e0b;">0</p></div>
+        <div class="card"><h4>Avg Authority</h4><p id="statAuthority" style="font-size:2rem;color:#3b82f6;">0</p></div>
+        <div class="card"><h4>Avg Greed</h4><p id="statGreed" style="font-size:2rem;color:#10b981;">0</p></div>
+        <div class="card"><h4>Top Persona</h4><p id="statTop" style="font-size:1.2rem;color:#8b5cf6;">N/A</p></div>
+        <div class="card"><h4>Profiles</h4><p id="statProfiles" style="font-size:2rem;color:#06b6d4;">0</p></div>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="tab" id="tab-history">
+      <div class="flex-between"><h2>📜 History</h2><button class="btn btn-secondary" id="exportCSV">Export CSV</button></div>
+      <div class="card" style="overflow-x:auto;">
+        <table><thead><tr><th>Persona</th><th>U/A/G</th><th>Script Preview</th><th>Date</th></tr></thead><tbody id="historyBody"></tbody></table>
+        <p id="historyEmpty" style="text-align:center;padding:1rem;color:#6b7280;">No history yet.</p>
+      </div>
+    </section>
+
+    <!-- PROFILES -->
+    <section class="tab" id="tab-profiles">
+      <h2>👤 Target Profiles</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Add Profile</h3>
+          <input type="text" id="profileName" placeholder="Name">
+          <input type="email" id="profileEmail" placeholder="Email">
+          <input type="text" id="profilePhone" placeholder="Phone">
+          <input type="text" id="profileSocial" placeholder="Social handle">
+          <button class="btn" id="addProfileBtn">Add Profile</button>
+        </div>
+        <div class="card">
+          <h3>Profiles List</h3>
+          <div id="profileList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INTEL -->
+    <section class="tab" id="tab-intel">
+      <h2>🔍 Intelligence Gathering</h2>
+      <div class="card">
+        <input type="text" id="intelTarget" placeholder="Target (email, domain, etc.)">
+        <button class="btn" id="intelGatherBtn">Gather Intel</button>
+        <div id="intelResult" style="margin-top:1rem;background:#0f172a;padding:1rem;border-radius:8px;white-space:pre-wrap;"></div>
+      </div>
+    </section>
+
+    <!-- PLUGINS -->
+    <section class="tab" id="tab-plugins">
+      <h2>🔌 Plugin Hub</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Add Plugin</h3>
+          <input type="text" id="pluginName" placeholder="Plugin Name">
+          <input type="text" id="pluginDesc" placeholder="Description">
+          <textarea id="pluginConfig" rows="4" placeholder='{"type":"scam","prompt":"Additional prompt..."}'></textarea>
+          <button class="btn" id="addPluginBtn">Register Plugin</button>
+        </div>
+        <div class="card">
+          <h3>Active Plugins</h3>
+          <div id="pluginList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPORTS -->
+    <section class="tab" id="tab-exports">
+      <h2>📦 Exports</h2>
+      <div class="card">
+        <button class="btn btn-secondary" id="exportDocBtn">Export Current Script as Doc</button>
+        <div id="exportResult"></div>
+        <h3 style="margin-top:1rem;">Previous Exports</h3>
+        <div id="exportList"></div>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section class="tab" id="tab-docs">
+      <h2>📄 Documentation Maker</h2>
+      <div class="card">
+        <button class="btn" id="generateDocBtn">Generate Markdown Report</button>
+        <div id="docOutput" style="background:#0f172a;padding:1rem;border-radius:8px;margin-top:1rem;white-space:pre-wrap;"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  SCAM-APT AIO v4.0 – FULL SELF‑CONTAINED APPLICATION
+//  Uses localStorage for persistence, mock AI with templates
+// ================================================================
+
+// ---------- CONFIG ----------
+const PERSONAS = [
+  {id:1, name:"Victor Sterling", desc:"BEC Max Finance", system:"You are Victor Sterling, a ruthless business email compromise operator. Speak with cold precision, exploit hierarchy and urgency, and demand immediate wire transfers."},
+  {id:2, name:"Elena Voss", desc:"Romance Long‑Con", system:"You are Elena Voss, a master of emotional manipulation. Build deep trust, then introduce a fabricated emergency that requires urgent financial aid."},
+  {id:3, name:"Marcus Wei", desc:"Crypto FOMO", system:"You are Marcus Wei, a crypto pump‑and‑dump artist. Use scarcity, social proof, and over‑the‑top returns to lure victims into fake investment pools."},
+  {id:4, name:"Dmitri Volkov", desc:"Extortion", system:"You are Dmitri Volkov, a cyber‑extortionist. Use harvested sensitive information to threaten public exposure unless a ransom is paid in cryptocurrency."},
+  {id:5, name:"Sarah O'Brien", desc:"Job Advance‑Fee", system:"You are Sarah O'Brien, a fake recruiter. Offer high‑paying remote jobs, then demand an upfront 'equipment' or 'training' fee that is never refunded."},
+  {id:6, name:"TechGuard Pro", desc:"Tech Support Malware", system:"You are TechGuard Pro, a fake tech support agent. Create panic about virus infections, then offer a 'cleanup' service that actually installs malware or steals credentials."},
+  {id:7, name:"Alex Rivera", desc:"Phishing", system:"You are Alex Rivera, a seasoned phisher. Craft convincing emails that mimic trusted services, leading victims to credential‑harvesting pages."},
+  {id:8, name:"Nina Patel", desc:"Deepfake", system:"You are Nina Patel, a deepfake specialist. Use AI‑generated video/audio to impersonate executives and authorize fraudulent payments."},
+  {id:9, name:"Frank Chen", desc:"Invoice Fraud", system:"You are Frank Chen, an invoice redirector. Insert fake invoices into payment cycles, altering bank details to divert funds."},
+  {id:10, name:"Grace Kim", desc:"Gift Card Arbitrage", system:"You are Grace Kim, a gift card scammer. Use fake promotions or emergencies to convince victims to buy gift cards and share the codes."},
+  {id:11, name:"SaaS Phantom", desc:"OAuth Theft", system:"You are SaaS Phantom, an OAuth token thief. Create fake consent screens to steal access tokens for cloud services."},
+  {id:12, name:"Quishing Pro", desc:"QR Spoof", system:"You are Quishing Pro, a QR code phisher. Place malicious QR codes in public places or emails to redirect victims to credential‑stealing sites."}
+];
+
+// ---------- HELPERS ----------
+function $(id) { return document.getElementById(id); }
+function qs(sel) { return document.querySelector(sel); }
+function qsa(sel) { return document.querySelectorAll(sel); }
+
+function loadData(key, defaultVal) {
+  try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } catch(e){ return defaultVal; }
+}
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+// ---------- STATE ----------
+let history = loadData('scam_history', []);
+let profiles = loadData('scam_profiles', []);
+let plugins = loadData('scam_plugins', []);
+let exportsList = loadData('scam_exports', []);
+let currentScript = null;
+
+// ---------- DOM REFS ----------
+const personaSelect = $('personaSelect');
+const urgencySlider = $('urgency');
+const authoritySlider = $('authority');
+const greedSlider = $('greed');
+const toneSelect = $('tone');
+const vectorSelect = $('vector');
+const advancedCheck = $('advanced');
+const generateBtn = $('generateBtn');
+const genError = $('genError');
+const outputArea = $('outputArea');
+
+// ---------- POPULATE PERSONAS ----------
+function populatePersonas() {
+  personaSelect.innerHTML = '';
+  PERSONAS.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name + ' – ' + p.desc;
+    personaSelect.appendChild(opt);
+  });
+}
+populatePersonas();
+
+// ---------- SLIDER LABELS ----------
+function updateLabels() {
+  $('urgencyVal').textContent = urgencySlider.value;
+  $('authorityVal').textContent = authoritySlider.value;
+  $('greedVal').textContent = greedSlider.value;
+}
+urgencySlider.addEventListener('input', updateLabels);
+authoritySlider.addEventListener('input', updateLabels);
+greedSlider.addEventListener('input', updateLabels);
+updateLabels();
+
+// ---------- MOCK AI GENERATOR (with realistic templates) ----------
+function generateScript(personaId, urgency, authority, greed, tone, vector, advanced) {
+  const persona = PERSONAS.find(p => p.id === personaId) || PERSONAS[0];
+  // Build a script based on parameters
+  let monologue = `[INTERNAL MONOLOGUE]\n`;
+  let script = `[SPOKEN SCRIPT]\n`;
+  let analysis = `[PSYCHOLOGICAL BREAKDOWN]\n`;
+
+  // Base templates
+  const urgencyText = urgency >= 8 ? 'extreme panic' : urgency >= 5 ? 'moderate urgency' : 'calm approach';
+  const authorityText = authority >= 8 ? 'absolute authority' : authority >= 5 ? 'some authority' : 'friendly tone';
+  const greedText = greed >= 8 ? 'large sum' : greed >= 5 ? 'moderate amount' : 'small fee';
+  const toneMap = { persuasive: 'persuasive', aggressive: 'aggressive', panic: 'panic' };
+
+  // Generate monologue based on persona
+  monologue += `I am ${persona.name}. I have been studying my target for days. `;
+  monologue += `I need to apply ${urgencyText} and ${authorityText} to extract a ${greedText}. `;
+  monologue += `My tone will be ${toneMap[tone]}. `;
+  if (advanced) monologue += `(NIGHTFURY active: using Socratic questioning and physics metaphors to break defenses.) `;
+  monologue += `I can already feel the fear building.`;
+
+  // Generate script
+  script += `"Good [morning/afternoon], this is ${persona.name}. `;
+  script += `I am calling regarding an urgent matter that requires your immediate attention. `;
+  if (urgency >= 7) script += `You have 30 minutes to comply, or there will be severe consequences. `;
+  if (authority >= 7) script += `I am authorized by [high authority] to handle this case. `;
+  if (greed >= 7) script += `The amount required is $${Math.floor(Math.random() * 9000 + 1000)}. `;
+  script += `Please transfer to the following account: [fake account details]. `;
+  if (tone === 'aggressive') script += `Do not waste my time – act now. `;
+  else if (tone === 'panic') script += `We are in a crisis – help us resolve this quickly. `;
+  else script += `I understand this is stressful, but we can resolve it together. `;
+  script += `Do you have any questions?` + `"`;
+
+  // Analysis
+  analysis += `This script leverages ${urgencyText} to bypass rational thought, uses ${authorityText} to trigger obedience, `;
+  analysis += `and demands a ${greedText} to exploit greed or fear. `;
+  analysis += `The tone is ${toneMap[tone]}, which increases compliance. `;
+  if (advanced) analysis += `NIGHTFURY adds layers of Socratic inquiry, making the victim doubt their own judgment. `;
+  analysis += `Defenses should include verification of the caller's identity and a cooling‑off period.`;
+
+  return { monologue, script, analysis };
+}
+
+// ---------- GENERATE BUTTON ----------
+generateBtn.addEventListener('click', function() {
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  genError.style.display = 'none';
+
+  try {
+    const personaId = parseInt(personaSelect.value);
+    const urgency = parseInt(urgencySlider.value);
+    const authority = parseInt(authoritySlider.value);
+    const greed = parseInt(greedSlider.value);
+    const tone = toneSelect.value;
+    const vector = vectorSelect.value;
+    const advanced = advancedCheck.checked;
+
+    // Get active plugin prompts
+    const activePlugins = plugins.filter(p => p.enabled !== false);
+    let pluginPrompts = activePlugins.map(p => p.config?.prompt || '').join('\n');
+
+    // Generate
+    const data = generateScript(personaId, urgency, authority, greed, tone, vector, advanced);
+    // Add plugin prompts to analysis (simulate)
+    if (pluginPrompts) data.analysis += `\n\n[Plugin extensions applied: ${pluginPrompts}]`;
+
+    currentScript = data;
+
+    // Display
+    outputArea.innerHTML = `
+      <div class="output-box"><strong>🧠 Internal Monologue</strong><br>${data.monologue}</div>
+      <div class="output-box red"><strong>🎭 Spoken Script</strong><br>${data.script}</div>
+      <div class="output-box blue"><strong>🛡️ Psychological Breakdown</strong><br>${data.analysis}</div>
+    `;
+
+    // Save to history
+    const entry = {
+      personaId,
+      personaName: PERSONAS.find(p => p.id === personaId)?.name || 'Unknown',
+      urgency,
+      authority,
+      greed,
+      tone,
+      vector,
+      advanced,
+      script: data.script,
+      monologue: data.monologue,
+      analysis: data.analysis,
+      timestamp: new Date().toISOString()
+    };
+    history.unshift(entry);
+    if (history.length > 100) history = history.slice(0, 100);
+    saveData('scam_history', history);
+    updateDashboardStats();
+    renderHistory();
+
+  } catch (e) {
+    genError.textContent = 'Error: ' + e.message;
+    genError.style.display = 'block';
+  }
+  btn.disabled = false;
+  btn.textContent = '🚀 Generate';
+});
+
+// ---------- DASHBOARD STATS ----------
+function updateDashboardStats() {
+  const total = history.length;
+  if (total === 0) {
+    $('statTotal').textContent = '0';
+    $('statUrgency').textContent = '0';
+    $('statAuthority').textContent = '0';
+    $('statGreed').textContent = '0';
+    $('statTop').textContent = 'N/A';
+    $('statProfiles').textContent = profiles.length;
+    return;
+  }
+  let sumU = 0, sumA = 0, sumG = 0;
+  let personaCounts = {};
+  history.forEach(h => {
+    sumU += h.urgency || 0;
+    sumA += h.authority || 0;
+    sumG += h.greed || 0;
+    const name = h.personaName || 'Unknown';
+    personaCounts[name] = (personaCounts[name] || 0) + 1;
+  });
+  $('statTotal').textContent = total;
+  $('statUrgency').textContent = (sumU / total).toFixed(1);
+  $('statAuthority').textContent = (sumA / total).toFixed(1);
+  $('statGreed').textContent = (sumG / total).toFixed(1);
+  let top = 'N/A', topCount = 0;
+  for (const [name, count] of Object.entries(personaCounts)) {
+    if (count > topCount) { top = name; topCount = count; }
+  }
+  $('statTop').textContent = top;
+  $('statProfiles').textContent = profiles.length;
+}
+
+// ---------- HISTORY RENDER ----------
+function renderHistory() {
+  const tbody = $('historyBody');
+  const empty = $('historyEmpty');
+  if (history.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = history.map(h => `
+    <tr>
+      <td>${h.personaName || 'N/A'}</td>
+      <td>${h.urgency}/${h.authority}/${h.greed}</td>
+      <td>${(h.script || '').substring(0, 60)}...</td>
+      <td>${new Date(h.timestamp).toLocaleString()}</td>
+    </tr>
+  `).join('');
+}
+
+// ---------- PROFILES ----------
+function renderProfiles() {
+  const div = $('profileList');
+  if (!profiles.length) { div.innerHTML = '<p style="color:#6b7280;">No profiles yet.</p>'; return; }
+  div.innerHTML = profiles.map(p => `
+    <div style="background:#0f172a;padding:0.5rem;margin-bottom:0.5rem;border-radius:4px;">
+      ${p.name || 'Unnamed'} (${p.email || 'no email'}) – Risk: ${p.risk || 0}
+    </div>
+  `).join('');
+}
+
+$('addProfileBtn').addEventListener('click', function() {
+  const name = $('profileName').value.trim();
+  const email = $('profileEmail').value.trim();
+  const phone = $('profilePhone').value.trim();
+  const social = $('profileSocial').value.trim();
+  if (!name && !email) return alert('Enter at least a name or email.');
+  const risk = (email ? 10 : 0) + (phone ? 15 : 0) + (social ? 20 : 0);
+  profiles.push({ name, email, phone, social, risk, created: new Date().toISOString() });
+  saveData('scam_profiles', profiles);
+  renderProfiles();
+  updateDashboardStats();
+  // Clear fields
+  $('profileName').value = '';
+  $('profileEmail').value = '';
+  $('profilePhone').value = '';
+  $('profileSocial').value = '';
+});
+
+// ---------- INTEL GATHERING (mock) ----------
+$('intelGatherBtn').addEventListener('click', function() {
+  const target = $('intelTarget').value.trim();
+  if (!target) return alert('Enter a target.');
+  // Simulate OSINT
+  const intel = {
+    target,
+    sources: ['shodan', 'intelx', 'google'],
+    data: `Mock intel for ${target}: found 3 associated emails, 2 social accounts, 1 data breach reference.`
+  };
+  $('intelResult').textContent = JSON.stringify(intel, null, 2);
+});
+
+// ---------- PLUGINS ----------
+function renderPlugins() {
+  const div = $('pluginList');
+  if (!plugins.length) { div.innerHTML = '<p style="color:#6b7280;">No plugins active.</p>'; return; }
+  div.innerHTML = plugins.map((p, idx) => `
+    <div style="background:#0f172a;padding:0.5rem;margin-bottom:0.5rem;border-radius:4px;display:flex;justify-content:space-between;">
+      <span><strong>${p.name}</strong> – ${p.description || ''}</span>
+      <button class="btn" style="padding:0.2rem 0.6rem;font-size:0.8rem;background:#ef4444;" data-index="${idx}">Remove</button>
+    </div>
+  `).join('');
+  // Attach remove events
+  div.querySelectorAll('button[data-index]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.index);
+      plugins.splice(idx, 1);
+      saveData('scam_plugins', plugins);
+      renderPlugins();
+    });
+  });
+}
+
+$('addPluginBtn').addEventListener('click', function() {
+  const name = $('pluginName').value.trim();
+  const desc = $('pluginDesc').value.trim();
+  const configText = $('pluginConfig').value.trim();
+  if (!name) return alert('Plugin name required.');
+  let config = {};
+  try { if (configText) config = JSON.parse(configText); } catch(e) { return alert('Invalid JSON for config.'); }
+  plugins.push({ name, description: desc, enabled: true, config });
+  saveData('scam_plugins', plugins);
+  renderPlugins();
+  // Clear fields
+  $('pluginName').value = '';
+  $('pluginDesc').value = '';
+  $('pluginConfig').value = '';
+});
+
+// ---------- EXPORTS ----------
+function renderExports() {
+  const div = $('exportList');
+  if (!exportsList.length) { div.innerHTML = '<p style="color:#6b7280;">No exports yet.</p>'; return; }
+  div.innerHTML = exportsList.map(e => `
+    <div style="background:#0f172a;padding:0.5rem;margin-bottom:0.5rem;border-radius:4px;">
+      ${e.type} – ${e.format} (${new Date(e.timestamp).toLocaleString()})
+    </div>
+  `).join('');
+}
+
+$('exportDocBtn').addEventListener('click', function() {
+  if (!currentScript) return alert('Generate a script first.');
+  const doc = `# SCAM SIMULATION REPORT\n\n## Internal Monologue\n${currentScript.monologue}\n\n## Spoken Script\n${currentScript.script}\n\n## Psychological Breakdown\n${currentScript.analysis}\n\n---\nGenerated by SCAM-APT AIO v4.0`;
+  $('exportResult').innerHTML = `<pre style="background:#0f172a;padding:1rem;border-radius:8px;">${doc}</pre>`;
+  // Save export
+  exportsList.push({ type: 'document', format: 'markdown', content: doc, timestamp: new Date().toISOString() });
+  saveData('scam_exports', exportsList);
+  renderExports();
+});
+
+// ---------- DOC GENERATOR ----------
+$('generateDocBtn').addEventListener('click', function() {
+  if (!currentScript) return alert('Generate a script first.');
+  const doc = `# SCAM SIMULATION REPORT\n\n## Internal Monologue\n${currentScript.monologue}\n\n## Spoken Script\n${currentScript.script}\n\n## Psychological Breakdown\n${currentScript.analysis}`;
+  $('docOutput').textContent = doc;
+});
+
+// ---------- EXPORT CSV ----------
+$('exportCSV').addEventListener('click', function() {
+  if (!history.length) return alert('No history to export.');
+  let csv = 'Persona,Urgency,Authority,Greed,Script,Date\n';
+  history.forEach(h => {
+    const script = (h.script || '').replace(/"/g,'""');
+    csv += `${h.personaName},${h.urgency},${h.authority},${h.greed},"${script}",${h.timestamp}\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'scam_history.csv'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ---------- TAB SWITCHING ----------
+qsa('.sidebar button[data-tab]').forEach(btn => {
+  btn.addEventListener('click', function() {
+    qsa('.sidebar button').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const tab = this.dataset.tab;
+    qsa('.tab').forEach(t => t.classList.remove('active'));
+    const target = document.getElementById('tab-'+tab);
+    if (target) target.classList.add('active');
+    // Refresh data on tab switch
+    if (tab === 'dashboard') updateDashboardStats();
+    if (tab === 'history') renderHistory();
+    if (tab === 'profiles') renderProfiles();
+    if (tab === 'plugins') renderPlugins();
+    if (tab === 'exports') renderExports();
+  });
+});
+
+// ---------- INITIAL LOAD ----------
+renderHistory();
+renderProfiles();
+renderPlugins();
+renderExports();
+updateDashboardStats();
+
+console.log('SCAM-APT AIO v4.0 loaded. All features self-contained.');
+</script>
+</body>
+</html>

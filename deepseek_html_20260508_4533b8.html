@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NEXUS // JOINT INTELLIGENCE TASK FORCE - OPERATIONS PORTAL</title>
+    <!-- Official Gov-Style Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b1a2f;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            color: #eef2ff;
+            line-height: 1.5;
+        }
+
+        /* GOV-STYLE THEME */
+        :root {
+            --primary-deep: #0a2b4e;
+            --primary-official: #1e3a8a;
+            --accent-gold: #d4af37;
+            --accent-red: #b91c1c;
+            --accent-green: #0e7c32;
+            --gray-panel: #111827dd;
+            --terminal-dark: #0a0f1a;
+            --border-glow: rgba(212, 175, 55, 0.4);
+        }
+
+        /* HEADER WITH SEAL */
+        .gov-header {
+            background: linear-gradient(135deg, #0a2b4e 0%, #071a2f 100%);
+            border-bottom: 3px solid var(--accent-gold);
+            padding: 0.8rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .seal {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 2px gold);
+        }
+        .agency-title h2 {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+        .agency-title h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .clearance-badge {
+            background: #0a2b4e;
+            border: 1px solid var(--accent-gold);
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        /* MAIN GRID LAYOUT */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 0;
+            height: calc(100vh - 100px);
+            overflow: hidden;
+        }
+
+        /* ROSTER PANEL (LEFT) - MODERN GOV STYLE */
+        .roster-panel-modern {
+            background: #0f172ad9;
+            backdrop-filter: blur(2px);
+            border-right: 1px solid #2d3a5e;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+        }
+        .panel-title {
+            background: #0b1120;
+            padding: 1rem;
+            border-bottom: 1px solid var(--accent-gold);
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .operative-list {
+            list-style: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .operative-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            border-bottom: 1px solid #1e2a44;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .operative-item:hover { background: #1e2a4a; border-left-color: var(--accent-gold); }
+        .operative-item.active {
+            background: #0f2c5e;
+            border-left-color: var(--accent-gold);
+            box-shadow: inset 0 0 0 1px var(--accent-gold);
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-Active { background: #16a34a; box-shadow: 0 0 4px #16a34a; }
+        .status-Inactive { background: #6b7280; }
+        .status-MIA { background: #f59e0b; }
+        .status-KIA { background: #dc2626; }
+
+        /* RIGHT CONTENT (TABS) */
+        .main-work-area {
+            background: #05101f;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 2px solid #1e3a5f;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'Inter', monospace;
+            font-weight: 600;
+            color: #9bb5d9;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            border-radius: 8px 8px 0 0;
+        }
+        .tab-btn.active {
+            background: #0f2c4e;
+            color: var(--accent-gold);
+            border-bottom: 2px solid var(--accent-gold);
+        }
+        .tab-content {
+            display: none;
+            animation: fade 0.25s ease;
+        }
+        .tab-content.active { display: block; }
+
+        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+        /* CARDS / MODULES */
+        .card {
+            background: #0f172ad9;
+            border-radius: 18px;
+            border: 1px solid #2d3a5e;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(3px);
+        }
+        .card-header {
+            font-weight: 700;
+            border-left: 4px solid var(--accent-gold);
+            padding-left: 12px;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+        button {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        button:hover { background: #2e4ab0; transform: translateY(-1px); }
+        .btn-danger { background: #9b1c1c; }
+        .btn-outline { background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold); }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            background: #04152b;
+            border: 1px solid #2e496e;
+            color: #eef2ff;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-family: monospace;
+        }
+        .dossier-field { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+        .dossier-label { font-weight: 600; width: 140px; color: var(--accent-gold); }
+        .specialty-tag {
+            background: #1e3a8a;
+            padding: 2px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+        }
+        .log-console {
+            background: #000000cc;
+            border: 1px solid #2c5a2e;
+            height: 200px;
+            overflow-y: auto;
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+        .disclaimer {
+            background: #1a0f0f;
+            border-top: 2px solid #b91c1c;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+        }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } .roster-panel-modern { max-height: 300px; } }
+    </style>
+</head>
+<body>
+
+<div class="gov-header">
+    <div class="logo-area">
+        <div class="seal">🦅</div>
+        <div class="agency-title">
+            <h2>DEPARTMENT OF CYBER & COGNITIVE OPERATIONS</h2>
+            <h1>JOINT TASK FORCE - NEXUS</h1>
+        </div>
+    </div>
+    <div class="clearance-badge"><i class="fas fa-shield-alt"></i> TS/SCI // STELLARWIND</div>
+</div>
+
+<div class="dashboard-grid">
+    <!-- LEFT ROSTER (DIA CLONE) -->
+    <div class="roster-panel-modern">
+        <div class="panel-title"><i class="fas fa-users"></i> ACTIVE ROSTER // FIELD ASSETS</div>
+        <ul class="operative-list" id="operativeListUI"></ul>
+        <div class="card" style="border-radius: 0; margin: 0; background: #0b1321;">
+            <div style="font-weight: bold; margin-bottom: 8px;"><i class="fas fa-user-plus"></i> COMMISSION NEW ASSET</div>
+            <input type="text" id="opName" placeholder="Full Name" autocomplete="off">
+            <input type="text" id="opCodename" placeholder="Codename">
+            <select id="opClearance">
+                <option>Secret</option><option>Top Secret</option><option>TS/SCI</option>
+            </select>
+            <select id="opStatusInit">
+                <option>Active</option><option>Inactive</option>
+            </select>
+            <input type="text" id="opSpecialties" placeholder="Specialties (comma)">
+            <button id="commissionBtn" style="width:100%;"><i class="fas fa-check-circle"></i> COMMISSION OPERATIVE</button>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL (MODERN TABS) -->
+    <div class="main-work-area">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tab-intel"><i class="fas fa-brain"></i> THREAT INTELLIGENCE (SC4M)</button>
+            <button class="tab-btn" data-tab="tab-dossier"><i class="fas fa-id-card"></i> OPERATIVE DOSSIER</button>
+            <button class="tab-btn" data-tab="tab-psych"><i class="fas fa-mask"></i> PSYCH-JEERING ENGINE</button>
+            <button class="tab-btn" data-tab="tab-sim"><i class="fas fa-vr-cardboard"></i> REAL-TIME SIMULATION</button>
+            <button class="tab-btn" data-tab="tab-integration"><i class="fas fa-project-diagram"></i> LAB INTEGRATION</button>
+        </div>
+
+        <!-- THREAT INTELLIGENCE (SC4M CORE) -->
+        <div id="tab-intel" class="tab-content active">
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-cogs"></i> SC4M METHOD GENERATOR</div>
+                    <textarea id="threatInput" rows="3" placeholder="Describe threat pattern / IoC / behavior..."></textarea>
+                    <button id="genMethodBtn" style="width:100%;">GENERATE COUNTERMEASURE</button>
+                    <div class="log-console" id="methodOutput" style="margin-top: 12px; height: 150px;">Awaiting threat input...</div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-chart-line"></i> THREAT CORRELATION</div>
+                    <canvas id="correlationChart" height="180"></canvas>
+                    <div class="status-panel" style="display: flex; justify-content: space-between; margin-top: 12px;">
+                        <div><span class="status-dot status-Active"></span> Live threats: <span id="liveThreatCount">0</span></div>
+                        <div><i class="fas fa-database"></i> Patterns correlated: <span id="correlCount">47</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><i class="fas fa-terminal"></i> SC4M ENGINE LOG</div>
+                <div class="log-console" id="sc4mConsole">SC4M v5.0 ready. Psych-jeering modules active. Real-time correlation online.</div>
+            </div>
+        </div>
+
+        <!-- OPERATIVE DOSSIER (FULL DETAIL) -->
+        <div id="tab-dossier" class="tab-content">
+            <div class="card" id="dossierDynamicContainer">
+                <div style="text-align:center; padding: 40px;">Select an operative from left roster to view classified dossier.</div>
+            </div>
+        </div>
+
+        <!-- PSYCH-JEERING ENGINE -->
+        <div id="tab-psych" class="tab-content">
+            <div class="grid-2col">
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-user-astronaut"></i> Adversary Mindset Emulation</div>
+                    <select id="psychProfileSelect">
+                        <option>APT29 (Cozy Bear)</option><option>Wizard Spider</option><option>Scattered Spider</option><option>Sandworm</option>
+                    </select>
+                    <button id="genPsychProfile">GENERATE ADVERSARY PROFILE</button>
+                    <div class="log-console" id="psychOutput" style="height: 200px;">Adversary profile will appear here.</div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><i class="fas fa-chess-queen"></i> Counter-Strategy (mirrorJing)</div>
+                    <button id="devCounterBtn">DEVELOP PSYCH-JEERING COUNTER</button>
+                    <div class="log-console" id="counterOutput" style="height: 200px;">Cognitive disruption strategies ready.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REAL-TIME SIMULATION -->
+        <div id="tab-sim" class="tab-content">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-chalkboard-user"></i> ISOLATED THREAT SIMULATION</div>
+                <div class="grid-2col">
+                    <div><button id="startSimulation">▶ START SIMULATION (SANDBOX)</button></div>
+                    <div><select id="simType"><option>Phishing Campaign</option><option>Social Engineering</option><option>Malware Delivery</option></select></div>
+                </div>
+                <div class="log-console" id="simLog" style="height: 250px;">Simulation environment ready. Execute to replay adversarial TTPs.</div>
+            </div>
+        </div>
+
+        <!-- LAB INTEGRATION / CLONED ASSETS -->
+        <div id="tab-integration" class="tab-content">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-flask"></i> CLONED LAB REPLICA // MODULAR ASSETS</div>
+                <p>Complete asset integration: Roster (AES-encrypted local storage), SC4M threat engine, psych-jeering, real-time simulation. <strong>Full functional clone identical to production TTP lab.</strong></p>
+                <button id="exportDbBtn"><i class="fas fa-download"></i> EXPORT FULL OPERATIVE DB</button>
+                <button id="resetAllData" class="btn-danger" style="margin-left: 10px;"><i class="fas fa-skull-crosswalk"></i> EMERGENCY WIPE</button>
+                <div class="log-console" id="integrationLog">System ready — cross-module synergy online.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="disclaimer">
+    <i class="fas fa-balance-scale"></i> DISCLAIMER: This system is a classified simulation and analytical sandbox. All data is fictional, used for authorized training and defensive research only. Unauthorized access or misuse violates 18 U.S.C. § 1030.
+</div>
+
+<script>
+    (function(){
+        // ---------- DIA ROSTER SYSTEM (CLONE) ----------
+        const ROSTER_STORAGE_KEY = 'nexus_roster_v2_enc';
+        const ENC_KEY = 'nexus-field-cognitive-9delta';
+
+        let operatives = [];
+        let selectedOpId = null;
+
+        function saveRoster() {
+            const encrypted = CryptoJS.AES.encrypt(JSON.stringify(operatives), ENC_KEY).toString();
+            localStorage.setItem(ROSTER_STORAGE_KEY, encrypted);
+        }
+
+        function loadRoster() {
+            const raw = localStorage.getItem(ROSTER_STORAGE_KEY);
+            if (raw) {
+                try {
+                    const bytes = CryptoJS.AES.decrypt(raw, ENC_KEY);
+                    operatives = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                } catch(e) { operatives = []; }
+            }
+            if (!operatives.length) {
+                // Seed with example operative (realistic)
+                operatives = [{
+                    id: 'op-init-1', name: 'Elena Vasquez', codename: 'ECHO', clearance: 'TS/SCI', status: 'Active',
+                    specialties: ['Cyber HUMINT', 'OSINT'], issueDate: new Date().toISOString(), expiryDate: new Date(Date.now()+ 2*365*864e5).toISOString(),
+                    log: [`[${new Date().toISOString()}] :: STATUS: COMMISSIONED`], currentAssignment: null
+                }];
+                saveRoster();
+            }
+            renderRosterUI();
+            if(operatives.length) selectedOpId = operatives[0].id;
+            renderDossierFull();
+        }
+
+        function addOperative(name, codename, clearance, status, specialtiesArr) {
+            if(!name || !codename) return false;
+            const newOp = {
+                id: `op-${Date.now()}-${Math.random().toString(36)}`,
+                name, codename, clearance, status,
+                specialties: specialtiesArr,
+                issueDate: new Date().toISOString(),
+                expiryDate: new Date(Date.now() + 2*365*864e5).toISOString(),
+                log: [`[${new Date().toISOString()}] :: COMMISSIONED - ACTIVE`],
+                currentAssignment: null
+            };
+            operatives.unshift(newOp);
+            selectedOpId = newOp.id;
+            saveRoster();
+            renderRosterUI();
+            renderDossierFull();
+            return true;
+        }
+
+        function updateStatus(opId, newStatus) {
+            const op = operatives.find(o=>o.id === opId);
+            if(op && op.status !== newStatus) {
+                op.status = newStatus;
+                op.log.push(`[${new Date().toISOString()}] :: STATUS CHANGED TO ${newStatus}`);
+                saveRoster();
+                renderRosterUI();
+                if(selectedOpId === opId) renderDossierFull();
+            }
+        }
+
+        function decommissionOp(opId) {
+            if(confirm('DECOMMISSION: permanently remove asset from roster?')) {
+                operatives = operatives.filter(o=>o.id !== opId);
+                if(selectedOpId === opId) selectedOpId = operatives.length ? operatives[0]?.id : null;
+                saveRoster();
+                renderRosterUI();
+                renderDossierFull();
+            }
+        }
+
+        function wipeAllData() {
+            if(confirm('!! EMERGENCY WIPE !! All operatives, methods, logs will be erased.')) {
+                operatives = [];
+                localStorage.removeItem(ROSTER_STORAGE_KEY);
+                saveRoster();
+                renderRosterUI();
+                selectedOpId = null;
+                renderDossierFull();
+                document.getElementById('sc4mConsole').innerHTML = '[WIPED] System reset.';
+            }
+        }
+
+        function renderRosterUI() {
+            const container = document.getElementById('operativeListUI');
+            if(!container) return;
+            container.innerHTML = '';
+            operatives.forEach(op => {
+                const li = document.createElement('li');
+                li.className = `operative-item ${selectedOpId === op.id ? 'active' : ''}`;
+                li.dataset.id = op.id;
+                li.innerHTML = `<div><span class="status-dot status-${op.status}"></span> ${op.codename} (${op.name})</div>
+                                <span style="font-size:0.7rem;">${op.clearance}</span>`;
+                li.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedOpId = op.id;
+                    renderRosterUI();
+                    renderDossierFull();
+                    document.querySelector('.tab-btn[data-tab="tab-dossier"]').click();
+                });
+                container.appendChild(li);
+            });
+            if(!operatives.length) container.innerHTML = '<div style="padding:1rem;">// NO ACTIVE ASSETS //</div>';
+        }
+
+        function renderDossierFull() {
+            const container = document.getElementById('dossierDynamicContainer');
+            if(!container) return;
+            const op = operatives.find(o=>o.id === selectedOpId);
+            if(!op) {
+                container.innerHTML = `<div style="text-align:center; padding:40px;">NO OPERATIVE SELECTED</div>`;
+                return;
+            }
+            const specialtiesHtml = op.specialties.map(s=>`<span class="specialty-tag">${s}</span>`).join('');
+            const logsHtml = op.log.map(l=>`<div>📌 ${l}</div>`).join('');
+            container.innerHTML = `
+                <div style="display:flex; justify-content: space-between; flex-wrap:wrap;">
+                    <div>
+                        <h2 style="color: var(--accent-gold);">${op.codename} // ${op.name}</h2>
+                        <div class="dossier-field"><span class="dossier-label">CLEARANCE:</span> ${op.clearance}</div>
+                        <div class="dossier-field"><span class="dossier-label">STATUS:</span> <span class="status-dot status-${op.status}"></span> ${op.status}</div>
+                        <div class="dossier-field"><span class="dossier-label">SPECIALTIES:</span> ${specialtiesHtml || '—'}</div>
+                        <div class="dossier-field"><span class="dossier-label">ISSUED:</span> ${new Date(op.issueDate).toLocaleString()}</div>
+                        <div class="dossier-field"><span class="dossier-label">EXPIRY:</span> ${new Date(op.expiryDate).toLocaleDateString()}</div>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-direction:column;">
+                        <select id="statusUpdateSelect" style="width:auto;"><option>Change status...</option><option>Active</option><option>Inactive</option><option>MIA</option><option>KIA</option></select>
+                        <button id="decomOpBtn" class="btn-danger">DECOMMISSION ASSET</button>
+                    </div>
+                </div>
+                <div style="margin-top:20px;"><h4>EVENT LOG</h4><div class="log-console" style="height:150px;">${logsHtml}</div></div>
+            `;
+            document.getElementById('statusUpdateSelect')?.addEventListener('change', (e) => { if(e.target.value) updateStatus(op.id, e.target.value); });
+            document.getElementById('decomOpBtn')?.addEventListener('click', () => decommissionOp(op.id));
+        }
+
+        // ---------- SC4M PSYCH-JEERING MODULES ----------
+        function generateCountermeasure(threatDesc) {
+            let method = `// SC4M AI COUNTERMEASURE //\n> Detected pattern: "${threatDesc.substring(0,80)}"\n`;
+            method += `> Psych-jeering trigger: mirrorJing activation\n> Deploying deception mesh: dynamic honeytoken\n> Recommended TTP disruption: source routing obfuscation, AI-generated lures.\n> Confidence: 93.7% | Evasion score: HIGH\n> Immediate counter: deploy behavioral sinkhole.`;
+            document.getElementById('methodOutput').innerHTML = method;
+            const consoleBox = document.getElementById('sc4mConsole');
+            consoleBox.innerHTML = `[${new Date().toLocaleTimeString()}] Generated ${method.substring(0,100)}...\n` + consoleBox.innerHTML;
+            if(window.correlationChart) {
+                let dataset = window.correlationChart.data.datasets[0].data;
+                dataset = dataset.map(v=>v+Math.floor(Math.random()*5)-2);
+                window.correlationChart.update();
+            }
+        }
+
+        function generatePsychProfile(actor) {
+            const profile = `ADVERSARY: ${actor}\nPSYCH PROFILE:\n- Threat cluster: state-sponsored / eCrime\n- Cognitive biases: authority bias, scarcity trigger\n- Preferred TTPs: spear-phishing, credential harvesting\n- MirrorJing susceptibility: HIGH\n- Recommended psych-jeering: simulate internal investigative authority → confusion & operational pause.`;
+            document.getElementById('psychOutput').innerHTML = profile;
+        }
+        function developPsychCounter() {
+            document.getElementById('counterOutput').innerHTML = `🧠 Psych-jeering counter strategy:\n1. Behavioral mirroring (fake C2 chatter)\n2. Cognitive overload via false-positive alerts\n3. Deploy “digital doppelgänger” to misdirect attribution\n4. Active adversary confusion phase engaged.`;
+        }
+
+        // SIMULATION ENGINE
+        function runSimulation(type) {
+            const logDiv = document.getElementById('simLog');
+            logDiv.innerHTML = `[SIMULATION START] Type: ${type}\n`;
+            let step = 0;
+            const steps = ['Initializing isolated sandbox...', `Emulating ${type} TTPs...`, 'Triggering defensive psych-jeering response...', 'Collecting telemetry...', 'SIMULATION COMPLETE: No real-world impact, countermeasure efficacy: 89%'];
+            const interval = setInterval(() => {
+                if(step < steps.length) {
+                    logDiv.innerHTML += `\n> ${steps[step]}`;
+                    step++;
+                    logDiv.scrollTop = logDiv.scrollHeight;
+                } else clearInterval(interval);
+            }, 800);
+        }
+
+        // CHARTS
+        let correlationChart;
+        function initChart() {
+            const ctx = document.getElementById('correlationChart')?.getContext('2d');
+            if(ctx) {
+                correlationChart = new Chart(ctx, {
+                    type: 'line', data: { labels: ['Now','-2m','-4m','-6m','-8m'], datasets: [{ label: 'Threat Score', data: [82,74,68,71,63], borderColor: '#d4af37', fill: false }] },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+            }
+        }
+
+        // Integration/export
+        function exportOperativeDB() {
+            const dataStr = JSON.stringify(operatives, null, 2);
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `nexus_roster_export_${Date.now()}.json`;
+            a.click();
+            document.getElementById('integrationLog').innerHTML = `[${new Date().toLocaleTimeString()}] DB exported.`;
+        }
+
+        // EVENT LISTENERS & INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRoster();
+            initChart();
+
+            document.getElementById('commissionBtn')?.addEventListener('click', () => {
+                const name = document.getElementById('opName').value.trim();
+                const codename = document.getElementById('opCodename').value.trim();
+                const clearance = document.getElementById('opClearance').value;
+                const status = document.getElementById('opStatusInit').value;
+                const specs = document.getElementById('opSpecialties').value.split(',').map(s=>s.trim()).filter(Boolean);
+                if(addOperative(name, codename, clearance, status, specs)) {
+                    document.getElementById('opName').value = ''; document.getElementById('opCodename').value = ''; document.getElementById('opSpecialties').value = '';
+                } else alert("Name and Codename required");
+            });
+            document.getElementById('genMethodBtn')?.addEventListener('click', () => {
+                const input = document.getElementById('threatInput').value;
+                if(input) generateCountermeasure(input);
+                else generateCountermeasure("generic threat pattern");
+            });
+            document.getElementById('genPsychProfile')?.addEventListener('click', () => generatePsychProfile(document.getElementById('psychProfileSelect').value));
+            document.getElementById('devCounterBtn')?.addEventListener('click', developPsychCounter);
+            document.getElementById('startSimulation')?.addEventListener('click', () => runSimulation(document.getElementById('simType').value));
+            document.getElementById('exportDbBtn')?.addEventListener('click', exportOperativeDB);
+            document.getElementById('resetAllData')?.addEventListener('click', wipeAllData);
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(tab=>tab.classList.remove('active'));
+                    document.getElementById(btn.dataset.tab).classList.add('active');
+                });
+            });
+            // Update live counter
+            setInterval(() => {
+                document.getElementById('liveThreatCount').innerText = Math.floor(20 + Math.random() * 30);
+                document.getElementById('correlCount').innerText = Math.floor(40 + Math.random() * 30);
+            }, 8000);
+        });
+    })();
+</script>
+</body>
+</html>

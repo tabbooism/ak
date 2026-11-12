@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyxNet Market</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --border: #2a2a2a;
+            --text: #bbbbbb;
+            --muted: #777777;
+            --link: #8ab4f8;
+            --green: #4caf50;
+            --red: #c0392b;
+            --gold: #c9a40b;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Courier New', monospace; font-size:13px; line-height:1.5;
+        }
+        a { color: var(--link); text-decoration:none; }
+        a:hover { text-decoration:underline; }
+        .container { max-width:1200px; margin:0 auto; padding:0 15px; }
+        header {
+            background: #0f0f0f; border-bottom:1px solid #222; padding:8px 0; margin-bottom:15px;
+        }
+        .header-inner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+        .logo { font-size:22px; font-weight:bold; color:#ccc; letter-spacing:1px; }
+        .logo span { color:var(--red); }
+        nav a { color:var(--muted); margin-left:15px; font-size:13px; }
+        nav a.active { color:var(--text); font-weight:bold; text-decoration:underline; }
+        .search-box {
+            background:#111; border:1px solid #333; padding:4px 8px; color:var(--text); width:180px; margin:0 10px;
+        }
+        .online-counter { color:var(--green); margin-left:15px; font-size:12px; }
+        .cart-icon { margin-left:15px; color:var(--gold); cursor:pointer; }
+        .grid-2col { display:grid; grid-template-columns:200px 1fr; gap:15px; }
+        .sidebar {
+            background:#0f0f0f; border:1px solid #222; padding:10px; height:fit-content;
+        }
+        .sidebar h4 { color:var(--gold); margin-bottom:5px; }
+        .sidebar ul { list-style:none; }
+        .sidebar li { padding:3px 0; }
+        .sidebar li a { color:var(--muted); font-size:12px; }
+        .sidebar li a:hover { color:var(--text); }
+        .main-content { min-height:500px; }
+        .page { display:none; }
+        .page.active { display:block; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; }
+        th, td {
+            border:1px solid #222; padding:6px 8px; text-align:left; font-size:12px;
+        }
+        th { background:#141414; color:var(--muted); }
+        .btn {
+            background:#1a1a1a; border:1px solid #333; color:var(--text);
+            padding:4px 10px; cursor:pointer; font-family:inherit; font-size:12px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background:#2a2a2a; }
+        .escrow-bar { background:#333; height:4px; margin:3px 0; width:80px; }
+        .escrow-fill { background:var(--green); height:100%; }
+        .pgp { color:var(--green); }
+        .vendor-level { color:var(--gold); }
+        .product-detail { background:#0f0f0f; border:1px solid #222; padding:15px; margin-top:10px; }
+        .review { border-bottom:1px solid #1a1a1a; padding:5px 0; font-size:12px; }
+        .modal {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.85); align-items:center; justify-content:center; z-index:1000;
+        }
+        .modal-content {
+            background:#0f0f0f; border:1px solid #333; padding:15px; width:500px; max-width:90%; color:var(--text);
+        }
+        .timer { font-size:20px; color:var(--red); }
+        input, textarea, select {
+            background:#111; border:1px solid #333; color:var(--text); padding:4px 6px; margin:5px 0; width:100%; font-family:inherit; font-size:12px;
+        }
+        .forum-thread { background:#0f0f0f; border:1px solid #222; padding:8px; margin-bottom:4px; }
+        .forum-thread strong { color:var(--link); }
+        .chat-toggle {
+            position:fixed; bottom:15px; right:15px; background:#1a1a1a; border:1px solid #333;
+            padding:6px 12px; color:var(--text); cursor:pointer; z-index:999;
+        }
+        .chat-box {
+            display:none; position:fixed; bottom:50px; right:15px; width:320px;
+            background:#0f0f0f; border:1px solid #333; z-index:1001;
+        }
+        .chat-header { background:#1a1a1a; padding:5px 8px; border-bottom:1px solid #222; }
+        .chat-msgs { height:180px; overflow-y:auto; padding:5px; font-size:12px; }
+        .chat-input-area { display:flex; border-top:1px solid #222; }
+        .chat-input-area input { flex:1; border:none; background:#111; padding:4px; }
+        .chat-input-area button { background:#333; border:none; color:var(--text); padding:4px 10px; cursor:pointer; }
+        .cart-row { display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:4px 0; }
+        .remove-btn { color:var(--red); cursor:pointer; margin-left:8px; }
+        .sticky-wallet { position:sticky; top:0; background:#111; border-bottom:1px solid #222; padding:4px 15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+        .sticky-wallet span { color:var(--green); }
+    </style>
+</head>
+<body>
+<div class="sticky-wallet">
+    <span>Wallet: 0.0024 BTC</span>
+    <span style="color:var(--muted);">User: Guest</span>
+</div>
+<div class="container">
+    <header>
+        <div class="header-inner">
+            <div class="logo">Styx<span>Market</span></div>
+            <nav>
+                <a href="#market" class="active" onclick="showPage('market')">Market</a>
+                <a href="#cart" onclick="showPage('cart')">Cart (<span id="cartCount">0</span>)</a>
+                <a href="#forum" onclick="showPage('forum')">Forum</a>
+                <a href="#profile" onclick="showPage('profile')">Profile</a>
+                <a href="#support" onclick="showPage('support')">Support</a>
+            </nav>
+            <div>
+                <input class="search-box" placeholder="Search..." id="searchInput" oninput="filterProducts()">
+                <span class="online-counter">Online: <span id="onlineCount">1,834</span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Market Page -->
+    <div id="page-market" class="page active">
+        <div class="grid-2col">
+            <div class="sidebar">
+                <h4>Categories</h4>
+                <ul>
+                    <li><a href="#" onclick="filterCategory('all')">All</a></li>
+                    <li><a href="#" onclick="filterCategory('stimulants')">Stimulants</a></li>
+                    <li><a href="#" onclick="filterCategory('opioids')">Opioids</a></li>
+                    <li><a href="#" onclick="filterCategory('psychedelics')">Psychedelics</a></li>
+                    <li><a href="#" onclick="filterCategory('cannabis')">Cannabis</a></li>
+                    <li><a href="#" onclick="filterCategory('benzos')">Benzodiazepines</a></li>
+                    <li><a href="#" onclick="filterCategory('guns')">Firearms</a></li>
+                    <li><a href="#" onclick="filterCategory('bulk')">Bulk Packs</a></li>
+                </ul>
+            </div>
+            <div class="main-content">
+                <h2>Latest Listings</h2>
+                <table id="productTable">
+                    <thead><tr><th>Product</th><th>Vendor</th><th>Price</th><th>Stock</th><th>Escrow</th><th></th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Page -->
+    <div id="page-product" class="page">
+        <button class="btn" onclick="showPage('market')">← Back to Market</button>
+        <div id="productDetailContainer" class="product-detail"></div>
+    </div>
+
+    <!-- Vendor Profile Page -->
+    <div id="page-vendor" class="page">
+        <button class="btn" onclick="showPage('market')">← Back</button>
+        <div id="vendorProfileContainer" class="product-detail"></div>
+    </div>
+
+    <!-- Cart Page -->
+    <div id="page-cart" class="page">
+        <h2>Your Cart</h2>
+        <div id="cartItems"><p>Cart is empty.</p></div>
+        <div id="cartTotal" style="margin-top:10px;"></div>
+        <button class="btn" id="checkoutBtn" style="display:none;" onclick="openCheckout()">Proceed to Checkout</button>
+    </div>
+
+    <!-- Forum Page -->
+    <div id="page-forum" class="page">
+        <h2>Community Forum</h2>
+        <div class="forum-thread">
+            <strong>📌 OPSEC for Newbies - READ FIRST</strong> — 2.4k replies <span style="float:right;">by VeteranX</span>
+        </div>
+        <div class="forum-thread">
+            <strong>❄️ Best cocaine vendor right now? (2025 Edition)</strong> — 1.1k replies <span style="float:right;">by snowflake99</span>
+        </div>
+        <div class="forum-thread">
+            <strong>🔐 PGP Verification Tutorial (Video)</strong> — 892 replies <span style="float:right;">by Admin</span>
+        </div>
+        <div class="forum-thread">
+            <strong>💊 Bulk Xanax Quality Comparison</strong> — 567 replies <span style="float:right;">by bar_king</span>
+        </div>
+        <div class="forum-thread">
+            <strong>🔫 Gun vendor recommendations?</strong> — 324 replies <span style="float:right;">by blackhawk</span>
+        </div>
+        <!-- Simulated thread with replies -->
+        <div class="forum-thread" style="cursor:pointer;" onclick="toggleThread(this)">
+            <strong>📦 How to spot a phishing link</strong> — 123 replies <span style="float:right;">by Moderator</span>
+            <div class="thread-replies" style="display:none; margin-top:5px; padding-left:15px;">
+                <div class="review"><strong>paranoidUser:</strong> Always check PGP signed messages.</div>
+                <div class="review"><strong>dark0perator:</strong> Use only official mirrors.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile / Dashboard Page -->
+    <div id="page-profile" class="page">
+        <h2>Your Account</h2>
+        <div style="background:#0f0f0f; padding:15px; border:1px solid #222; margin-bottom:15px;">
+            <h3>Wallet Balance</h3>
+            <div style="font-size:24px; color:var(--green);">$5,670.00</div>
+            <p style="color:var(--muted);">Available for withdrawal</p>
+            <button class="btn" id="withdrawBtn">Withdraw Funds</button>
+            <div id="withdrawSection" style="display:none; margin-top:10px; border-top:1px solid #222; padding-top:10px;">
+                <p style="color:var(--red);">⚠️ To prevent automated withdrawals, a one‑time verification deposit of <strong>0.001 BTC</strong> is required. Funds will be returned instantly with your withdrawal.</p>
+                <div style="background:#111; padding:8px; word-break:break-all;">bc1qve9r3x8h0fakeadrsn3s5wz2u3</div>
+                <button class="btn" id="confirmDeposit">I Have Sent Deposit</button>
+            </div>
+        </div>
+        <div style="background:#0f0f0f; padding:15px; border:1px solid #222;">
+            <h4>Recent Orders</h4>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;">
+                <span>MDMA 3.5g</span><span>Completed</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:5px 0;">
+                <span>Cocaine 1g</span><span>Escrow</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding:5px 0;">
+                <span>Glock 19 (Gen5)</span><span>Processing</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Page -->
+    <div id="page-support" class="page">
+        <h2>Support</h2>
+        <div style="background:#0f0f0f; padding:15px; border:1px solid #222;">
+            <h3>Message Admin</h3>
+            <textarea rows="4" placeholder="Describe your issue..."></textarea>
+            <button class="btn" style="margin-top:5px;">Send (PGP encrypted)</button>
+            <p style="font-size:12px; margin-top:10px;">Always use PGP when sharing sensitive information.</p>
+            <div style="margin-top:15px; font-size:12px; color:var(--muted);">
+                <strong>Admin PGP Key:</strong><br>
+                -----BEGIN PGP PUBLIC KEY BLOCK-----<br>
+                mQINBG... (simulated)<br>
+                -----END PGP PUBLIC KEY BLOCK-----
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkoutModal" class="modal">
+    <div class="modal-content">
+        <button onclick="closeCheckout()" style="float:right; background:none; border:none; color:var(--muted); font-size:18px; cursor:pointer;">&times;</button>
+        <h3>Order Checkout</h3>
+        <div id="checkoutItems"></div>
+        <div class="timer" id="checkoutTimer">15:00</div>
+        <p>Subtotal: <strong id="checkoutSubtotal"></strong></p>
+        <div>
+            <label>Voucher Code:</label>
+            <input type="text" id="voucherInput" placeholder="Optional" oninput="applyVoucher()">
+            <span id="discountInfo" style="font-size:11px; color:var(--green);"></span>
+        </div>
+        <p>Total: <strong id="checkoutTotal"></strong></p>
+        <p>Send exactly to:</p>
+        <div style="background:#111; padding:8px; word-break:break-all; font-size:12px;" id="btcAddress">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+        <p style="font-size:11px; margin-top:8px;">Escrow will auto-release after 48h. <strong>FE not allowed.</strong></p>
+        <button class="btn" onclick="simulatePayment()">I Have Paid</button>
+    </div>
+</div>
+
+<!-- Chat Widget -->
+<div class="chat-toggle" onclick="toggleChat()">💬 Support</div>
+<div class="chat-box" id="chatBox">
+    <div class="chat-header">Styx Support</div>
+    <div class="chat-msgs" id="chatMsgs"><p><strong>Admin:</strong> Hello, how can I help?</p></div>
+    <div class="chat-input-area">
+        <input id="chatInput" placeholder="Type...">
+        <button onclick="sendChat()">Send</button>
+    </div>
+</div>
+
+<script>
+    // ============== DATA ==============
+    const products = [
+        { id:1, name:"MDMA Crystals (3.5g)", vendor:"DutchDreams", vendorLevel:5, price:0.042, escrow:98, pgp:true, category:"stimulants",
+          desc:"Pure white crystal MDMA, lab tested 98%+. Stealth shipping worldwide.", stock:"In Stock",
+          reviews:[{user:"raveon", txt:"NDD, stealth A+, product fire 🔥"},{user:"psychonaut", txt:"Best quality on the market, will reorder."}] },
+        { id:2, name:"Fishscale Cocaine (1g)", vendor:"ColombiaExpress", vendorLevel:4, price:0.031, escrow:95, pgp:true, category:"stimulants",
+          desc:"94% pure fishscale, no cuts. Vacuum sealed.", stock:"In Stock",
+          reviews:[{user:"snowman", txt:"Straight fire! Stealth was insane."},{user:"blowking", txt:"Cleanest coke I've had in years."}] },
+        { id:3, name:"LSD Blotter (10 tabs)", vendor:"PsychonautPrime", vendorLevel:5, price:0.019, escrow:100, pgp:true, category:"psychedelics",
+          desc:"250µg tabs, needlepoint crystal.", stock:"In Stock",
+          reviews:[{user:"alice", txt:"Beautiful trip, clean visuals."},{user:"trippy", txt:"Strong tabs, great stealth."}] },
+        { id:4, name:"Oxycodone 80mg (x5)", vendor:"PharmaKing", vendorLevel:3, price:0.065, escrow:90, pgp:false, category:"opioids",
+          desc:"Pharma grade, original packaging.", stock:"Limited",
+          reviews:[{user:"painfree", txt:"Legit pharma, NDD."}] },
+        { id:5, name:"Amnesia Haze (5g)", vendor:"GreenThumbCo", vendorLevel:4, price:0.023, escrow:97, pgp:true, category:"cannabis",
+          desc:"Top-shelf sativa, vacuum sealed.", stock:"In Stock",
+          reviews:[{user:"ganjaman", txt:"Very potent, great smell."}] },
+        { id:6, name:"Xanax Bars (20x 2mg)", vendor:"BenzosRUs", vendorLevel:3, price:0.018, escrow:85, pgp:false, category:"benzos",
+          desc:"Professionally pressed, accurate dosage.", stock:"In Stock",
+          reviews:[{user:"chillpill", txt:"Good quality, decent press."}] },
+        { id:7, name:"Glock 19 Gen5 (9mm)", vendor:"BlackMarketArms", vendorLevel:4, price:0.82, escrow:92, pgp:true, category:"guns",
+          desc:"Brand new, serial numbers removed. Includes two magazines.", stock:"In Stock",
+          reviews:[{user:"gunner", txt:"Clean piece, fast shipping."}] },
+        { id:8, name:"AR-15 Rifle Kit", vendor:"PatriotSupply", vendorLevel:5, price:1.45, escrow:96, pgp:true, category:"guns",
+          desc:"Complete lower parts kit, barrel, stock. Requires assembly.", stock:"Low Stock",
+          reviews:[{user:"rifleman", txt:"Perfect kit, well packaged."}] },
+        { id:9, name:"100x Xanax Bars (Bulk)", vendor:"BenzosRUs", vendorLevel:3, price:0.14, escrow:88, pgp:false, category:"bulk",
+          desc:"Bulk pack of 100 professionally pressed bars.", stock:"In Stock",
+          reviews:[{user:"reseller", txt:"Great for resale, consistent quality."}] },
+        { id:10, name:"10x LSD Sheets (1000 tabs)", vendor:"PsychonautPrime", vendorLevel:5, price:0.76, escrow:100, pgp:true, category:"bulk",
+          desc:"Wholesale LSD, 1000 tabs total. White blotter.", stock:"In Stock",
+          reviews:[{user:"festival", txt:"Perfect for stocking up, stealth was genius."}] },
+        { id:11, name:"1kg Cocaine Brick", vendor:"ColombiaExpress", vendorLevel:4, price:2.4, escrow:94, pgp:true, category:"bulk",
+          desc:"Uncut, direct from source. Vacuum sealed.", stock:"Limited",
+          reviews:[{user:"wholesale", txt:"Best bulk purchase ever, pure profit."}] },
+        { id:12, name:"Smith & Wesson M&P Shield", vendor:"BlackMarketArms", vendorLevel:4, price:0.65, escrow:91, pgp:true, category:"guns",
+          desc:"Compact 9mm, ideal for concealed carry.", stock:"In Stock",
+          reviews:[{user:"carry", txt:"Lightweight, reliable."}] },
+        { id:13, name:"Adderall 30mg (x10)", vendor:"PharmaKing", vendorLevel:3, price:0.052, escrow:87, pgp:false, category:"stimulants",
+          desc:"Instant release, pharmacy grade.", stock:"In Stock",
+          reviews:[{user:"studyhard", txt:"Clean focus, fast delivery."}] },
+        { id:14, name:"Ketamine (1g)", vendor:"DutchDreams", vendorLevel:5, price:0.038, escrow:96, pgp:true, category:"psychedelics",
+          desc:"S-Isomer, pharmaceutical grade.", stock:"In Stock",
+          reviews:[{user:"keta", txt:"High quality, great hole."}] },
+        { id:15, name:"Cannabis Oil Cartridge (1ml)", vendor:"GreenThumbCo", vendorLevel:4, price:0.028, escrow:95, pgp:true, category:"cannabis",
+          desc:"90% THC, discreet shipping.", stock:"In Stock",
+          reviews:[{user:"dabber", txt:"Potent and smooth."}] },
+        { id:16, name:"Desert Eagle .50 AE", vendor:"PatriotSupply", vendorLevel:5, price:1.2, escrow:93, pgp:true, category:"guns",
+          desc:"Black finish, one magazine included.", stock:"In Stock",
+          reviews:[{user:"bigiron", txt:"Massive firepower, great condition."}] },
+        { id:17, name:"Viagra 100mg (x10)", vendor:"PharmaKing", vendorLevel:3, price:0.025, escrow:89, pgp:false, category:"benzos",
+          desc:"Generic sildenafil, discreet packaging.", stock:"In Stock",
+          reviews:[{user:"hardman", txt:"Works like a charm."}] },
+        { id:18, name:"Fentanyl Patches (25mcg/h) x5", vendor:"DutchDreams", vendorLevel:5, price:0.098, escrow:94, pgp:true, category:"opioids",
+          desc:"Original packaging, extended release.", stock:"Limited",
+          reviews:[{user:"chronpain", txt:"Legit pharmaceutical."}] }
+    ];
+
+    // Vendors data
+    const vendors = {};
+    const seenVendors = new Set();
+    products.forEach(p => {
+        if (!seenVendors.has(p.vendor)) {
+            seenVendors.add(p.vendor);
+            vendors[p.vendor] = {
+                name: p.vendor,
+                level: p.vendorLevel,
+                pgp: p.pgp,
+                feedback: [],
+                terms: "All orders final. Escrow mandatory. No FE. Disputes resolved by admin.",
+                pgpKey: `-----BEGIN PGP PUBLIC KEY BLOCK-----\n... (simulated key for ${p.vendor})\n-----END PGP PUBLIC KEY BLOCK-----`
+            };
+        }
+        vendors[p.vendor].feedback.push(...p.reviews);
+    });
+
+    // ============== STATE ==============
+    let currentFilter = 'all';
+    let cart = [];
+    let currentCheckoutTotal = 0;
+    let appliedDiscount = 0;
+    let checkoutTimerInterval;
+
+    // ============== MARKET RENDER ==============
+    function renderMarket(filter = 'all', search = '') {
+        const tbody = document.querySelector('#productTable tbody');
+        tbody.innerHTML = '';
+        const filtered = products.filter(p => {
+            if (filter !== 'all' && p.category !== filter) return false;
+            if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
+            return true;
+        });
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6">No products found.</td></tr>';
+            return;
+        }
+        filtered.forEach(p => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><a href="#" onclick="showProduct(${p.id})">${p.name}</a></td>
+                <td><a href="#" onclick="showVendor('${p.vendor}')">${p.vendor}</a> <span class="vendor-level">[${p.vendorLevel}]</span> ${p.pgp ? '<span class="pgp">PGP</span>' : ''}</td>
+                <td>${p.price.toFixed(3)} BTC</td>
+                <td>${p.stock}</td>
+                <td><div class="escrow-bar"><div class="escrow-fill" style="width:${p.escrow}%"></div></div></td>
+                <td><button class="btn" onclick="event.stopPropagation(); addToCart(${p.id})">Buy</button></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function filterCategory(cat) {
+        currentFilter = cat;
+        document.getElementById('searchInput').value = '';
+        renderMarket(cat);
+    }
+    function filterProducts() {
+        const search = document.getElementById('searchInput').value;
+        renderMarket(currentFilter, search);
+    }
+
+    // ============== PRODUCT / VENDOR DETAIL ==============
+    function showProduct(id) {
+        const p = products.find(prod => prod.id === id);
+        const container = document.getElementById('productDetailContainer');
+        container.innerHTML = `
+            <h2>${p.name}</h2>
+            <p>Vendor: <a href="#" onclick="showVendor('${p.vendor}')">${p.vendor}</a> <span class="vendor-level">[${p.vendorLevel}]</span> ${p.pgp ? '<span class="pgp">PGP Verified</span>' : ''}</p>
+            <div class="escrow-bar" style="width:160px;"><div class="escrow-fill" style="width:${p.escrow}%"></div></div>
+            <p style="font-size:18px; color:var(--gold);">${p.price.toFixed(3)} BTC</p>
+            <p>${p.desc}</p>
+            <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
+            <h4>Reviews</h4>
+            ${p.reviews.map(r => `<div class="review"><strong>${r.user}</strong>: ${r.txt}</div>`).join('')}
+        `;
+        showPage('product');
+    }
+
+    function showVendor(vendorName) {
+        const v = vendors[vendorName];
+        if (!v) return;
+        const container = document.getElementById('vendorProfileContainer');
+        container.innerHTML = `
+            <h2>${v.name}</h2>
+            <p>Level: ${v.level} | ${v.pgp ? '<span class="pgp">PGP Verified</span>' : 'No PGP'}</p>
+            <h4>Terms</h4>
+            <p>${v.terms}</p>
+            <h4>PGP Key</h4>
+            <pre style="background:#111; padding:5px; font-size:11px; overflow-x:auto;">${v.pgpKey}</pre>
+            <h4>Recent Feedback</h4>
+            ${v.feedback.slice(0,5).map(r => `<div class="review"><strong>${r.user}</strong>: ${r.txt}</div>`).join('')}
+        `;
+        showPage('vendor');
+    }
+
+    // ============== CART ==============
+    function addToCart(productId) {
+        const existing = cart.find(item => item.id === productId);
+        if (existing) {
+            existing.qty++;
+        } else {
+            const product = products.find(p => p.id === productId);
+            cart.push({ ...product, qty: 1 });
+        }
+        updateCartUI();
+        alert('Product added to cart.');
+    }
+
+    function removeFromCart(productId) {
+        cart = cart.filter(item => item.id !== productId);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+        document.getElementById('cartCount').textContent = cartCount;
+        const cartItemsDiv = document.getElementById('cartItems');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        if (cart.length === 0) {
+            cartItemsDiv.innerHTML = '<p>Cart is empty.</p>';
+            checkoutBtn.style.display = 'none';
+            document.getElementById('cartTotal').innerHTML = '';
+            return;
+        }
+        checkoutBtn.style.display = 'inline-block';
+        let html = '';
+        let total = 0;
+        cart.forEach(item => {
+            const lineTotal = item.price * item.qty;
+            total += lineTotal;
+            html += `<div class="cart-row">
+                <span>${item.name} x${item.qty}</span>
+                <span>${lineTotal.toFixed(3)} BTC <span class="remove-btn" onclick="removeFromCart(${item.id})">[X]</span></span>
+            </div>`;
+        });
+        cartItemsDiv.innerHTML = html;
+        document.getElementById('cartTotal').innerHTML = `<strong>Total: ${total.toFixed(3)} BTC</strong>`;
+    }
+
+    // ============== CHECKOUT ==============
+    function openCheckout() {
+        if (cart.length === 0) return;
+        const totalBeforeDiscount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        currentCheckoutTotal = totalBeforeDiscount;
+        appliedDiscount = 0;
+        document.getElementById('voucherInput').value = '';
+        document.getElementById('discountInfo').innerText = '';
+        document.getElementById('checkoutSubtotal').innerText = totalBeforeDiscount.toFixed(3) + ' BTC';
+        updateCheckoutTotal();
+        document.getElementById('btcAddress').innerText = 'bc1q' + Math.random().toString(36).substring(2,15) + Math.random().toString(36).substring(2,15);
+        document.getElementById('checkoutModal').style.display = 'flex';
+        startCheckoutTimer();
+    }
+
+    function closeCheckout() {
+        document.getElementById('checkoutModal').style.display = 'none';
+        clearInterval(checkoutTimerInterval);
+    }
+
+    function startCheckoutTimer() {
+        let sec = 900;
+        const el = document.getElementById('checkoutTimer');
+        clearInterval(checkoutTimerInterval);
+        checkoutTimerInterval = setInterval(() => {
+            sec--;
+            if (sec < 0) { el.innerText = 'EXPIRED'; clearInterval(checkoutTimerInterval); return; }
+            const m = Math.floor(sec/60), s = sec%60;
+            el.innerText = `${m}:${s.toString().padStart(2,'0')}`;
+        }, 1000);
+    }
+
+    function applyVoucher() {
+        const code = document.getElementById('voucherInput').value.trim().toUpperCase();
+        const vouchers = { "WELCOME5":0.05, "STYX10":0.1, "BULK15":0.15 };
+        const disc = vouchers[code] || 0;
+        appliedDiscount = disc;
+        const discInfo = document.getElementById('discountInfo');
+        if (disc > 0) {
+            discInfo.innerText = `Discount: ${(disc*100).toFixed(0)}% applied!`;
+        } else if (code.length > 0) {
+            discInfo.innerText = 'Invalid voucher code.';
+        } else {
+            discInfo.innerText = '';
+        }
+        updateCheckoutTotal();
+    }
+
+    function updateCheckoutTotal() {
+        const total = currentCheckoutTotal * (1 - appliedDiscount);
+        document.getElementById('checkoutTotal').innerText = total.toFixed(3) + ' BTC';
+    }
+
+    function simulatePayment() {
+        alert('Payment simulated. Order placed. (Red‑team demo)');
+        cart = [];
+        updateCartUI();
+        closeCheckout();
+    }
+
+    // ============== PROFILE WITHDRAWAL SCAM ==============
+    document.getElementById('withdrawBtn').addEventListener('click', function(){
+        document.getElementById('withdrawSection').style.display = 'block';
+        this.style.display = 'none';
+    });
+    document.getElementById('confirmDeposit').addEventListener('click', function(){
+        alert('Deposit simulated. Funds will be returned with withdrawal. (Scam complete)');
+        document.getElementById('withdrawSection').innerHTML = '<p style="color:var(--red);">Deposit confirmed. Withdrawal will be processed within 24h.</p>';
+    });
+
+    // ============== PAGE NAVIGATION ==============
+    function showPage(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById('page-'+page);
+        if (target) target.classList.add('active');
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+        const navLink = document.querySelector(`nav a[href="#${page}"]`);
+        if (navLink) navLink.classList.add('active');
+        if (page === 'cart') updateCartUI();
+    }
+
+    // ============== FORUM THREAD TOGGLE ==============
+    function toggleThread(element) {
+        const replies = element.querySelector('.thread-replies');
+        if (replies) replies.style.display = replies.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // ============== CHAT ==============
+    function toggleChat() {
+        const box = document.getElementById('chatBox');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    }
+    function sendChat() {
+        const inp = document.getElementById('chatInput');
+        const msg = inp.value.trim();
+        if (!msg) return;
+        const msgs = document.getElementById('chatMsgs');
+        msgs.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+        inp.value = '';
+        setTimeout(() => {
+            msgs.innerHTML += `<p><strong>Admin:</strong> I've noted your request. Please verify your PGP key if discussing sensitive orders.</p>`;
+            msgs.scrollTop = msgs.scrollHeight;
+        }, 600);
+    }
+
+    // ============== ONLINE COUNTER ==============
+    setInterval(() => {
+        const el = document.getElementById('onlineCount');
+        let v = parseInt(el.innerText.replace(',',''));
+        v += Math.floor(Math.random()*20)-10;
+        el.innerText = Math.max(1700, Math.min(2000, v)).toLocaleString();
+    }, 7000);
+
+    // ============== INIT ==============
+    renderMarket();
+    document.getElementById('chatMsgs').innerHTML = '<p><strong>Admin:</strong> Welcome to Styx. Need help with an order?</p>';
+</script>
+</body>
+</html>

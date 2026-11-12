@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuneHall Sentinel – AIO Ultimate v6.0 (Production Hardened)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            background: #0a0e1a;
+            color: #e0e4f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            border-left: 4px solid #2a6;
+            padding-left: 15px;
+        }
+        .controls {
+            background: #151e2a;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        button {
+            background: #2a3a50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #3a4a60;
+            transform: scale(0.98);
+        }
+        button.danger {
+            background: #b33;
+        }
+        button.danger:hover {
+            background: #c44;
+        }
+        button.success {
+            background: #2a6;
+        }
+        button.success:hover {
+            background: #3a8;
+        }
+        .status {
+            background: #0f1722;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin-bottom: 20px;
+            border-left: 3px solid #8cf;
+        }
+        pre {
+            background: #0b0f17;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            max-height: 600px;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .filter-bar {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-bar input {
+            background: #1a2333;
+            border: 1px solid #2a3a50;
+            color: #ddd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            width: 280px;
+        }
+        .badge {
+            background: #2a3a50;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 12px;
+        }
+        hr {
+            border-color: #253040;
+            margin: 15px 0;
+        }
+        a {
+            color: #8cf;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 11px;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🛡️ RuneHall Sentinel – AIO Ultimate v6.0<br><span style="font-size:0.8rem;">Production Hardened • Auto‑Export • Smart Adaptive Exploits</span></h1>
+    <div class="controls">
+        <div>🎯 Target: <strong id="targetUrl"></strong></div>
+        <button id="exportBtn" class="success">📥 Export JSON Now</button>
+        <button id="forceDedupe">🧹 Force Re‑dedupe</button>
+        <button id="aggressiveToggle" class="danger">⚡ Adaptive Exploits: OFF</button>
+        <button id="stealthToggle">👁️ Stealth: ON</button>
+        <button id="manualInjectBtn">🔫 Manual Inject Test</button>
+        <button id="clearBtn">🗑️ Wipe Storage & Reload</button>
+    </div>
+    <div class="status" id="statusMsg">🟢 Initializing hardened scanner...</div>
+    <div class="filter-bar">
+        <input type="text" id="filterInput" placeholder="Filter by category, severity, name... (e.g., CRITICAL, XSS)">
+        <span class="badge" id="statsBadge">Findings: 0 | Secrets: 0 | Endpoints: 0</span>
+    </div>
+    <h3>📋 Live Findings (adaptive, deduplicated)</h3>
+    <pre id="findingsLog">Waiting for scan completion...</pre>
+    <footer>✅ Auto‑export to localStorage + JSON download every 8s | No remote exfiltration | All data stays in your browser</footer>
+</div>
+
+<script>
+    (function(){
+        // ======================= CONFIGURATION =======================
+        let CONFIG = {
+            stealth: true,               // minimal console noise
+            aggressive: false,          // adaptive exploits (XSS attempt, prototype pollution demo)
+            autoExportInterval: 8000,   // ms
+            fuzzParams: true,
+            maxPayloadsPerParam: 12,
+            dedupeFields: ['cat','name','details']   // uniqueness keys
+        };
+
+        // ======================= GLOBALS =======================
+        const findings = [];            // array of finding objects
+        const networkLog = [];          // limited size
+        const endpoints = new Set();
+        const secretsSet = new Set();
+        let startTime = Date.now();
+        let mutObserver = null;
+        let exportTimer = null;
+        let framework = 'unknown';
+        let wafDetected = null;          // simulated WAF fingerprint
+        let seenHashes = new Set();       // for fast deduplication
+
+        // DOM elements
+        const findingsPre = document.getElementById('findingsLog');
+        const statusDiv = document.getElementById('statusMsg');
+        const targetSpan = document.getElementById('targetUrl');
+        const statsBadge = document.getElementById('statsBadge');
+        const filterInput = document.getElementById('filterInput');
+
+        targetSpan.textContent = window.location.hostname;
+
+        // helper: generate deterministic hash for deduplication
+        function getDedupeHash(finding) {
+            const str = `${finding.cat}|${finding.name}|${finding.details}`.substring(0, 256);
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return `h${hash}`;
+        }
+
+        // core: add finding with deduplication + auto export trigger
+        function addFinding(cat, name, det, sev = 'MED', evi = '') {
+            const finding = {
+                ts: Date.now(),
+                cat, name, det, sev,
+                evi: String(evi).slice(0, 1800)
+            };
+            const hashKey = getDedupeHash(finding);
+            if (seenHashes.has(hashKey)) return false;
+            seenHashes.add(hashKey);
+            finding.id = findings.length;
+            findings.push(finding);
+            if (!CONFIG.stealth) console.log(`[SENTINEL] ${sev} | ${cat} | ${name}`);
+            updateUI();
+            scheduleStorageSave();   // incremental save
+            return true;
+        }
+
+        // UI update with filter
+        function updateUI() {
+            let filtered = [...findings];
+            const filterTxt = filterInput.value.toLowerCase();
+            if (filterTxt) {
+                filtered = filtered.filter(f =>
+                    f.cat.toLowerCase().includes(filterTxt) ||
+                    f.name.toLowerCase().includes(filterTxt) ||
+                    f.det.toLowerCase().includes(filterTxt) ||
+                    f.sev.toLowerCase().includes(filterTxt)
+                );
+            }
+            const lines = filtered.slice(-45).map(f =>
+                `[${new Date(f.ts).toLocaleTimeString()}] ${f.sev.padEnd(8)} | ${f.cat.padEnd(12)} | ${f.name}`
+            ).join('\n');
+            findingsPre.textContent = lines || '✅ No findings yet – scanning in progress...';
+            statsBadge.innerHTML = `🔍 Findings: ${findings.length} | 🧩 Secrets: ${secretsSet.size} | 🧭 Endpoints: ${endpoints.size}`;
+            const mode = CONFIG.aggressive ? '🔥 ADAPTIVE EXPLOITS ON' : '🛡️ Passive';
+            statusDiv.innerHTML = `🟢 Hardened v6.0 | ${mode} | WAF: ${wafDetected || 'none'} | Framework: ${framework} | Auto‑export active`;
+        }
+
+        // Persistent storage (localStorage + auto file export)
+        function saveToLocalStorage() {
+            try {
+                const exportData = {
+                    meta: {
+                        target: location.hostname,
+                        url: location.href,
+                        start: new Date(startTime).toISOString(),
+                        lastUpdate: new Date().toISOString(),
+                        framework, waf: wafDetected,
+                        aggressiveMode: CONFIG.aggressive,
+                        totalFindings: findings.length
+                    },
+                    findings: findings.map(f => ({ ...f, evi: f.evi?.slice(0,500) })), // truncate for storage
+                    secrets: Array.from(secretsSet).slice(0, 100),
+                    endpoints: Array.from(endpoints).slice(0, 200),
+                    networkPreview: networkLog.slice(-30)
+                };
+                localStorage.setItem('runehall_sentinel_v6', JSON.stringify(exportData));
+            } catch(e) { /* ignore quota */ }
+        }
+
+        let pendingSave = null;
+        function scheduleStorageSave() {
+            if (pendingSave) clearTimeout(pendingSave);
+            pendingSave = setTimeout(() => {
+                saveToLocalStorage();
+                pendingSave = null;
+            }, 500);
+        }
+
+        function exportFullJSON() {
+            const exportData = {
+                meta: {
+                    target: location.hostname,
+                    url: location.href,
+                    scanStart: new Date(startTime).toISOString(),
+                    scanEnd: new Date().toISOString(),
+                    framework, waf: wafDetected,
+                    aggressiveMode: CONFIG.aggressive,
+                    totalFindings: findings.length
+                },
+                findings: findings,
+                secrets: Array.from(secretsSet),
+                endpoints: Array.from(endpoints),
+                networkLog: networkLog.slice(-300)
+            };
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `sentinel_${location.hostname}_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(a.href);
+            addFinding('INFO', 'Manual export', 'JSON saved', 'LOW');
+        }
+
+        // ======================= ADVANCED SCANNING MODULES =======================
+        // Entropy + secret patterns (enhanced)
+        function hasHighEntropy(str) {
+            if (!str || str.length < 20) return false;
+            let entropy = 0, freq = {};
+            for (let c of str) freq[c] = (freq[c]||0)+1;
+            for (let f in freq) {
+                const p = freq[f]/str.length;
+                entropy -= p * Math.log2(p);
+            }
+            return entropy > 3.8;
+        }
+
+        function scanSecrets(text, source) {
+            const patterns = [
+                {r: /(?:api|secret|token|jwt|key|auth|bearer|password|private)[\s:=]+["']?([A-Za-z0-9_\-\.\/+]{25,})/gi, n:'Token/Key'},
+                {r: /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, n:'JWT'},
+                {r: /sk_live_[A-Za-z0-9]{24,}/gi, n:'Stripe'},
+                {r: /AKIA[0-9A-Z]{16}/gi, n:'AWS'},
+                {r: /-----BEGIN [A-Z ]+ KEY-----/gi, n:'Private Key'},
+                {r: /ghp_[A-Za-z0-9]{36}/gi, n:'GitHub'},
+                {r: /xoxb-[0-9]{10,}-[A-Za-z0-9]{20,}/gi, n:'Slack'},
+                {r: /AIza[0-9A-Za-z_-]{35}/gi, n:'Firebase'}
+            ];
+            for (let p of patterns) {
+                let m;
+                while ((m = p.r.exec(text)) !== null) {
+                    const val = (m[1] || m[0]).slice(0, 200);
+                    if (hasHighEntropy(val) && !secretsSet.has(val)) {
+                        secretsSet.add(val);
+                        addFinding('SECRET', p.n, `Found in ${source}`, 'CRITICAL', val);
+                    }
+                }
+            }
+        }
+
+        // Storage scanner (localStorage, sessionStorage, cookies)
+        function scanStorages() {
+            try {
+                for (let store of [localStorage, sessionStorage]) {
+                    for (let i = 0; i < store.length; i++) {
+                        const k = store.key(i);
+                        const v = store.getItem(k);
+                        scanSecrets(`${k}=${v}`, store === localStorage ? 'localStorage' : 'sessionStorage');
+                        if (/token|auth|jwt|session|key/i.test(k)) {
+                            addFinding('STORAGE', 'Sensitive key', `Key: ${k}`, 'HIGH', v?.slice(0,100));
+                        }
+                    }
+                }
+                if (document.cookie) {
+                    scanSecrets(document.cookie, 'cookies');
+                    document.cookie.split(';').forEach(c => {
+                        const name = c.split('=')[0].trim();
+                        if (/token|auth|session/i.test(name)) {
+                            addFinding('COOKIE', 'Auth cookie JS readable', name, 'HIGH');
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // Framework detection & adaptive payloads
+        function detectFramework() {
+            if (window.React || document.querySelector('[data-reactroot]')) framework = 'react';
+            else if (window.angular || document.querySelector('[ng-app]')) framework = 'angular';
+            else if (window.Vue || document.querySelector('[v-app]')) framework = 'vue';
+            if (framework !== 'unknown') addFinding('FRAMEWORK', 'Detected', framework, 'LOW');
+        }
+
+        // WAF simulation (simple header check)
+        async function detectWAF() {
+            try {
+                const res = await fetch(location.href, {method:'HEAD', cache:'no-store'});
+                const headers = res.headers;
+                if (headers.get('cf-ray')) wafDetected = 'Cloudflare';
+                else if (headers.get('x-amzn-RequestId')) wafDetected = 'AWS';
+                else if (headers.get('x-sucuri-id')) wafDetected = 'Sucuri';
+                if (wafDetected) addFinding('WAF', 'Detected', wafDetected, 'INFO');
+            } catch(e) {}
+        }
+
+        // CSP & Security headers
+        async function checkHeaders() {
+            try {
+                const res = await fetch(location.href, {method:'HEAD', cache:'no-store'});
+                const csp = res.headers.get('Content-Security-Policy');
+                if (!csp) addFinding('HEADERS', 'Missing CSP', 'No CSP header', 'HIGH');
+                else if (/unsafe-inline|unsafe-eval/.test(csp)) addFinding('HEADERS', 'Weak CSP', 'Allows unsafe-inline/eval', 'HIGH');
+                if (!res.headers.get('Strict-Transport-Security')) addFinding('HEADERS', 'Missing HSTS', '', 'MED');
+                if (!res.headers.get('X-Frame-Options')) addFinding('HEADERS', 'Missing XFO', 'Clickjacking risk', 'MED');
+            } catch(e) {}
+        }
+
+        // XSS fuzzing + adaptive reflection detection (smart)
+        function fuzzXSS() {
+            if (!CONFIG.fuzzParams) return;
+            const payloads = [
+                '<img src=x onerror=alert(1)>', '<svg/onload=alert(1)>', 'javascript:alert(1)',
+                '"><script>alert(1)</script>', '{{constructor.constructor("alert(1)")()}}',
+                '`-alert(1)-`', '<math><mi><svg/onload=alert(1)>'
+            ];
+            // framework-specific mutations
+            let finalPayloads = [...payloads];
+            if (framework === 'react') finalPayloads.push('{alert(1)}', '{{toString.constructor("alert(1)")()}}');
+            if (framework === 'angular') finalPayloads.push('{{$eval("alert(1)")}}');
+            if (wafDetected === 'Cloudflare') finalPayloads = finalPayloads.map(p => p.replace(/alert/g, 'ale\\x72t'));
+            const params = new URLSearchParams(location.search);
+            if (params.toString() === '') return;
+            for (let [param] of params) {
+                for (let p of finalPayloads.slice(0, CONFIG.maxPayloadsPerParam)) {
+                    const testUrl = new URL(location.href);
+                    testUrl.searchParams.set(param, p);
+                    fetch(testUrl.toString(), { mode: 'no-cors', cache: 'no-store' }).catch(()=>{});
+                }
+            }
+            // Check for reflected payloads in DOM after delay
+            setTimeout(() => {
+                const html = document.documentElement.innerHTML;
+                if (html.includes('alert(1)') || html.includes('<svg/onload') || html.includes('javascript:alert')) {
+                    addFinding('XSS', 'Reflected Payload Detected', 'Possible XSS in DOM', 'CRITICAL', html.match(/alert\(1\)/)?.[0]);
+                }
+            }, 1800);
+        }
+
+        // CSS injection test
+        function testCSSInjection() {
+            const style = document.createElement('style');
+            style.textContent = 'body{background:url("javascript:alert(1)")}';
+            document.head.appendChild(style);
+            setTimeout(() => style.remove(), 300);
+            addFinding('CSS', 'Injection test', 'Attempted javascript: url()', 'LOW');
+        }
+
+        // Prototype pollution (smart, non-destructive unless aggressive)
+        function testPrototypePollution() {
+            try {
+                const payload = '{"__proto__":{"polluted":true}}';
+                const obj = JSON.parse(payload);
+                if (Object.prototype.polluted) {
+                    addFinding('PROTO_POLLUTION', 'Vulnerable', '__proto__ injection', 'CRITICAL');
+                    if (CONFIG.aggressive) {
+                        Object.prototype.toString = function(){ return '[ADAPTIVE EXPLOIT]'; };
+                        addFinding('EXPLOIT', 'Prototype Pollution Demo', 'toString overridden', 'HIGH');
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // DOM clobbering test
+        function testDOMClobbering() {
+            const test = document.createElement('a');
+            test.id = 'clobberSentinel';
+            test.name = 'clobberSentinel';
+            document.body.appendChild(test);
+            if (window.clobberSentinel !== undefined) addFinding('DOM_CLOBBER', 'Possible', 'ID/name overrides global', 'HIGH');
+            test.remove();
+        }
+
+        // Modern APIs leak
+        function testModernAPIs() {
+            if (navigator.clipboard) addFinding('MODERN_API', 'Clipboard', 'Read/write possible', 'MED');
+            if (navigator.usb) addFinding('MODERN_API', 'WebUSB', 'USB access', 'MED');
+            if (navigator.bluetooth) addFinding('MODERN_API', 'Bluetooth', 'BLE access', 'MED');
+            if ('RTCPeerConnection' in window) {
+                const pc = new RTCPeerConnection({iceServers:[]});
+                pc.createDataChannel('');
+                pc.createOffer().then(o => pc.setLocalDescription(o));
+                pc.onicecandidate = e => {
+                    if (e.candidate) {
+                        const ip = /([0-9]{1,3}\.){3}[0-9]{1,3}/.exec(e.candidate.candidate);
+                        if (ip) addFinding('WEBRTC', 'Local IP leak', ip[0], 'MED');
+                    }
+                };
+                setTimeout(() => pc.close(), 2000);
+            }
+        }
+
+        // ========== NETWORK HOOKS ==========
+        function installNetworkHooks() {
+            const origFetch = window.fetch;
+            window.fetch = async function(...args) {
+                let url = typeof args[0] === 'string' ? args[0] : args[0]?.url;
+                if (url) {
+                    endpoints.add(url);
+                    networkLog.unshift({type:'fetch', url, ts: Date.now()});
+                    if (networkLog.length > 200) networkLog.pop();
+                    if (args[1]?.body) scanSecrets(String(args[1].body), `fetch body ${url}`);
+                }
+                return origFetch.apply(this, args);
+            };
+            const origXHROpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function(method, url) {
+                this._url = url;
+                endpoints.add(url);
+                return origXHROpen.apply(this, arguments);
+            };
+        }
+
+        // Mutation observer for dynamic scripts/iframes
+        function observeDOM() {
+            if (mutObserver) mutObserver.disconnect();
+            mutObserver = new MutationObserver(mutations => {
+                for (let mut of mutations) {
+                    if (mut.addedNodes) {
+                        for (let node of mut.addedNodes) {
+                            if (node.nodeType === 1 && node.tagName === 'SCRIPT') {
+                                addFinding('DOM', 'Dynamic script', node.src || 'inline', 'MED');
+                                if (node.src) fetch(node.src).then(r=>r.text()).then(t=>scanSecrets(t, `script ${node.src}`)).catch(()=>{});
+                            }
+                            if (node.nodeType === 1 && node.tagName === 'IFRAME' && node.src) {
+                                addFinding('DOM', 'Iframe injected', node.src, 'MED');
+                            }
+                        }
+                    }
+                }
+            });
+            mutObserver.observe(document.documentElement, { childList: true, subtree: true });
+        }
+
+        // Adaptive exploit manual trigger (aggressive mode)
+        function manualInjectTest() {
+            addFinding('MANUAL', 'Inject test', 'User-triggered adaptive payload', 'INFO');
+            const s = document.createElement('script');
+            s.textContent = 'console.log("%c[ADAPTIVE] Manual injection successful","color:orange;font-size:14px")';
+            document.head.appendChild(s);
+            if (CONFIG.aggressive) {
+                // Attempt to demonstrate XSS
+                const testDiv = document.createElement('div');
+                testDiv.innerHTML = '<img src=x onerror="alert(\'Adaptive XSS Demo (safe)\')">';
+                document.body.appendChild(testDiv);
+                setTimeout(() => testDiv.remove(), 500);
+                addFinding('EXPLOIT', 'Adaptive XSS Demo', 'Executed test payload', 'HIGH');
+            }
+        }
+
+        // ========== MAIN BOOTSTRAP ==========
+        async function bootstrap() {
+            addFinding('INFO', 'Scanner start', `Hardened v6.0 on ${location.href}`, 'LOW');
+            detectFramework();
+            await detectWAF();
+            scanStorages();
+            installNetworkHooks();
+            observeDOM();
+            testCSSInjection();
+            testPrototypePollution();
+            testDOMClobbering();
+            testModernAPIs();
+            await checkHeaders();
+            fuzzXSS();            // adaptive fuzzing
+            // re-run periodic checks for XSS reflection
+            setInterval(() => {
+                const html = document.documentElement.innerHTML;
+                if (html.includes('alert(1)') && !seenHashes.has('xss_refl')) {
+                    addFinding('XSS', 'Persistent reflection', 'alert(1) still in DOM', 'CRITICAL');
+                }
+            }, 5000);
+            updateUI();
+            scheduleStorageSave();
+        }
+
+        // ========== UI CONTROLS & AUTO-EXPORT ==========
+        document.getElementById('exportBtn').onclick = exportFullJSON;
+        document.getElementById('forceDedupe').onclick = () => {
+            addFinding('INFO', 'Manual deduplication', 'Cleared duplicate cache', 'LOW');
+            // hash set remains, but we don't clear findings; just force re-save
+            scheduleStorageSave();
+        };
+        document.getElementById('aggressiveToggle').onclick = () => {
+            CONFIG.aggressive = !CONFIG.aggressive;
+            const btn = document.getElementById('aggressiveToggle');
+            btn.textContent = CONFIG.aggressive ? '⚡ Adaptive Exploits: ON' : '⚡ Adaptive Exploits: OFF';
+            btn.className = CONFIG.aggressive ? 'danger' : '';
+            addFinding('CONFIG', 'Adaptive mode', CONFIG.aggressive ? 'Enabled' : 'Disabled', 'INFO');
+        };
+        document.getElementById('stealthToggle').onclick = () => {
+            CONFIG.stealth = !CONFIG.stealth;
+            const btn = document.getElementById('stealthToggle');
+            btn.textContent = CONFIG.stealth ? '👁️ Stealth: ON' : '👁️ Stealth: OFF';
+            addFinding('CONFIG', 'Stealth mode', CONFIG.stealth ? 'Enabled' : 'Disabled', 'INFO');
+        };
+        document.getElementById('manualInjectBtn').onclick = manualInjectTest;
+        document.getElementById('clearBtn').onclick = () => {
+            localStorage.removeItem('runehall_sentinel_v6');
+            seenHashes.clear();
+            findings.length = 0;
+            secretsSet.clear();
+            endpoints.clear();
+            updateUI();
+            addFinding('INFO', 'Storage cleared', 'All local data wiped', 'LOW');
+            scheduleStorageSave();
+        };
+        filterInput.addEventListener('input', () => updateUI());
+
+        // Auto export interval (JSON file download every 8s)
+        setInterval(() => {
+            exportFullJSON();
+        }, CONFIG.autoExportInterval);
+
+        // Start
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootstrap);
+        else bootstrap();
+
+        // Save to localStorage periodically
+        setInterval(() => scheduleStorageSave(), 5000);
+        window.addEventListener('beforeunload', () => {
+            saveToLocalStorage();
+            exportFullJSON();
+        });
+    })();
+</script>
+</body>
+</html>

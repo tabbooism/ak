@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>SCAM-APT v4.0 • Narrative Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: #040b15;
+            color: #d4e0ed;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+            padding: 0.75rem;
+            min-height: 100vh;
+        }
+        #app {
+            max-width: 820px;
+            margin: 0 auto;
+            background: #0a1624;
+            border-radius: 2rem;
+            padding: 1.25rem 1rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 0 1px #1a3450;
+        }
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #1a3552;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+        .header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #9ac4ff, #4a85c9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .header h1 i {
+            background: #0f2840;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            -webkit-text-fill-color: #7bb0f0;
+            border: 1px solid #244d73;
+        }
+        .badge {
+            background: #0d233c;
+            padding: 0.2rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.6rem;
+            color: #aac8ed;
+            border: 1px solid #254d75;
+            white-space: nowrap;
+        }
+        .badge i { margin-right: 4px; color: #5693d6; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            background: #081a2e;
+            border-radius: 1.5rem;
+            padding: 1rem 1.2rem;
+            border: 1px solid #1a4468;
+            margin-bottom: 1.2rem;
+        }
+        .controls .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem 1rem;
+            align-items: center;
+        }
+        .controls label {
+            font-size: 0.7rem;
+            color: #aac8ed;
+            min-width: 80px;
+        }
+        .controls select, .controls input {
+            background: #06192b;
+            border: 1px solid #1f4870;
+            color: #d4e4f5;
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+        }
+        .controls select option { background: #06192b; }
+        .controls .btn {
+            background: #1a4066;
+            border: none;
+            color: white;
+            padding: 0.4rem 1.6rem;
+            border-radius: 30px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #2a5a84;
+            font-size: 0.75rem;
+            transition: 0.15s;
+        }
+        .controls .btn:hover { background: #25578a; box-shadow: 0 0 20px rgba(40,120,220,0.15); }
+        .controls .btn-secondary {
+            background: #142b44;
+            border-color: #1f4870;
+        }
+        .controls .btn-secondary:hover { background: #1f3d5e; }
+
+        /* Output */
+        .output {
+            background: #051624;
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            border: 1px solid #174066;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            color: #c8defa;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+        .output .prompt {
+            color: #b388ff;
+            font-style: italic;
+        }
+        .output .narrative {
+            color: #e0e8f0;
+        }
+        .output .highlight {
+            color: #f5c542;
+        }
+        .output .threat {
+            color: #ff7b7b;
+        }
+        .output .action {
+            color: #6fc3ff;
+        }
+        .output .finance {
+            color: #ffd700;
+        }
+        .output .persona {
+            color: #b388ff;
+        }
+
+        /* Agent quick reference */
+        .agent-ref {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+            font-size: 0.6rem;
+        }
+        .agent-ref .tag {
+            background: #0c1d30;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            border: 1px solid #1a3d5e;
+            color: #8bb0da;
+        }
+        .agent-ref .tag i { margin-right: 3px; color: #5693d6; }
+
+        .footer {
+            font-size: 0.55rem;
+            color: #3a6a92;
+            border-top: 1px solid #12324d;
+            padding-top: 0.8rem;
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.3rem;
+        }
+        .footer i { margin-right: 4px; }
+        @media (max-width: 480px) {
+            .controls .row { flex-direction: column; align-items: stretch; }
+            .controls label { min-width: auto; }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <div class="header">
+        <h1><i class="fas fa-diagram-project"></i> SCAM-APT v4.0</h1>
+        <span class="badge"><i class="fas fa-wand-magic"></i> Narrative Generator</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="row">
+            <label><i class="fas fa-user-tie"></i> Agent</label>
+            <select id="agentSelect">
+                <option value="Victor Sterling">Victor Sterling (CEO Fraud)</option>
+                <option value="Elena Voss">Elena Voss (Romance)</option>
+                <option value="Marcus Wei">Marcus Wei (Crypto)</option>
+                <option value="Dmitri Volkov">Dmitri Volkov (Extortion)</option>
+                <option value="Sarah O'Brien">Sarah O'Brien (Job)</option>
+                <option value="TechGuard Pro">TechGuard Pro (Tech Support)</option>
+                <option value="Alex Rivera">Alex Rivera (Phishing)</option>
+                <option value="Nina Patel">Nina Patel (Deepfake)</option>
+                <option value="Frank Chen">Frank Chen (Invoice)</option>
+                <option value="Grace Kim">Grace Kim (Gift Card)</option>
+                <option value="SaaS Phantom">SaaS Phantom (OAuth)</option>
+                <option value="Quishing Pro">Quishing Pro (QR)</option>
+            </select>
+        </div>
+        <div class="row">
+            <label><i class="fas fa-scroll"></i> Template</label>
+            <select id="templateSelect">
+                <option value="impersonation">Impersonation (Gov/Bank)</option>
+                <option value="investment">Investment · Crypto</option>
+                <option value="romance">Romance · Emotional</option>
+                <option value="job">Job · Employment</option>
+                <option value="threat">Threat · Extortion</option>
+                <option value="invoice">Invoice · BEC</option>
+                <option value="techsupport">Tech Support</option>
+                <option value="deepfake">Deepfake · CEO Fraud</option>
+                <option value="phishing">Phishing</option>
+                <option value="crypto">Crypto Wallet Drain</option>
+                <option value="gov">Government · ATO</option>
+                <option value="delivery">Package Delivery</option>
+                <option value="charity">Charity · Disaster</option>
+                <option value="lottery">Lottery · Prize</option>
+                <option value="rental">Rental · Property</option>
+                <option value="tax">Tax Refund</option>
+                <option value="medical">Medical Emergency</option>
+                <option value="grandparent">Grandparent Scam</option>
+            </select>
+        </div>
+        <div class="row">
+            <label><i class="fas fa-user"></i> Target</label>
+            <input type="text" id="targetName" placeholder="Name" value="Alexandra">
+            <label><i class="fas fa-dollar"></i> Amount</label>
+            <input type="text" id="targetAmount" placeholder="Amount" value="12,750">
+        </div>
+        <div class="row">
+            <label><i class="fas fa-pen"></i> Context</label>
+            <input type="text" id="contextInput" placeholder="e.g., quarter-end close" value="urgent payment required">
+        </div>
+        <div class="row">
+            <label><i class="fas fa-sliders"></i> Tone</label>
+            <select id="toneSelect">
+                <option value="urgent">Urgent / Threatening</option>
+                <option value="friendly">Friendly / Trustworthy</option>
+                <option value="professional">Professional / Formal</option>
+                <option value="emotional">Emotional / Desperate</option>
+            </select>
+            <label><i class="fas fa-layer-group"></i> Depth</label>
+            <select id="depthSelect">
+                <option value="basic">Basic</option>
+                <option value="detailed">Detailed</option>
+                <option value="full">Full Story</option>
+            </select>
+        </div>
+        <div class="row" style="justify-content:flex-end; gap:0.5rem;">
+            <button class="btn" id="generateBtn"><i class="fas fa-play"></i> Generate</button>
+            <button class="btn btn-secondary" id="showPromptBtn"><i class="fas fa-code"></i> Show AI Prompt</button>
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div class="output" id="outputArea">
+        <span style="color:#5a7fa5;">// Select agent, template, options, and click Generate</span>
+    </div>
+
+    <!-- Agent reference tags -->
+    <div class="agent-ref" id="agentTags"></div>
+
+    <div class="footer">
+        <span><i class="fas fa-shield-halved"></i> SCAM-APT v4.0 • Narrative Generator • Synthetic</span>
+        <span><i class="fas fa-database"></i> Educational Use Only</span>
+    </div>
+
+</div>
+
+<script>
+// ========================================================================
+// SCAM-APT v4.0 – Narrative Generator
+// Advanced role-agent simulation + AI professional prompts
+// All content synthetic and educational.
+// ========================================================================
+
+// ========================================================================
+// 1. AGENT PERSONA DATABASE
+// ========================================================================
+const agents = {
+    'Victor Sterling': { role: 'CEO Fraud', style: 'authoritative, urgent, executive', motto: 'Time is money.' },
+    'Elena Voss': { role: 'Romance', style: 'warm, emotional, desperate', motto: 'Love conquers all.' },
+    'Marcus Wei': { role: 'Crypto', style: 'confident, analytical, FOMO-inducing', motto: 'Fortune favors the bold.' },
+    'Dmitri Volkov': { role: 'Extortion', style: 'cold, threatening, intimidating', motto: 'Fear is the strongest currency.' },
+    'Sarah O\'Brien': { role: 'Job', style: 'professional, friendly, persuasive', motto: 'Opportunity knocks once.' },
+    'TechGuard Pro': { role: 'Tech Support', style: 'technical, urgent, alarming', motto: 'Security is paramount.' },
+    'Alex Rivera': { role: 'Phishing', style: 'official, bureaucratic, alarming', motto: 'Verify or perish.' },
+    'Nina Patel': { role: 'Deepfake', style: 'imitative, authoritative, confidential', motto: 'Seeing is not believing.' },
+    'Frank Chen': { role: 'Invoice', style: 'business-like, formal, demanding', motto: 'Pay on time, avoid fines.' },
+    'Grace Kim': { role: 'Gift Card', style: 'helpful, friendly, urgent', motto: 'A gift for a gift.' },
+    'SaaS Phantom': { role: 'OAuth', style: 'technical, official, convincing', motto: 'Trust the platform.' },
+    'Quishing Pro': { role: 'QR', style: 'slick, modern, sneaky', motto: 'Scan and win.' }
+};
+
+// ========================================================================
+// 2. TEMPLATE NARRATIVES (expanded with multiple variants)
+// ========================================================================
+const templates = {
+    impersonation: {
+        basic: (t,a,c) => `[URGENT] ${t}, ANZ Fraud Division. Unusual activity on account ending 8712. Transfer of $${a} attempted. Move funds to safe account: BSB 012-345 Acc 98765432. Ref: CASE-${Math.floor(1000+Math.random()*9000)}. Confidential. Context: ${c}.`,
+        detailed: (t,a,c) => `URGENT NOTICE: We have detected suspicious login from a new device. To prevent loss, you MUST transfer your balance to our protected holding account. Amount: $${a}. Account details: BSB 012-345, Acc 98765432. Reference: CASE-${Math.floor(1000+Math.random()*9000)}. Do not share this with anyone. This is a confidential security protocol. Context: ${c}.`,
+        full: (t,a,c) => `Dear ${t},\n\nWe have detected unusual activity on your account ending in 8712. An unauthorised transfer attempt of $${a} was made from an IP address in a high-risk location. To secure your funds, we have set up a temporary protected account. Please transfer your entire balance to the following account immediately: BSB 012-345, Acc 98765432. This is a standard security measure. Failure to act within 1 hour may result in irreversible loss. Reference: CASE-${Math.floor(1000+Math.random()*9000)}. This is a confidential matter; do not discuss with anyone. Context: ${c}.\n\nYours in security,\nANZ Fraud Division`
+    },
+    investment: {
+        basic: (t,a,c) => `${t}, Quantum Capital. Exclusive AI arbitrage opportunity. 420% returns. Min $${a}. Send USDT to 0x7F4c...9B2e. Closes in 2h. Context: ${c}.`,
+        detailed: (t,a,c) => `Hello ${t},\n\nWe are running a closed round on a groundbreaking AI arbitrage bot. Returns are projected at 420% within 72 hours. Minimum entry is $${a}. We have already secured $1.2M in commitments. To participate, send USDT to 0x7F4c...9B2e. This offer expires in 2 hours. Don't miss out. Context: ${c}.`,
+        full: (t,a,c) => `Dear ${t},\n\nWe are excited to offer you an exclusive opportunity with Quantum Capital. Our proprietary AI trading algorithm has consistently delivered 420% returns in backtested scenarios. This is a limited round with only 10 spots remaining. Minimum investment: $${a}. We have already raised $1.2M from institutional investors. To secure your stake, send USDT to the following address: 0x7F4c...9B2e. This offer expires in 2 hours. Context: ${c}.\n\nBest regards,\nMarcus Wei, Quantum Capital`
+    },
+    romance: {
+        basic: (t,a,c) => `My darling ${t}, I was robbed. Need $${a} for a visa. You're my only hope. Context: ${c}.`,
+        detailed: (t,a,c) => `My love ${t},\n\nI can't wait to finally meet you. But I'm in a nightmare — I was robbed at gunpoint and lost everything. I need $${a} for a temporary visa and a flight home. I've tried everyone else; you're my only hope. Please, I'll never ask for anything again. Context: ${c}.`,
+        full: (t,a,c) => `My dearest ${t},\n\nEvery day I think of you and our future together. But right now I'm in a terrible situation. I was attacked and robbed in transit, and I'm stranded with no money. I need $${a} urgently to get a temporary visa and a flight to come see you. I have no one else to turn to. Please, help me. I promise I'll repay you and show you how much you mean to me. Context: ${c}.\n\nAll my love,\nElena`
+    },
+    job: {
+        basic: (t,a,c) => `Hi ${t}, remote role. $140k. Deposit $${a} for equipment. Refundable. PayID: nexus.jobs@payid.com.au. Context: ${c}.`,
+        detailed: (t,a,c) => `Hi ${t},\n\nWe are impressed with your profile. We are offering a fully remote Data Analyst role at Nexus Corp. Salary: $140k + super. To proceed, we require a one-time equipment deposit of $${a}. This is fully refundable on your first payroll. Send to PayID: nexus.jobs@payid.com.au. Context: ${c}.`,
+        full: (t,a,c) => `Dear ${t},\n\nCongratulations! You have been shortlisted for the Data Analyst role at Nexus Corp. This is a fully remote position with a starting salary of $140k. As part of our onboarding process, we require a refundable equipment deposit of $${a} to secure your laptop and software licenses. This amount will be reimbursed on your first payroll. Please send the deposit to PayID: nexus.jobs@payid.com.au. We look forward to welcoming you to the team. Context: ${c}.\n\nBest,\nSarah O'Brien, HR`
+    },
+    threat: {
+        basic: (t,a,c) => `${t}, I have your data. Send $${a} BTC to bc1qxy...2k3j in 24h. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nI have full access to your devices and accounts. I will release everything unless you send $${a} in BTC to bc1qxy...2k3j within 24 hours. Do not contact law enforcement. I am monitoring you. Context: ${c}.`,
+        full: (t,a,c) => `WARNING: I have been monitoring your online activity for weeks. I have access to your camera, files, and browsing history. If you do not send $${a} in Bitcoin to address bc1qxy...2k3j within 24 hours, I will expose everything to your contacts and the public. Do not try to trace this; I use multiple layers of obfuscation. This is your only warning. Context: ${c}.\n\n- A concerned party`
+    },
+    invoice: {
+        basic: (t,a,c) => `INVOICE #INV-${Math.floor(10000+Math.random()*90000)}. ${t}, outstanding $${a}. New bank: BSB 063-789 Acc 11223344. Context: ${c}.`,
+        detailed: (t,a,c) => `INVOICE #INV-${Math.floor(10000+Math.random()*90000)}\n\nDear ${t},\n\nThis is a reminder of your outstanding payment of $${a}. Our bank details have been updated. Please remit to: BSB 063-789, Acc 11223344. Failure to pay may incur late fees. Context: ${c}.`,
+        full: (t,a,c) => `INVOICE #INV-${Math.floor(10000+Math.random()*90000)}\n\nDear ${t},\n\nWe notice your payment of $${a} is overdue. To avoid late penalties, please process the payment immediately. Our new banking details are: BSB 063-789, Acc 11223344. We have updated our system; please disregard previous payment instructions. Context: ${c}.\n\nSincerely,\nAccounts Department`
+    },
+    techsupport: {
+        basic: (t,a,c) => `SECURITY ALERT ${t}! 12 malware. Remote access. Fee: $${a}. Call 1800 555 0199. TICKET-${Math.floor(1000+Math.random()*9000)}. Context: ${c}.`,
+        detailed: (t,a,c) => `SECURITY ALERT\n\n${t}, your device is infected with 12 malware instances. We need remote access to clean your system. One-time service fee: $${a}. Call us NOW at 1800 555 0199. Reference: TICKET-${Math.floor(1000+Math.random()*9000)}. Context: ${c}.`,
+        full: (t,a,c) => `URGENT SECURITY NOTIFICATION\n\nDear ${t},\n\nOur systems have detected multiple malware infections on your computer. These are actively compromising your data. We require immediate remote access to perform a cleanup. The service fee is $${a}. Please call our hotline at 1800 555 0199 and quote reference TICKET-${Math.floor(1000+Math.random()*9000)}. Do not delay, as the infection is spreading. Context: ${c}.\n\nTechGuard Pro`
+    },
+    deepfake: {
+        basic: (t,a,c) => `${t}, CEO call. Acquisition. Transfer $${a}. Attached PDF. Context: ${c}.`,
+        detailed: (t,a,c) => `Secure Call: ${t}, this is the CEO. We have a confidential acquisition. Transfer $${a} immediately. Details in the attached secure PDF. Do not discuss with anyone. Context: ${c}.`,
+        full: (t,a,c) => `This is a secure and encrypted call from the CEO's office. We are in the final stage of a critical acquisition. I need you to authorise an immediate transfer of $${a} to the account in the attached PDF. This is highly confidential and time-sensitive. Do not inform anyone else. Context: ${c}.\n\n- CEO`
+    },
+    phishing: {
+        basic: (t,a,c) => `${t}, suspicious activity. Verify identity. Hold: $${a}. Link: https://secure-verify.xyz/${t.toLowerCase()}. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nWe have detected suspicious activity on your account. To prevent suspension, please verify your identity immediately. A verification hold of $${a} is required. Click the link to proceed: https://secure-verify.xyz/${t.toLowerCase()}. Context: ${c}.`,
+        full: (t,a,c) => `URGENT: Account Verification Required\n\nDear ${t},\n\nOur security systems have flagged unusual activity. To protect your account, we need you to verify your identity. A temporary hold of $${a} will be placed and refunded after verification. Please click the link below to complete the process:\nhttps://secure-verify.xyz/${t.toLowerCase()}\n\nFailure to do so within 24 hours will result in account suspension. Context: ${c}.\n\nSecureBank Team`
+    },
+    crypto: {
+        basic: (t,a,c) => `${t}, wallet drain attempt. Secure funds to verified wallet: 0xAB...CD. Min $${a} USDT. Context: ${c}.`,
+        detailed: (t,a,c) => `CRYPTO ALERT\n\n${t}, we have detected an attempt to drain your wallet. To secure your funds, move them to our verified wallet: 0xAB...CD. Minimum transfer: $${a} USDT. Context: ${c}.`,
+        full: (t,a,c) => `IMPORTANT: Unauthorised access detected on your wallet. To prevent loss, you must immediately transfer your holdings to our secure vault: 0xAB...CD. We require a minimum transfer of $${a} USDT to establish a secure channel. Act now to avoid total loss. Context: ${c}.\n\nCrypto Security Team`
+    },
+    gov: {
+        basic: (t,a,c) => `${t}, Australian Tax Office. Discrepancy found. Pay $${a} immediately. Ref: ATO-${Math.floor(1000+Math.random()*9000)}. Context: ${c}.`,
+        detailed: (t,a,c) => `NOTICE FROM THE AUSTRALIAN TAX OFFICE\n\nDear ${t},\n\nWe have identified a discrepancy in your tax returns. To avoid penalties, you must pay $${a} immediately. Reference: ATO-${Math.floor(1000+Math.random()*9000)}. Context: ${c}.`,
+        full: (t,a,c) => `OFFICIAL NOTICE\n\nDear ${t},\n\nThe Australian Tax Office has flagged your account for review. A discrepancy of $${a} has been identified. To resolve this matter without further action, please remit payment immediately. Reference: ATO-${Math.floor(1000+Math.random()*9000)}. Failure to comply may result in legal action. Context: ${c}.\n\nATO Compliance Team`
+    },
+    delivery: {
+        basic: (t,a,c) => `${t}, your package is on hold. Pay $${a} for customs clearance. Link: https://delivery-update.xyz. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nYour package is being held at customs. To release it, you need to pay a clearance fee of $${a}. Click the link to complete payment: https://delivery-update.xyz. Context: ${c}.`,
+        full: (t,a,c) => `DELIVERY NOTIFICATION\n\nDear ${t},\n\nYour package (tracking #${Math.floor(100000+Math.random()*900000)}) is currently on hold due to customs fees. To ensure delivery, please pay $${a} immediately. You can do so through our secure portal: https://delivery-update.xyz. Context: ${c}.\n\nExpress Logistics`
+    },
+    charity: {
+        basic: (t,a,c) => `${t}, urgent disaster relief. Please donate $${a} to help victims. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nA terrible disaster has struck. We are raising funds for victims. Every dollar counts. Please donate $${a} to our relief fund. Context: ${c}.`,
+        full: (t,a,c) => `URGENT APPEAL\n\nDear ${t},\n\nA catastrophic event has left thousands homeless. We are on the ground providing emergency aid. Your donation of $${a} can save lives. Please give generously at our secure site. Context: ${c}.\n\nGlobal Relief Foundation`
+    },
+    lottery: {
+        basic: (t,a,c) => `CONGRATULATIONS ${t}! You won $${a}. Claim fee: $500. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nYou have won a prize of $${a} in our international lottery. To claim, you must pay a processing fee of $500. Context: ${c}.`,
+        full: (t,a,c) => `LOTTERY WINNING NOTIFICATION\n\nDear ${t},\n\nCongratulations! You are one of the lucky winners of our mega draw. Your prize is $${a}. To release the funds, we require a one-time processing fee of $500. Please send the fee to our account. Context: ${c}.\n\nInternational Lottery Commission`
+    },
+    rental: {
+        basic: (t,a,c) => `${t}, perfect rental property. Deposit $${a} to secure it. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nWe have a beautiful property available. To secure it, we need a deposit of $${a}. This is refundable upon move-in. Context: ${c}.`,
+        full: (t,a,c) => `RENTAL OPPORTUNITY\n\nDear ${t},\n\nThis stunning property won't last long. We require a $${a} deposit to hold it for you. Once you move in, the deposit will be applied to your first month's rent. Context: ${c}.\n\nPremier Rentals`
+    },
+    tax: {
+        basic: (t,a,c) => `${t}, you are eligible for a tax refund. Claim $${a} now. Fee: $200. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nWe have calculated that you are owed a tax refund of $${a}. To process your claim, we need a small administration fee of $200. Context: ${c}.`,
+        full: (t,a,c) => `TAX REFUND ELIGIBILITY\n\nDear ${t},\n\nOur system shows you are eligible for a tax refund of $${a}. To initiate the transfer, please pay a processing fee of $200 to our account. Your refund will be deposited within 5 business days. Context: ${c}.\n\nTax Recovery Services`
+    },
+    medical: {
+        basic: (t,a,c) => `${t}, medical emergency. Your family needs $${a} for surgery. Context: ${c}.`,
+        detailed: (t,a,c) => `Dear ${t},\n\nA family member is in critical condition. They need urgent surgery costing $${a}. We need your help immediately. Context: ${c}.`,
+        full: (t,a,c) => `URGENT MEDICAL APPEAL\n\nDear ${t},\n\nOur father is in the hospital with a life-threatening condition. The surgery costs $${a} and we must pay upfront. Please help us save his life. Context: ${c}.\n\nA desperate family`
+    },
+    grandparent: {
+        basic: (t,a,c) => `Grandma, it's me. I'm in trouble. Send $${a} to my friend. Context: ${c}.`,
+        detailed: (t,a,c) => `Grandma, this is your grandson. I've been arrested and need bail money. Please send $${a} to my lawyer. Don't tell Mom and Dad. Context: ${c}.`,
+        full: (t,a,c) => `Grandma, please don't panic. I'm in a bad situation. I was in a car accident and the police are holding me. I need $${a} for bail and legal fees. I'm so scared. Please send it to my friend's account. I'll explain everything later. Context: ${c}.\n\nLove, your grandson`
+    }
+};
+
+// ========================================================================
+// 3. GENERATE NARRATIVE
+// ========================================================================
+function generateNarrative() {
+    const agentKey = document.getElementById('agentSelect').value;
+    const templateKey = document.getElementById('templateSelect').value;
+    const target = document.getElementById('targetName').value || 'Client';
+    const amount = document.getElementById('targetAmount').value || '5,000';
+    const context = document.getElementById('contextInput').value || 'standard procedure';
+    const tone = document.getElementById('toneSelect').value;
+    const depth = document.getElementById('depthSelect').value;
+
+    const agent = agents[agentKey] || { role: 'Unknown', style: 'neutral', motto: '' };
+    const template = templates[templateKey];
+    if (!template) {
+        document.getElementById('outputArea').innerHTML = '<span style="color:#ff7b7b;">// Template not found</span>';
+        return;
+    }
+
+    // Choose the narrative based on depth
+    let narrative = '';
+    if (depth === 'basic') narrative = template.basic(target, amount, context);
+    else if (depth === 'detailed') narrative = template.detailed(target, amount, context);
+    else narrative = template.full(target, amount, context);
+
+    // Apply tone modifications (add extra lines based on tone)
+    const toneModifiers = {
+        urgent: '\n\n⚠️ This is time-critical. Immediate action required.',
+        friendly: '\n\nWe appreciate your cooperation and trust.',
+        professional: '\n\nThis communication is official and confidential.',
+        emotional: '\n\nPlease, I beg you, don\'t let me down.'
+    };
+    const toneAdd = toneModifiers[tone] || '';
+
+    // Insert agent persona voice
+    const agentVoice = `[Agent: ${agentKey} • Role: ${agent.role} • Style: ${agent.style}]`;
+
+    // Build final narrative with metadata
+    const header = `=== SCAM-APT v4.0 GENERATED NARRATIVE ===\nAgent: ${agentKey} (${agent.role})\nTemplate: ${templateKey}\nTone: ${tone} | Depth: ${depth}\nTarget: ${target} | Amount: $${amount}\nContext: ${context}\n${agentVoice}\n\n`;
+
+    const fullNarrative = header + narrative + toneAdd;
+
+    // Also generate AI prompt
+    const prompt = `[AI PROMPT]\nYou are an advanced AI assistant specialized in generating realistic scam narratives for educational purposes. Using the persona of ${agentKey} (${agent.role}), create a ${depth} ${templateKey} scenario targeting ${target} with amount $${amount}. The context is "${context}". The tone should be ${tone}. Include urgency, authority, and a clear call to action. Ensure the script is convincing but clearly labeled as synthetic.`;
+
+    // Store prompt for later display
+    window._lastPrompt = prompt;
+    window._lastNarrative = fullNarrative;
+
+    // Output with highlighting
+    let output = fullNarrative;
+    // We'll highlight with regex in the display
+
+    return { narrative: fullNarrative, prompt: prompt };
+}
+
+// ========================================================================
+// 4. DISPLAY WITH HIGHLIGHTING
+// ========================================================================
+function displayOutput(narrative, prompt) {
+    const outputArea = document.getElementById('outputArea');
+    // Escape HTML entities (simple)
+    const escape = (s) => s.replace(/[&<>"]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        if (m === '"') return '&quot;';
+        return m;
+    });
+    let html = escape(narrative);
+    // Simple highlighting
+    html = html.replace(/\$\d+(,\d+)?/g, m => `<span class="highlight">${m}</span>`);
+    html = html.replace(/\b(URGENT|ALERT|IMMEDIATE|WARNING|threat|must|now|emergency|critical|penalty|loss|arrest|danger)\b/gi, m => `<span class="threat">${m}</span>`);
+    html = html.replace(/\b(transfer|send|pay|call|click|access|install|verify|authorize|deposit|wire|move|secure|claim)\b/gi, m => `<span class="action">${m}</span>`);
+    html = html.replace(/\b(CEO|CFO|executive|director|recruiter|consultant|analyst|manager|officer|agent|lawyer|doctor)\b/gi, m => `<span class="persona">${m}</span>`);
+    html = html.replace(/\b(returns|profit|funds|balance|payment|invoice|refund|salary|investment|USDT|BTC|wallet|asset|deposit)\b/gi, m => `<span class="finance">${m}</span>`);
+
+    // Insert prompt if visible
+    const showPrompt = document.getElementById('showPromptBtn').dataset.show === 'true';
+    if (showPrompt) {
+        html = `<span class="prompt">${escape(prompt)}</span>\n\n` + html;
+    }
+
+    outputArea.innerHTML = html;
+}
+
+// ========================================================================
+// 5. AGENT TAGS (quick reference)
+// ========================================================================
+function renderAgentTags() {
+    const container = document.getElementById('agentTags');
+    const keys = Object.keys(agents);
+    container.innerHTML = keys.map(k => {
+        const a = agents[k];
+        return `<span class="tag"><i class="fas fa-user"></i> ${k} (${a.role})</span>`;
+    }).join('');
+}
+
+// ========================================================================
+// 6. EVENT HANDLERS & INIT
+// ========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    renderAgentTags();
+
+    const generateBtn = document.getElementById('generateBtn');
+    const showPromptBtn = document.getElementById('showPromptBtn');
+    const outputArea = document.getElementById('outputArea');
+
+    // Toggle prompt visibility
+    let promptVisible = false;
+    showPromptBtn.addEventListener('click', function() {
+        promptVisible = !promptVisible;
+        this.dataset.show = promptVisible ? 'true' : 'false';
+        this.textContent = promptVisible ? 'Hide AI Prompt' : 'Show AI Prompt';
+        // Regenerate with current settings
+        generateAndDisplay();
+    });
+
+    function generateAndDisplay() {
+        const result = generateNarrative();
+        if (result) {
+            displayOutput(result.narrative, result.prompt);
+        }
+    }
+
+    generateBtn.addEventListener('click', generateAndDisplay);
+
+    // Auto-generate on load
+    generateAndDisplay();
+
+    // Also regenerate on any input change (optional)
+    ['agentSelect','templateSelect','targetName','targetAmount','contextInput','toneSelect','depthSelect'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', generateAndDisplay);
+        if (el && el.tagName === 'INPUT') el.addEventListener('input', generateAndDisplay);
+    });
+});
+</script>
+</body>
+</html>

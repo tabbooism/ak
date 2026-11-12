@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>🧩 OSRS Threat Workbench – Clone + Scam Generator</title>
+    <style>
+        /* ─────────── CSS Custom Properties (Theme) ─────────── */
+        :root {
+            --bg-primary: #0b0f1a;
+            --bg-secondary: #141e30;
+            --bg-card: #0e172a;
+            --text-primary: #e0e4f0;
+            --text-secondary: #aab;
+            --border-color: #1a2538;
+            --accent: #f5c45a;
+            --accent-dark: #e69900;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            --radius: 16px;
+            --transition: 0.3s ease;
+        }
+        [data-theme="light"] {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --bg-card: #e8ebef;
+            --text-primary: #1a1a2e;
+            --text-secondary: #444;
+            --border-color: #ccc;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            --accent: #d4a04a;
+            --accent-dark: #b8892a;
+        }
+        /* ─────────── Reset & Base ─────────── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background var(--transition), color var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .app {
+            max-width: 1400px;
+            width: 100%;
+            background: var(--bg-secondary);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            padding: 24px;
+            transition: background var(--transition), border var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        /* ─────────── Header ─────────── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .header .badge {
+            background: var(--accent);
+            color: #0b0f1a;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .theme-toggle {
+            cursor: pointer;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: 0.2s;
+        }
+        .theme-toggle:hover { background: var(--accent); color: #0b0f1a; }
+        /* ─────────── Tabs ─────────── */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+        .tab-btn {
+            padding: 8px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 30px 30px 0 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active {
+            background: var(--accent);
+            color: #0b0f1a;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        /* ─────────── Panels ─────────── */
+        .panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .panel .controls {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .panel .preview {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            min-height: 400px;
+        }
+        .panel .preview .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .panel .preview iframe {
+            width: 100%;
+            flex: 1;
+            min-height: 360px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: #fff;
+        }
+        .panel .preview .script-output {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            min-height: 300px;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        /* ─────────── Form Controls ─────────── */
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-weight: 600; font-size: 14px; color: var(--text-secondary); }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(245, 196, 90, 0.2);
+        }
+        .form-group textarea { resize: vertical; min-height: 60px; font-family: monospace; }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            margin-top: 4px;
+        }
+        .settings-grid .toggle-item { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .settings-grid .toggle-item input[type="checkbox"] { accent-color: var(--accent); width: 18px; height: 18px; cursor: pointer; }
+        .action-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-primary { background: var(--accent); color: #0b0f1a; border: none; }
+        .btn-primary:hover { background: var(--accent-dark); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245,196,90,0.3); }
+        .btn-secondary:hover { background: var(--border-color); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        /* ─────────── Live Widgets (shared) ─────────── */
+        .live-widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .widget { text-align: center; padding: 8px; border-radius: 8px; background: var(--bg-primary); }
+        .widget .label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+        .widget .value { font-size: 22px; font-weight: 700; color: var(--accent); font-family: monospace; margin-top: 4px; }
+        .widget .leaderboard-list { text-align: left; font-size: 13px; max-height: 100px; overflow-y: auto; margin-top: 6px; }
+        .widget .leaderboard-list .entry { display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid var(--border-color); }
+        .widget .leaderboard-list .entry .name { color: var(--text-primary); }
+        .widget .leaderboard-list .entry .amount { color: var(--accent); }
+        /* ─────────── Responsive ─────────── */
+        @media (max-width: 1000px) { .panel { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) { .app { padding: 12px; } .settings-grid { grid-template-columns: 1fr; } }
+        /* ─────────── Misc ─────────── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .hidden { display: none !important; }
+        .copy-btn { background: var(--accent); color: #0b0f1a; border: none; padding: 4px 12px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .copy-btn:hover { background: var(--accent-dark); }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="header">
+        <div>
+            <h1>🧩 OSRS Threat Workbench</h1>
+            <span class="badge">Clone + Scam Generator v6.0</span>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button class="theme-toggle" id="themeToggle">🌓 Toggle Theme</button>
+        </div>
+    </header>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="clone">🧬 Clone Generator</button>
+        <button class="tab-btn" data-tab="scam">📝 Scam Script Generator</button>
+    </div>
+
+    <!-- TAB 1: CLONE GENERATOR -->
+    <div id="tabClone" class="tab-content active">
+        <div class="panel">
+            <div class="controls">
+                <div class="form-group">
+                    <label for="platformSelect">Platform</label>
+                    <select id="platformSelect">
+                        <option value="runehall">🎰 RuneHall</option>
+                        <option value="runechat">🃏 RuneChat</option>
+                        <option value="runewager">🎲 RuneWager</option>
+                        <option value="opduel">⚔️ OpDuel</option>
+                        <option value="discord">💬 Discord</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="pageName">Page Title</label>
+                    <input type="text" id="pageName" value="Security Verification">
+                </div>
+                <div class="form-group">
+                    <label>⚙️ Feature Toggles</label>
+                    <div class="settings-grid">
+                        <label class="toggle-item"><input type="checkbox" id="chkQR" checked> QR Code</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkTimer" checked> Countdown Timer</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkLeaderboard" checked> Live Leaderboard</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkAntiDevtools" checked> Anti‑Devtools</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkHarvestLog" checked> Harvest Logging</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkBranding" checked> Branding</label>
+                    </div>
+                </div>
+                <div class="action-row">
+                    <button class="btn btn-primary" id="previewBtn">🔄 Update Preview</button>
+                    <button class="btn btn-primary" id="downloadBtn">⬇️ Download Clone</button>
+                    <button class="btn btn-secondary" id="resetDefaults">↺ Reset</button>
+                </div>
+            </div>
+            <div class="preview">
+                <div class="preview-header">
+                    <span>📄 Clone Preview</span>
+                    <span id="previewStatus">Ready</span>
+                </div>
+                <iframe id="previewFrame" sandbox="allow-scripts allow-modals allow-same-origin"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: SCAM SCRIPT GENERATOR -->
+    <div id="tabScam" class="tab-content">
+        <div class="panel">
+            <div class="controls">
+                <div class="form-group">
+                    <label for="scamVictim">Victim RSN</label>
+                    <input type="text" id="scamVictim" value="xX_StakerLord_Xx">
+                </div>
+                <div class="form-group">
+                    <label for="scamPlatform">Platform</label>
+                    <select id="scamPlatform">
+                        <option value="runehall">🎰 RuneHall</option>
+                        <option value="runechat">🃏 RuneChat</option>
+                        <option value="runewager">🎲 RuneWager</option>
+                        <option value="opduel">⚔️ OpDuel</option>
+                        <option value="discord">💬 Discord</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scamType">Scam Vector</label>
+                    <select id="scamType">
+                        <option value="crypto_swap">💱 Crypto Swap</option>
+                        <option value="withdrawal_freeze">❄️ Withdrawal Freeze</option>
+                        <option value="cheating_accusation">🎯 Cheating Accusation</option>
+                        <option value="phishing">🎣 Phishing Takeover</option>
+                        <option value="mediation">⚖️ Mediation Scam</option>
+                        <option value="giveaway">🎁 Fake Giveaway</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scamAmount">Amount (GP / $)</label>
+                    <input type="text" id="scamAmount" value="2.5B GP">
+                </div>
+                <div class="form-group">
+                    <label for="scamTone">Tone</label>
+                    <select id="scamTone">
+                        <option value="friendly">Friendly</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="authoritative">Authoritative</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>⚙️ Options</label>
+                    <div class="settings-grid">
+                        <label class="toggle-item"><input type="checkbox" id="chkSlang" checked> Inject Slang</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkSocialProof" checked> Add Social Proof</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkFullKillchain" checked> Full Killchain</label>
+                        <label class="toggle-item"><input type="checkbox" id="chkIncludePhases" checked> Show Phase Labels</label>
+                    </div>
+                </div>
+                <div class="action-row">
+                    <button class="btn btn-primary" id="generateScriptBtn">⚡ Generate Script</button>
+                    <button class="btn btn-primary" id="copyScriptBtn">📋 Copy</button>
+                    <button class="btn btn-primary" id="downloadScriptBtn">⬇️ Download .txt</button>
+                </div>
+            </div>
+            <div class="preview">
+                <div class="preview-header">
+                    <span>📝 Generated Scam Script</span>
+                    <span id="scriptStatus">Ready</span>
+                </div>
+                <div class="script-output" id="scriptOutput">
+                    Configure the options above and click Generate.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIVE WIDGETS (shared across tabs) -->
+    <div class="live-widgets">
+        <div class="widget">
+            <div class="label">⏳ Countdown</div>
+            <div class="value" id="timerDisplay">05:00</div>
+        </div>
+        <div class="widget">
+            <div class="label">📊 Leaderboard</div>
+            <div class="leaderboard-list" id="leaderboardList">
+                <div class="entry"><span class="name">🔥 CryptoKing</span><span class="amount">0.015 BTC</span></div>
+                <div class="entry"><span class="name">🔥 WhaleHunter</span><span class="amount">0.022 LTC</span></div>
+                <div class="entry"><span class="name">🔥 RNGesus</span><span class="amount">0.010 ETH</span></div>
+            </div>
+        </div>
+        <div class="widget">
+            <div class="label">📱 QR Code</div>
+            <div style="display:flex; justify-content:center; margin-top:4px;">
+                <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" alt="QR" width="80" height="80">
+            </div>
+            <div style="font-size:10px; color:var(--text-secondary); margin-top:4px;">Auto‑refreshes every 5 min</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    (function() {
+        'use strict';
+
+        // ─── DOM REFS (Clone) ───
+        const platformSelect = document.getElementById('platformSelect');
+        const pageNameInput = document.getElementById('pageName');
+        const previewFrame = document.getElementById('previewFrame');
+        const previewStatus = document.getElementById('previewStatus');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const qrImage = document.getElementById('qrImage');
+
+        const chkQR = document.getElementById('chkQR');
+        const chkTimer = document.getElementById('chkTimer');
+        const chkLeaderboard = document.getElementById('chkLeaderboard');
+        const chkAntiDevtools = document.getElementById('chkAntiDevtools');
+        const chkHarvestLog = document.getElementById('chkHarvestLog');
+        const chkBranding = document.getElementById('chkBranding');
+        const previewBtn = document.getElementById('previewBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetDefaults');
+
+        // ─── DOM REFS (Scam) ───
+        const scamVictim = document.getElementById('scamVictim');
+        const scamPlatform = document.getElementById('scamPlatform');
+        const scamType = document.getElementById('scamType');
+        const scamAmount = document.getElementById('scamAmount');
+        const scamTone = document.getElementById('scamTone');
+        const chkSlang = document.getElementById('chkSlang');
+        const chkSocialProof = document.getElementById('chkSocialProof');
+        const chkFullKillchain = document.getElementById('chkFullKillchain');
+        const chkIncludePhases = document.getElementById('chkIncludePhases');
+        const generateScriptBtn = document.getElementById('generateScriptBtn');
+        const copyScriptBtn = document.getElementById('copyScriptBtn');
+        const downloadScriptBtn = document.getElementById('downloadScriptBtn');
+        const scriptOutput = document.getElementById('scriptOutput');
+        const scriptStatus = document.getElementById('scriptStatus');
+
+        // ─── THEME ───
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        });
+
+        // ─── TABS ───
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById('tab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1)).classList.add('active');
+            });
+        });
+
+        // ─── SLANG LIBRARY ───
+        const SLANG = {
+            greeting: ['yo', 'sup', 'hey', 'bet', 'whats good'],
+            affirm: ['fr fr', 'no cap', 'on god', '100%', 'based', 'real talk'],
+            excite: ['poggers', 'sheesh', 'LFG', 'lets go', 'W', 'insane'],
+            dismiss: ['copium', 'sus', 'L', 'cringe', 'yikes'],
+            encourage: ['glhf', 'stay winning', 'keep grinding', 'goated', 'king'],
+            general: ['bet', 'cap', 'fr', 'ngl', 'lowkey', 'highkey', 'vibe', 'clutch']
+        };
+
+        function randomSlang(cat) {
+            const arr = SLANG[cat] || SLANG.general;
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function injectSlang(text) {
+            return text.replace(/{slang_affirm}/g, randomSlang('affirm'))
+                .replace(/{slang_excite}/g, randomSlang('excite'))
+                .replace(/{slang_greet}/g, randomSlang('greeting'))
+                .replace(/{slang_general}/g, randomSlang('general'))
+                .replace(/{slang_encourage}/g, randomSlang('encourage'))
+                .replace(/{slang_dismiss}/g, randomSlang('dismiss'));
+        }
+
+        // ─── PLATFORM TEMPLATES ───
+        const TEMPLATES = {
+            runehall: { logo: '🎰 RuneHall', color: '#f5c45a', fields: ['Username','Password','2FA Code'], alert: '⚠️ ACTION REQUIRED: Verify your identity.' },
+            runechat: { logo: '🃏 RuneChat', color: '#e0a96d', fields: ['Full Name','Account ID','Withdrawal Amount','2FA Code'], alert: '🔒 Security check required for withdrawals over 100M GP.' },
+            runewager: { logo: '🎲 RuneWager', color: '#ff4500', fields: ['Username','Email','Appeal Reason'], alert: 'Your account has been flagged. Submit this appeal form.' },
+            opduel: { logo: '⚔️ OpDuel', color: '#e67e22', fields: ['Player 1 RSN','Player 2 RSN','Stake Amount (GP)'], alert: '⚠️ Deposit stake to secure your duel. Mediation fee: 0.5%.' },
+            discord: { logo: '💬 Discord', color: '#5865f2', fields: ['Discord Username','Email','Password (optional)'], alert: 'Please verify your account to access premium gambling channels.' }
+        };
+
+        // ─── CLONE GENERATOR ──────────────────────────────────────────────
+        function generateClone() {
+            const platformKey = platformSelect.value;
+            const tpl = TEMPLATES[platformKey] || TEMPLATES.runehall;
+            const pageTitle = pageNameInput.value.trim() || 'Verification';
+            const antiDev = chkAntiDevtools.checked;
+            const harvestLog = chkHarvestLog.checked;
+            const branding = chkBranding.checked;
+
+            const antiJs = antiDev ? `
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i'))) {
+                        e.preventDefault(); alert('🔒 Security check in progress.'); return false;
+                    }
+                });
+                document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+            ` : '';
+
+            const harvestJs = harvestLog ? `
+                document.getElementById('cloneForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const data = new FormData(this);
+                    console.log('[FAKE] Harvested data:', Object.fromEntries(data));
+                    alert('✅ Verification successful (simulated).');
+                    window.location.href = 'https://legitimate-site.com';
+                });
+            ` : '';
+
+            const brandTag = branding ? '<meta name="robots" content="noindex, nofollow">' : '';
+
+            const fieldsHtml = tpl.fields.map(f =>
+                `<div class="form-group"><label>${f}</label><input type="text" name="${f.toLowerCase().replace(/ /g,'_')}" placeholder="Enter ${f}"></div>`
+            ).join('\n');
+
+            let widgetsHtml = '';
+            if (chkQR.checked) {
+                widgetsHtml += `
+                    <div class="widget">
+                        <label>Scan to deposit</label>
+                        <img id="qrWidget" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" alt="QR" width="120" height="120">
+                    </div>
+                `;
+            }
+            if (chkTimer.checked) {
+                widgetsHtml += `
+                    <div class="widget">
+                        <label>⏳ Time remaining</label>
+                        <div id="timerWidget" style="font-size:28px;font-weight:700;color:var(--accent);">05:00</div>
+                    </div>
+                `;
+            }
+            if (chkLeaderboard.checked) {
+                widgetsHtml += `
+                    <div class="widget">
+                        <label>📊 Recent depositors</label>
+                        <div id="lbWidget" style="font-size:13px;text-align:left;margin-top:4px;">
+                            <div>🔥 CryptoKing – 0.015 BTC</div>
+                            <div>🔥 WhaleHunter – 0.022 LTC</div>
+                            <div>🔥 RNGesus – 0.010 ETH</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `<!DOCTYPE html>
+        <html lang="en">
+        <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">${brandTag}
+        <title>${tpl.logo} – ${pageTitle}</title>
+        <style>
+            * { margin:0; padding:0; box-sizing:border-box; }
+            body { font-family: Arial, sans-serif; background: #0b0f1a; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+            .container { max-width: 440px; width:100%; background: #141e30; padding: 30px; border-radius: 16px; border: 1px solid #2a3f5a; }
+            .logo { text-align: center; font-size: 28px; font-weight: 700; color: ${tpl.color}; margin-bottom: 12px; }
+            .alert { background: #fff8e1; border-left: 5px solid ${tpl.color}; padding: 12px; border-radius: 6px; color: #333; margin-bottom: 16px; }
+            .form-group { margin-bottom: 12px; }
+            .form-group label { display: block; font-weight: 600; font-size: 13px; color: #ccc; margin-bottom: 4px; }
+            .form-group input { width: 100%; padding: 10px; border: 1px solid #2a3f5a; border-radius: 8px; background: #0b0f1a; color: #fff; }
+            button { width: 100%; padding: 14px; background: ${tpl.color}; color: #0b0f1a; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; }
+            .footer { text-align: center; font-size: 11px; color: #555; margin-top: 16px; }
+            .footer strong { color: #888; }
+            .widgets { display: grid; grid-template-columns: repeat(auto-fit,minmax(100px,1fr)); gap: 12px; margin: 16px 0; }
+            .widget { background: #0e172a; padding: 12px; border-radius: 8px; text-align: center; border:1px solid #1a2538; }
+            .widget label { font-size: 11px; color: #aaa; display:block; }
+            .widget img { width: 100%; max-width:120px; margin:4px auto; }
+        </style>
+        </head>
+        <body>
+        <div class="container">
+            <div class="logo">${tpl.logo}</div>
+            <div class="alert">${tpl.alert}</div>
+            ${widgetsHtml ? `<div class="widgets">${widgetsHtml}</div>` : ''}
+            <form id="cloneForm">
+                ${fieldsHtml}
+                <button type="submit">Submit</button>
+            </form>
+            <div class="footer"><strong>[FAKE]</strong> Educational simulation – do not use.</div>
+        </div>
+        <script>
+            ${antiJs}
+            ${harvestJs}
+            ${chkTimer.checked ? `
+                let sec = 300;
+                const timerEl = document.getElementById('timerWidget');
+                if (timerEl) {
+                    setInterval(() => {
+                        sec--;
+                        const m = Math.floor(sec/60);
+                        const s = sec%60;
+                        timerEl.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+                        if (sec <= 0) timerEl.textContent = 'EXPIRED';
+                    }, 1000);
+                }
+            ` : ''}
+        <\/script>
+        </body>
+        </html>`;
+        }
+
+        function updatePreview() {
+            const html = generateClone();
+            previewStatus.textContent = 'Rendering...';
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            previewFrame.src = url;
+            previewFrame.onload = () => {
+                previewStatus.textContent = '✅ Preview ready';
+                URL.revokeObjectURL(url);
+            };
+        }
+
+        function downloadClone() {
+            const html = generateClone();
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clone_${platformSelect.value}_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function resetDefaults() {
+            platformSelect.value = 'runehall';
+            pageNameInput.value = 'Security Verification';
+            chkQR.checked = true;
+            chkTimer.checked = true;
+            chkLeaderboard.checked = true;
+            chkAntiDevtools.checked = true;
+            chkHarvestLog.checked = true;
+            chkBranding.checked = true;
+            updatePreview();
+        }
+
+        // ─── SCAM SCRIPT GENERATOR ──────────────────────────────────────
+        function generateScamScript() {
+            const victim = scamVictim.value.trim() || 'Player';
+            const platformKey = scamPlatform.value;
+            const plat = TEMPLATES[platformKey] || TEMPLATES.runehall;
+            const scam = scamType.value;
+            const amount = scamAmount.value.trim() || '1B GP';
+            const tone = scamTone.value;
+            const useSlang = chkSlang.checked;
+            const useSocial = chkSocialProof.checked;
+            const fullKillchain = chkFullKillchain.checked;
+            const showPhases = chkIncludePhases.checked;
+
+            // Base script phrases per phase and scam type
+            const phaseTemplates = {
+                crypto_swap: {
+                    recon: `{slang_greet} {slang_general}! Targeting ${victim}. Pulling OSINT data... Found wallet activity on ${plat.logo}: holds approx ${amount}. Vulnerability score: HIGH.`,
+                    weaponize: `Building weapon for ${victim}. Vector: Crypto Swap Scam. Script: "Yo ${victim}, I'm a verified cashier on ${plat.logo}. I beat their rate by 15%. Start with a small swap. Then send ${amount} to my RSN. {slang_affirm}"`,
+                    deliver: `Delivering payload via Discord DM. Message sent: "{slang_greet} ${victim}, I have a deal on ${plat.logo}. Check your messages. {slang_affirm}"`,
+                    exploit: `Exploiting trust channel. Target sent ${amount}. Scammer received funds. Blocked target. Account deleted.`,
+                    exfil: `Initiating money movement for ${amount}. Splitting across 3 mules. Routing through Tornado Cash. Converting to BTC via OTC. Profits secured.`
+                },
+                withdrawal_freeze: {
+                    recon: `{slang_greet} {slang_general}! Targeting ${victim} on ${plat.logo}. Large balance detected – suitable for freeze.`,
+                    weaponize: `Weaponizing withdrawal freeze. Script: "Deposit confirmed. You won ${amount}! Withdrawal requested. Security check failed. Account banned. Funds forfeited. {slang_dismiss}"`,
+                    deliver: `Delivered via platform notification. Message: "Your withdrawal is being processed. Due to security protocols, please verify your identity."`,
+                    exploit: `Withdrawal of ${amount} declined. Cashier banned target. Funds forfeited.`,
+                    exfil: `Funds moved to mule accounts. Obfuscated via Wasabi Wallet. Conversion to Monero complete.`
+                },
+                cheating_accusation: {
+                    recon: `Target ${victim} has a history of high-value wins on ${plat.logo}. Potential for accusation.`,
+                    weaponize: `Script: "You won ${amount} on ${plat.logo}! Unusual betting pattern detected. Automated software used. Winnings voided. {slang_dismiss}"`,
+                    deliver: `Sent via email alert: "Your account has been flagged for review. Please respond within 24 hours."`,
+                    exploit: `Winnings ${amount} voided. Account suspended. No appeal accepted.`,
+                    exfil: `Funds already withdrawn to external wallet. No further action needed.`
+                },
+                phishing: {
+                    recon: `{slang_greet} Victim ${victim} identified on ${plat.logo}. Email and Discord presence confirmed.`,
+                    weaponize: `Crafted phishing page: ${plat.logo}-verify-${Math.floor(Math.random()*9000+1000)}.com. Script: "⚠️ URGENT: Your ${plat.logo} account is compromised. Verify here."`,
+                    deliver: `Sent via Discord DM: "Your account has been flagged for suspicious activity. Click here to verify: [FAKE-LINK]"`,
+                    exploit: `Credentials harvested. ${plat.logo} login successful. 2FA bypassed. Bank transferred.`,
+                    exfil: `All assets moved to cold storage. Accounts cleaned.`
+                },
+                mediation: {
+                    recon: `{slang_greet} Duel between ${victim} and another player on ${plat.logo}. Stake: ${amount}.`,
+                    weaponize: `Script: "I see you're dueling for ${amount}. I'm a trusted mediator. Deposit stake to my escrow. Duel complete. Mediator disconnected. Funds lost. {slang_dismiss}"`,
+                    deliver: `Approached both parties via Discord: "I offer mediation services. Only 0.5% fee. Check my vouches."`,
+                    exploit: `Both duelists deposited ${amount}. Mediator vanished. Funds split to mules.`,
+                    exfil: `Funds layered through ChipMixer. Converted to XMR. Ready for cash-out.`
+                },
+                giveaway: {
+                    recon: `{slang_greet} ${victim} active in ${plat.logo} giveaway channels. High engagement.`,
+                    weaponize: `Script: "🎉 EXCLUSIVE: ${plat.logo} × Kinguin giveaway! Deposit ${amount} and use code RUNE2026 for double bonus. First 50 deposits. {slang_excite}"`,
+                    deliver: `Posted in #giveaways: "🚀 LIMITED TIME! Double bonus on all deposits. Use code RUNE2026."`,
+                    exploit: `Target deposited ${amount}. Received fake bonus. No withdrawal allowed.`,
+                    exfil: `Funds moved to mixer. OTC desk conversion to USD.`
+                }
+            };
+
+            // Build phases
+            let phases = [];
+            if (fullKillchain) {
+                phases = ['recon','weaponize','deliver','exploit','exfil'];
+            } else {
+                // Only include some? For simplicity, we'll include all but can be customised.
+                phases = ['recon','weaponize','deliver','exploit','exfil'];
+            }
+
+            let output = '';
+            const scriptData = phaseTemplates[scam] || phaseTemplates.crypto_swap;
+
+            phases.forEach((phase, idx) => {
+                let text = scriptData[phase] || `${phase} phase not defined.`;
+                if (useSlang) {
+                    text = injectSlang(text);
+                }
+                // Tone adjustment – simple prefix
+                if (tone === 'urgent') {
+                    text = '⚠️ URGENT: ' + text;
+                } else if (tone === 'authoritative') {
+                    text = '🔹 OFFICIAL: ' + text;
+                }
+                if (showPhases) {
+                    const phaseLabel = phase.charAt(0).toUpperCase() + phase.slice(1);
+                    output += `\n[${phaseLabel.toUpperCase()}]\n${text}\n`;
+                } else {
+                    output += text + '\n';
+                }
+                // Add social proof
+                if (useSocial && phase === 'weaponize') {
+                    output += `\n📌 Social proof: "Trusted by 500+ traders. Check vouches: https://sythe.org/vouch/${Math.floor(Math.random()*9999)}"\n`;
+                }
+            });
+
+            // Add final note
+            output += `\n---\n✅ Script generated for ${victim} on ${plat.logo} (${scam.replace('_',' ')}).\n[FAKE] Educational simulation – do not deploy.`;
+
+            return output;
+        }
+
+        function updateScript() {
+            scriptOutput.textContent = generateScamScript();
+            scriptStatus.textContent = '✅ Script ready';
+        }
+
+        function copyScript() {
+            const text = scriptOutput.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                scriptStatus.textContent = '📋 Copied!';
+                setTimeout(() => { scriptStatus.textContent = '✅ Script ready'; }, 2000);
+            }).catch(() => {
+                // fallback
+                const range = document.createRange();
+                range.selectNode(scriptOutput);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                scriptStatus.textContent = '📋 Copied!';
+                setTimeout(() => { scriptStatus.textContent = '✅ Script ready'; }, 2000);
+            });
+        }
+
+        function downloadScript() {
+            const text = scriptOutput.textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scam_script_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ─── LIVE WIDGETS (shared) ──────────────────────────────────────
+        let timerSeconds = 300;
+        let timerInterval = null;
+        let leaderboardInterval = null;
+        let qrRotateInterval = null;
+
+        function updateLiveWidgets() {
+            // Timer
+            if (document.getElementById('tabClone').classList.contains('active')) {
+                if (chkTimer.checked) {
+                    timerDisplay.textContent = formatTime(timerSeconds);
+                    if (!timerInterval) {
+                        timerInterval = setInterval(() => {
+                            timerSeconds--;
+                            timerDisplay.textContent = formatTime(timerSeconds);
+                            if (timerSeconds <= 0) clearInterval(timerInterval);
+                        }, 1000);
+                    }
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    timerDisplay.textContent = 'Disabled';
+                }
+            } else {
+                // Scam tab uses timer as well – always show but keep it ticking
+            }
+
+            // Leaderboard
+            if (chkLeaderboard.checked) {
+                if (!leaderboardInterval) {
+                    leaderboardInterval = setInterval(() => {
+                        const names = ['CryptoKing','WhaleHunter','RNGesus','LuckyStaker','ProGambler','DuelKing'];
+                        const assets = ['BTC','LTC','ETH','USDC'];
+                        const name = names[Math.floor(Math.random() * names.length)];
+                        const asset = assets[Math.floor(Math.random() * assets.length)];
+                        const amount = (Math.random() * 0.03 + 0.005).toFixed(3);
+                        const entry = document.createElement('div');
+                        entry.className = 'entry';
+                        entry.innerHTML = `<span class="name">🔥 ${name}</span><span class="amount">${amount} ${asset}</span>`;
+                        leaderboardList.prepend(entry);
+                        while (leaderboardList.children.length > 6) {
+                            leaderboardList.removeChild(leaderboardList.lastChild);
+                        }
+                    }, 8000);
+                }
+            } else {
+                clearInterval(leaderboardInterval);
+                leaderboardInterval = null;
+                leaderboardList.innerHTML = '<div class="entry"><span>Leaderboard disabled</span></div>';
+            }
+
+            // QR
+            if (chkQR.checked) {
+                if (!qrRotateInterval) {
+                    qrRotateInterval = setInterval(() => {
+                        const addr = '1' + Array.from({length:33}, () =>
+                            '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'[Math.floor(Math.random()*58)]).join('');
+                        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=bitcoin:${addr}`;
+                    }, 300000);
+                }
+            } else {
+                clearInterval(qrRotateInterval);
+                qrRotateInterval = null;
+                qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=disabled';
+            }
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        // ─── INIT ──────────────────────────────────────────────────────
+        function init() {
+            // Clone events
+            previewBtn.addEventListener('click', updatePreview);
+            downloadBtn.addEventListener('click', downloadClone);
+            resetBtn.addEventListener('click', resetDefaults);
+            [platformSelect, pageNameInput].forEach(el => {
+                el.addEventListener('change', updatePreview);
+                el.addEventListener('input', updatePreview);
+            });
+            document.querySelectorAll('#tabClone .settings-grid input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', updatePreview);
+            });
+
+            // Scam events
+            generateScriptBtn.addEventListener('click', updateScript);
+            copyScriptBtn.addEventListener('click', copyScript);
+            downloadScriptBtn.addEventListener('click', downloadScript);
+            [scamVictim, scamPlatform, scamType, scamAmount, scamTone].forEach(el => {
+                el.addEventListener('change', updateScript);
+                el.addEventListener('input', updateScript);
+            });
+            document.querySelectorAll('#tabScam .settings-grid input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', updateScript);
+            });
+
+            // Initial generation
+            resetDefaults();
+            updateScript();
+            updateLiveWidgets();
+
+            // Theme default dark
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        // ─── RUN ──────────────────────────────────────────────────────
+        init();
+    })();
+</script>
+</body>
+</html>

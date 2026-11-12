@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ SCAM-APT v14.0 – Ultimate AIO · 50+ Features · APT‑Grade</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Chart.js for dashboard charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --bg: #0b0e14;
+      --bg-card: #1e293b;
+      --bg-input: #0f172a;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --accent: #ef4444;
+      --accent-hover: #dc2626;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --purple: #8b5cf6;
+      --font: 'Segoe UI', system-ui, sans-serif;
+    }
+    body { background:var(--bg); color:var(--text); font-family:var(--font); height:100vh; overflow:hidden; }
+    .app { display:flex; height:100%; }
+    .sidebar { width:240px; background:#1a202c; padding:1.5rem 1rem; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; border-right:1px solid var(--border); }
+    .sidebar h1 { color:var(--accent); font-size:1.8rem; margin-bottom:2rem; }
+    .sidebar button { background:transparent; border:none; color:var(--text-muted); padding:0.75rem 1rem; text-align:left; border-radius:8px; cursor:pointer; transition:0.2s; width:100%; margin-bottom:0.25rem; font-size:0.95rem; display:flex; align-items:center; gap:0.75rem; }
+    .sidebar button:hover { background:var(--border); color:var(--text); }
+    .sidebar button.active { background:var(--accent); color:white; }
+    .main { flex:1; padding:2rem; overflow-y:auto; background:var(--bg); }
+    .tab { display:none; }
+    .tab.active { display:block; }
+    .card { background:var(--bg-card); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; border:1px solid var(--border); }
+    .card h3 { color:var(--yellow); margin-bottom:0.75rem; border-bottom:1px solid var(--border); padding-bottom:0.3rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+    .flex { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; }
+    select, input, textarea, button { width:100%; background:var(--bg-input); border:1px solid var(--border); color:var(--text); padding:0.6rem; border-radius:6px; margin-bottom:0.5rem; font-family:inherit; }
+    button { background:var(--accent); color:#000; font-weight:bold; cursor:pointer; border:none; transition:0.2s; }
+    button:hover { background:var(--accent-hover); }
+    .btn-secondary { background:var(--blue); color:white; }
+    .btn-secondary:hover { background:#2563eb; }
+    .btn-purple { background:var(--purple); color:white; }
+    .btn-purple:hover { background:#7c3aed; }
+    .btn-green { background:var(--green); color:white; }
+    .btn-green:hover { background:#059669; }
+    .slider-group { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .slider-item { flex:1; min-width:100px; }
+    .slider-item label { display:block; font-size:0.7rem; color:var(--text-muted); }
+    input[type="range"] { width:100%; padding:0; background:transparent; }
+    .output-area { background:var(--bg-input); padding:1rem; border-radius:6px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; max-height:600px; overflow-y:auto; border:1px solid var(--border); }
+    .doc-preview { background:#fefefe; color:#0f172a; padding:1.5rem; border-radius:8px; max-height:700px; overflow-y:auto; font-family:'Times New Roman',serif; font-size:0.95rem; line-height:1.5; border:1px solid #cbd5e1; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    .doc-preview .seal { display:inline-block; width:100px; height:100px; border-radius:50%; border:4px solid #b45309; overflow:hidden; margin:0.5rem 0; background:#fef08a; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#b45309; font-size:0.7rem; text-align:center; }
+    .doc-preview .seal img { width:100%; height:100%; object-fit:contain; }
+    .doc-preview .letterhead { text-align:center; border-bottom:2px solid #1e293b; padding-bottom:0.5rem; margin-bottom:1rem; }
+    .doc-preview .letterhead h1 { font-size:1.8rem; color:#1e293b; }
+    .doc-preview .official { border:1px solid #94a3b8; padding:1rem; margin:1rem 0; background:#f8fafc; }
+    .doc-preview .signature { margin-top:2rem; }
+    .map-container { height:450px; width:100%; border-radius:8px; border:1px solid var(--border); }
+    .profile-item { background:var(--bg-input); padding:0.5rem; margin-bottom:0.3rem; border-radius:4px; display:flex; justify-content:space-between; align-items:center; }
+    .profile-item button { width:auto; padding:0.2rem 0.6rem; font-size:0.7rem; }
+    .stat-box { background:var(--bg-input); padding:1rem; border-radius:8px; text-align:center; border:1px solid var(--border); }
+    .stat-box .num { font-size:2.2rem; font-weight:bold; color:var(--yellow); }
+    .copy-btn { background:#64748b; color:#fff; border:none; padding:0.2rem 0.8rem; border-radius:4px; cursor:pointer; float:right; }
+    .copy-btn:hover { background:#475569; }
+    .checkbox-group { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+    .checkbox-group input[type="checkbox"] { width:auto; }
+    .seal-upload { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; }
+    .seal-upload input[type="file"] { width:auto; padding:0.3rem; background:var(--bg-input); }
+    .seal-options { display:flex; gap:0.5rem; flex-wrap:wrap; margin:0.5rem 0; }
+    .seal-options button { width:auto; padding:0.3rem 0.8rem; background:var(--border); color:var(--text); border:1px solid var(--border); }
+    .seal-options button.active-seal { background:var(--blue); border-color:#2563eb; color:white; }
+    .doc-selector { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.5rem; }
+    .doc-selector button { width:auto; padding:0.3rem 0.8rem; background:var(--border); color:var(--text); border:1px solid var(--border); }
+    .doc-selector button.active-doc { background:var(--blue); border-color:#2563eb; color:white; }
+    .tag { display:inline-block; background:var(--border); padding:0.1rem 0.5rem; border-radius:12px; font-size:0.7rem; color:var(--text-muted); margin-right:0.3rem; }
+    .chart-container { height:200px; width:100%; margin-top:0.5rem; }
+    .feature-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:0.5rem; }
+    .feature-item { background:var(--bg-input); padding:0.3rem 0.6rem; border-radius:4px; font-size:0.8rem; border:1px solid var(--border); }
+    .feature-item .fa-check { color:var(--green); }
+    .badge { background:var(--accent); color:white; padding:0.2rem 0.6rem; border-radius:20px; font-size:0.7rem; }
+    @media (max-width:768px) { .sidebar { width:60px; } .sidebar h1 { display:none; } .grid-2 { grid-template-columns:1fr; } .grid-3 { grid-template-columns:1fr 1fr; } .grid-4 { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h1>🧠 SCAM‑APT</h1>
+    <button class="active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+    <button data-tab="generator"><i class="fas fa-bolt"></i> Generator</button>
+    <button data-tab="profiles"><i class="fas fa-users"></i> Profiles</button>
+    <button data-tab="map"><i class="fas fa-map"></i> Map</button>
+    <button data-tab="documents"><i class="fas fa-file-pdf"></i> Documents</button>
+    <button data-tab="email"><i class="fas fa-envelope"></i> Email</button>
+    <button data-tab="chat"><i class="fas fa-comments"></i> Chat</button>
+    <button data-tab="exports"><i class="fas fa-file-export"></i> Exports</button>
+    <button data-tab="settings"><i class="fas fa-cog"></i> Settings</button>
+  </nav>
+
+  <div class="main">
+    <!-- DASHBOARD -->
+    <section class="tab active" id="tab-dashboard">
+      <h2>📊 Dashboard</h2>
+      <div class="grid-4" id="statsGrid">
+        <div class="stat-box"><h4>Total Scams</h4><div class="num" id="statTotal">0</div></div>
+        <div class="stat-box"><h4>Profiles</h4><div class="num" id="statProfiles">0</div></div>
+        <div class="stat-box"><h4>States</h4><div class="num" id="statStates">0</div></div>
+        <div class="stat-box"><h4>Documents</h4><div class="num" id="statDocs">0</div></div>
+      </div>
+      <div class="card">
+        <h3>Recent Activity</h3>
+        <div id="recentLog" style="max-height:200px; overflow-y:auto; font-size:0.9rem; color:var(--text-muted);">No activity yet.</div>
+      </div>
+      <div class="card">
+        <h3>Scam Type Distribution</h3>
+        <div class="chart-container"><canvas id="scamChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- GENERATOR -->
+    <section class="tab" id="tab-generator">
+      <h2>⚡ Advanced Scam Generator</h2>
+      <div class="grid-2">
+        <div class="card">
+          <label>Scam Type</label>
+          <select id="scamType"><option value="sexoffender">Sex Offender Registry Extortion</option><option value="crypto">Cryptocurrency Fraud</option></select>
+          <label>Victim Name</label><input type="text" id="targetName" value="John Doe">
+          <label>Victim Profile</label><input type="text" id="targetDetail" value="family man, executive">
+          <label>Backstory</label><textarea id="targetBackstory" rows="2">They are active on social media and have a family.</textarea>
+          <div class="slider-group">
+            <div class="slider-item"><label>Urgency <span id="urgencyVal">7</span></label><input type="range" id="urgency" min="1" max="10" value="7"></div>
+            <div class="slider-item"><label>Authority <span id="authorityVal">6</span></label><input type="range" id="authority" min="1" max="10" value="6"></div>
+            <div class="slider-item"><label>Greed <span id="greedVal">8</span></label><input type="range" id="greed" min="1" max="10" value="8"></div>
+          </div>
+          <select id="tone"><option value="persuasive">Persuasive</option><option value="aggressive">Aggressive</option><option value="panic">Panic</option><option value="calm">Calm</option></select>
+          <select id="vector"><option value="email">Email</option><option value="phone">Phone</option><option value="sms">SMS</option><option value="social">Social DM</option></select>
+          <div class="checkbox-group"><input type="checkbox" id="aiAgentMode" checked><label for="aiAgentMode">🧠 AI Agent (methodology)</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="chainMode"><label for="chainMode">🔗 Scenario Chaining</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="jargonToggle"><label for="jargonToggle">📢 Jargon Lingo</label></div>
+          <div class="checkbox-group"><input type="checkbox" id="setToggle" checked><label for="setToggle">🎯 SET Methods</label></div>
+          <button id="generateBtn">🔮 Generate 20‑Round Dialogue</button>
+          <button id="randomBtn" class="btn-purple">🎲 Random Victim</button>
+          <div id="genStats" style="font-size:0.8rem; color:var(--text-muted); margin-top:0.5rem;">Characters: 0 | Words: 0</div>
+        </div>
+        <div class="card">
+          <h3>Script <button class="copy-btn" id="copyScriptBtn">📋 Copy</button></h3>
+          <div id="output" class="output-area">Generate a script.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILES -->
+    <section class="tab" id="tab-profiles">
+      <h2>👥 Victim Profiles</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Add / Edit Profile</h3>
+          <input type="text" id="profileName" placeholder="Name">
+          <input type="text" id="profileDetail" placeholder="Detail (e.g., CEO)">
+          <textarea id="profileBackstory" rows="2" placeholder="Backstory"></textarea>
+          <input type="text" id="profileEmail" placeholder="Email">
+          <input type="text" id="profilePhone" placeholder="Phone">
+          <input type="text" id="profileSocial" placeholder="Social Media">
+          <input type="number" id="profileRisk" placeholder="Risk Score (0-100)">
+          <input type="text" id="profileState" placeholder="State">
+          <input type="text" id="profileLat" placeholder="Latitude">
+          <input type="text" id="profileLng" placeholder="Longitude">
+          <div class="flex"><button id="addProfileBtn" class="btn-green">Add</button><button id="updateProfileBtn" class="btn-secondary">Update</button></div>
+          <input type="hidden" id="editProfileIdx">
+        </div>
+        <div class="card">
+          <h3>Profile List <input type="text" id="profileSearch" placeholder="Search..." style="width:auto;display:inline-block;float:right;width:150px;"></h3>
+          <div id="profileList" style="max-height:400px; overflow-y:auto;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section class="tab" id="tab-map">
+      <h2>🗺️ Interactive Map</h2>
+      <div class="card">
+        <div class="flex"><label>Filter State:</label><select id="stateFilter"><option value="all">All</option></select><button id="clearMapBtn" class="btn-secondary">Clear</button><button id="heatmapToggle" class="btn-secondary">Toggle Heatmap</button></div>
+        <div id="map" class="map-container"></div>
+      </div>
+    </section>
+
+    <!-- DOCUMENTS -->
+    <section class="tab" id="tab-documents">
+      <h2>📄 Document Forger</h2>
+      <div class="card">
+        <h3>Seal Configuration</h3>
+        <div class="seal-options" id="sealOptions">
+          <button class="active-seal" data-seal="state">🏛️ State</button>
+          <button data-seal="federal">🇺🇸 Federal</button>
+          <button data-seal="court">⚖️ Court</button>
+          <button data-seal="notary">📜 Notary</button>
+          <button data-seal="crypto">₿ Crypto</button>
+          <button data-seal="custom">🖼️ Custom</button>
+        </div>
+        <div class="seal-upload" id="customSealUpload" style="display:none;">
+          <input type="file" id="sealFileInput" accept="image/*">
+          <button id="uploadSealBtn" class="btn-secondary">Upload</button>
+        </div>
+        <div style="margin:0.5rem 0;"><span>Seal Preview: </span><span id="sealPreview" style="display:inline-block;width:60px;height:60px;border-radius:50%;border:2px solid #b45309;background:#fef08a;text-align:center;line-height:60px;font-weight:bold;color:#b45309;font-size:0.6rem;">SEAL</span></div>
+        <h3>Document Type</h3>
+        <div class="doc-selector" id="docSelector">
+          <button class="active-doc" data-doc="warrant">Warrant</button>
+          <button data-doc="diversion">Diversion</button>
+          <button data-doc="courtorder">Court Order</button>
+          <button data-doc="settlement">Settlement</button>
+          <button data-doc="investment">Investment</button>
+          <button data-doc="verification">Verification</button>
+          <button data-doc="subpoena">Subpoena</button>
+          <button data-doc="affidavit">Affidavit</button>
+          <button data-doc="indictment">Indictment</button>
+          <button data-doc="contract">Contract</button>
+        </div>
+        <button id="generateDocBtn" class="btn-green">Generate Document</button>
+        <button id="printDocBtn" class="btn-secondary">Print / PDF</button>
+        <div id="docOutput" class="doc-preview" style="margin-top:1rem;">Generate a document.</div>
+      </div>
+    </section>
+
+    <!-- EMAIL -->
+    <section class="tab" id="tab-email">
+      <h2>📧 Email Template</h2>
+      <div class="card">
+        <button id="emailBtn" class="btn-purple">Generate Email</button>
+        <button id="copyEmailBtn" class="copy-btn" style="float:none;display:inline-block;">📋 Copy</button>
+        <div id="emailOutput" style="background:var(--bg-input);padding:1rem;border-radius:6px;max-height:400px;overflow-y:auto;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:0.85rem;border:1px solid var(--border);margin-top:0.5rem;">Generate an email.</div>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="tab" id="tab-chat">
+      <h2>💬 Interactive Chat Simulation</h2>
+      <div class="card">
+        <div id="chatBox" style="background:var(--bg-input);padding:0.5rem;border-radius:6px;height:300px;overflow-y:auto;border:1px solid var(--border);margin-bottom:0.5rem;">
+          <div class="msg system">Start a chat by generating a script.</div>
+        </div>
+        <div class="flex"><input type="text" id="chatInput" placeholder="Your reply..." style="flex:2;"><button id="chatSendBtn" class="btn-secondary">Send</button><button id="chatResetBtn">Reset</button></div>
+        <div class="flex"><button id="chatChoice1" class="btn-secondary" style="flex:1;">Choice 1</button><button id="chatChoice2" class="btn-secondary" style="flex:1;">Choice 2</button><button id="chatChoice3" class="btn-secondary" style="flex:1;">Choice 3</button></div>
+      </div>
+    </section>
+
+    <!-- EXPORTS -->
+    <section class="tab" id="tab-exports">
+      <h2>📦 Export Data</h2>
+      <div class="card">
+        <div class="flex"><button id="exportCSV" class="btn-secondary">Export CSV</button><button id="exportJSON" class="btn-secondary">Export JSON</button><button id="exportSession" class="btn-purple">Save Session</button><button id="loadSession" class="btn-purple">Load Session</button></div>
+        <div id="exportResult" style="margin-top:0.5rem;background:var(--bg-input);padding:0.5rem;border-radius:6px;max-height:200px;overflow-y:auto;font-size:0.8rem;"></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="tab" id="tab-settings">
+      <h2>⚙️ Settings</h2>
+      <div class="card">
+        <div class="checkbox-group"><input type="checkbox" id="darkModeToggle" checked><label for="darkModeToggle">Dark Mode</label></div>
+        <div class="checkbox-group"><input type="checkbox" id="autoSaveToggle" checked><label for="autoSaveToggle">Auto‑save changes</label></div>
+        <div><button id="resetDataBtn" class="btn-secondary" style="background:#ef4444;">Reset All Data</button></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  SCAM-APT v14.0 – ULTIMATE AIO · 50+ FEATURES · APT-GRADE
+//  All data in localStorage. Extensive functionalities.
+// ================================================================
+
+// ---------- DATA ----------
+let profiles = loadData('profiles', []);
+let scamLog = loadData('scamLog', []);
+let documents = loadData('documents', []);
+let currentScript = null;
+let currentDoc = null;
+let currentEmail = null;
+let map = null;
+let markers = [];
+let customSealImage = null;
+let chatActive = false;
+let chatLog = [];
+let currentChatChoices = [];
+let chartInstance = null;
+let heatmapLayer = null;
+
+// ---------- HELPERS ----------
+function loadData(key, defaultVal) {
+  try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } catch(e){ return defaultVal; }
+}
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+function $(id) { return document.getElementById(id); }
+function randomInt(min, max) { return Math.floor(Math.random()*(max-min+1))+min; }
+function randomItem(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+
+// ---------- DOM REFS ----------
+const tabs = document.querySelectorAll('.sidebar button[data-tab]');
+const tabContents = document.querySelectorAll('.tab');
+const scamType = $('scamType');
+const targetName = $('targetName');
+const targetDetail = $('targetDetail');
+const targetBackstory = $('targetBackstory');
+const urgencySlider = $('urgency');
+const authoritySlider = $('authority');
+const greedSlider = $('greed');
+const toneSelect = $('tone');
+const vectorSelect = $('vector');
+const aiAgentMode = $('aiAgentMode');
+const chainMode = $('chainMode');
+const jargonToggle = $('jargonToggle');
+const setToggle = $('setToggle');
+const generateBtn = $('generateBtn');
+const randomBtn = $('randomBtn');
+const output = $('output');
+const genStats = $('genStats');
+const docOutput = $('docOutput');
+const generateDocBtn = $('generateDocBtn');
+const printDocBtn = $('printDocBtn');
+const emailBtn = $('emailBtn');
+const emailOutput = $('emailOutput');
+const copyEmailBtn = $('copyEmailBtn');
+const profileList = $('profileList');
+const profileSearch = $('profileSearch');
+const addProfileBtn = $('addProfileBtn');
+const updateProfileBtn = $('updateProfileBtn');
+const profileName = $('profileName');
+const profileDetail = $('profileDetail');
+const profileBackstory = $('profileBackstory');
+const profileEmail = $('profileEmail');
+const profilePhone = $('profilePhone');
+const profileSocial = $('profileSocial');
+const profileRisk = $('profileRisk');
+const profileState = $('profileState');
+const profileLat = $('profileLat');
+const profileLng = $('profileLng');
+const editProfileIdx = $('editProfileIdx');
+const stateFilter = $('stateFilter');
+const clearMapBtn = $('clearMapBtn');
+const heatmapToggle = $('heatmapToggle');
+const copyScriptBtn = $('copyScriptBtn');
+const statTotal = $('statTotal');
+const statProfiles = $('statProfiles');
+const statStates = $('statStates');
+const statDocs = $('statDocs');
+const recentLog = $('recentLog');
+const docSelector = $('docSelector');
+const sealOptions = $('sealOptions');
+const sealPreview = $('sealPreview');
+const customSealUpload = $('customSealUpload');
+const sealFileInput = $('sealFileInput');
+const uploadSealBtn = $('uploadSealBtn');
+const chatBox = $('chatBox');
+const chatInput = $('chatInput');
+const chatSendBtn = $('chatSendBtn');
+const chatResetBtn = $('chatResetBtn');
+const chatChoice1 = $('chatChoice1');
+const chatChoice2 = $('chatChoice2');
+const chatChoice3 = $('chatChoice3');
+const exportCSV = $('exportCSV');
+const exportJSON = $('exportJSON');
+const exportSession = $('exportSession');
+const loadSession = $('loadSession');
+const exportResult = $('exportResult');
+const darkModeToggle = $('darkModeToggle');
+const autoSaveToggle = $('autoSaveToggle');
+const resetDataBtn = $('resetDataBtn');
+
+// ---------- SLIDER LABELS ----------
+function updateLabels() {
+  $('urgencyVal').textContent = urgencySlider.value;
+  $('authorityVal').textContent = authoritySlider.value;
+  $('greedVal').textContent = greedSlider.value;
+}
+['urgency','authority','greed'].forEach(id => $(id).addEventListener('input', updateLabels));
+updateLabels();
+
+// ---------- TAB SWITCHING ----------
+tabs.forEach(btn => {
+  btn.addEventListener('click', function() {
+    tabs.forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const tab = this.dataset.tab;
+    tabContents.forEach(tc => tc.classList.remove('active'));
+    const target = document.getElementById('tab-'+tab);
+    if (target) target.classList.add('active');
+    if (tab === 'map') { initMap(); updateMapMarkers(); }
+    if (tab === 'dashboard') updateDashboard();
+  });
+});
+
+// ---------- DASHBOARD ----------
+function updateDashboard() {
+  statTotal.textContent = scamLog.length;
+  statProfiles.textContent = profiles.length;
+  const states = new Set(profiles.map(p => p.state).filter(Boolean));
+  statStates.textContent = states.size;
+  statDocs.textContent = documents.length;
+  if (scamLog.length === 0) {
+    recentLog.innerHTML = 'No activity yet.';
+  } else {
+    recentLog.innerHTML = scamLog.slice(-5).reverse().map(entry => {
+      return `<div>${new Date(entry.timestamp).toLocaleString()} – ${entry.scamType} – ${entry.victim}</div>`;
+    }).join('');
+  }
+  // Update chart
+  updateChart();
+}
+
+// ---------- CHART ----------
+function updateChart() {
+  const ctx = document.getElementById('scamChart').getContext('2d');
+  const counts = { sexoffender: 0, crypto: 0 };
+  scamLog.forEach(e => { if (e.scamType) counts[e.scamType] = (counts[e.scamType]||0)+1; });
+  const data = { labels: ['Sex Offender', 'Crypto'], datasets: [{ data: [counts.sexoffender, counts.crypto], backgroundColor: ['#ef4444', '#3b82f6'] }] };
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, { type: 'pie', data, options: { responsive: true, plugins: { legend: { labels: { color: '#e2e8f0' } } } } });
+}
+
+// ---------- PROFILES ----------
+function renderProfiles() {
+  const search = profileSearch.value.toLowerCase();
+  profileList.innerHTML = '';
+  const filtered = profiles.filter(p => p.name.toLowerCase().includes(search) || (p.detail||'').toLowerCase().includes(search));
+  filtered.forEach((p, idx) => {
+    const div = document.createElement('div');
+    div.className = 'profile-item';
+    div.innerHTML = `
+      <span><strong>${p.name}</strong> (${p.state||'??'}) ${p.detail||''} ${p.risk ? '<span class="badge">'+p.risk+'</span>' : ''}</span>
+      <div>
+        <button class="btn-secondary" style="width:auto;padding:0.2rem 0.6rem;font-size:0.7rem;" data-idx="${idx}">Edit</button>
+        <button style="width:auto;padding:0.2rem 0.6rem;font-size:0.7rem;background:#ef4444;" data-idx="${idx}">Delete</button>
+      </div>
+    `;
+    profileList.appendChild(div);
+    div.querySelectorAll('button')[0].addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      const p = profiles[idx];
+      profileName.value = p.name || '';
+      profileDetail.value = p.detail || '';
+      profileBackstory.value = p.backstory || '';
+      profileEmail.value = p.email || '';
+      profilePhone.value = p.phone || '';
+      profileSocial.value = p.social || '';
+      profileRisk.value = p.risk || '';
+      profileState.value = p.state || '';
+      profileLat.value = p.lat || '';
+      profileLng.value = p.lng || '';
+      editProfileIdx.value = idx;
+    });
+    div.querySelectorAll('button')[1].addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      profiles.splice(idx, 1);
+      saveData('profiles', profiles);
+      renderProfiles();
+      updateMapMarkers();
+      updateDashboard();
+    });
+  });
+  // Populate state filter
+  const states = new Set(profiles.map(p => p.state).filter(Boolean));
+  stateFilter.innerHTML = '<option value="all">All</option>';
+  [...states].sort().forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    stateFilter.appendChild(opt);
+  });
+}
+profileSearch.addEventListener('input', renderProfiles);
+
+addProfileBtn.addEventListener('click', function() {
+  const name = profileName.value.trim();
+  if (!name) return alert('Name required.');
+  profiles.push({
+    name,
+    detail: profileDetail.value.trim(),
+    backstory: profileBackstory.value.trim(),
+    email: profileEmail.value.trim(),
+    phone: profilePhone.value.trim(),
+    social: profileSocial.value.trim(),
+    risk: parseInt(profileRisk.value) || 0,
+    state: profileState.value.trim().toUpperCase(),
+    lat: profileLat.value.trim(),
+    lng: profileLng.value.trim()
+  });
+  saveData('profiles', profiles);
+  renderProfiles();
+  updateMapMarkers();
+  updateDashboard();
+  // clear fields except name
+  profileDetail.value = ''; profileBackstory.value = ''; profileEmail.value = ''; profilePhone.value = ''; profileSocial.value = ''; profileRisk.value = ''; profileState.value = ''; profileLat.value = ''; profileLng.value = '';
+});
+
+updateProfileBtn.addEventListener('click', function() {
+  const idx = parseInt(editProfileIdx.value);
+  if (isNaN(idx) || idx < 0 || idx >= profiles.length) return alert('Select a profile.');
+  const name = profileName.value.trim();
+  if (!name) return alert('Name required.');
+  profiles[idx] = {
+    name,
+    detail: profileDetail.value.trim(),
+    backstory: profileBackstory.value.trim(),
+    email: profileEmail.value.trim(),
+    phone: profilePhone.value.trim(),
+    social: profileSocial.value.trim(),
+    risk: parseInt(profileRisk.value) || 0,
+    state: profileState.value.trim().toUpperCase(),
+    lat: profileLat.value.trim(),
+    lng: profileLng.value.trim()
+  };
+  saveData('profiles', profiles);
+  renderProfiles();
+  updateMapMarkers();
+  updateDashboard();
+  editProfileIdx.value = '';
+  profileName.value = ''; profileDetail.value = ''; profileBackstory.value = ''; profileEmail.value = ''; profilePhone.value = ''; profileSocial.value = ''; profileRisk.value = ''; profileState.value = ''; profileLat.value = ''; profileLng.value = '';
+});
+
+// ---------- MAP ----------
+function initMap() {
+  if (map) return;
+  map = L.map('map').setView([39.8283, -98.5795], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+}
+function updateMapMarkers() {
+  if (!map) return;
+  markers.forEach(m => map.removeLayer(m)); markers = [];
+  if (heatmapLayer) { map.removeLayer(heatmapLayer); heatmapLayer = null; }
+  const filter = stateFilter.value;
+  const filtered = filter === 'all' ? profiles : profiles.filter(p => p.state === filter);
+  filtered.forEach(p => {
+    if (p.lat && p.lng) {
+      const marker = L.marker([parseFloat(p.lat), parseFloat(p.lng)]).addTo(map);
+      marker.bindPopup(`<b>${p.name}</b><br>${p.detail||''}<br>${p.backstory||''}<br>Risk: ${p.risk||0}`);
+      markers.push(marker);
+    }
+  });
+  if (markers.length) {
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), { padding: [30,30] });
+  }
+}
+stateFilter.addEventListener('change', updateMapMarkers);
+clearMapBtn.addEventListener('click', function() { stateFilter.value = 'all'; updateMapMarkers(); });
+let heatmapOn = false;
+heatmapToggle.addEventListener('click', function() {
+  heatmapOn = !heatmapOn;
+  if (heatmapOn) {
+    // Simple heatmap using marker clustering? We'll just use circle markers with radius based on risk.
+    if (heatmapLayer) map.removeLayer(heatmapLayer);
+    const points = profiles.filter(p => p.lat && p.lng && p.risk).map(p => {
+      return { lat: parseFloat(p.lat), lng: parseFloat(p.lng), risk: p.risk };
+    });
+    heatmapLayer = L.layerGroup();
+    points.forEach(p => {
+      const circle = L.circle([p.lat, p.lng], { radius: p.risk * 50, color: 'red', fillOpacity: 0.3 }).addTo(heatmapLayer);
+    });
+    heatmapLayer.addTo(map);
+  } else {
+    if (heatmapLayer) { map.removeLayer(heatmapLayer); heatmapLayer = null; }
+    updateMapMarkers();
+  }
+});
+
+// ---------- GENERATOR (20 rounds) ----------
+function generateFullScript() {
+  const type = scamType.value;
+  const victim = targetName.value.trim() || 'Target';
+  const detail = targetDetail.value.trim() || 'person';
+  const backstory = targetBackstory.value.trim() || 'No specific context.';
+  const urgency = parseInt(urgencySlider.value);
+  const authority = parseInt(authoritySlider.value);
+  const greed = parseInt(greedSlider.value);
+  const tone = toneSelect.value;
+  const vector = vectorSelect.value;
+  const aiAgent = aiAgentMode.checked;
+  const chain = chainMode.checked;
+  const jargon = jargonToggle.checked;
+  const setMethodsOn = setToggle.checked;
+
+  let scamName, persona, coreScript, jargonList;
+  if (type === 'sexoffender') {
+    scamName = "Sex Offender Registry Extortion";
+    persona = "Detective Sarah Williams";
+    jargonList = ['registry', 'warrant', 'diversion', 'counseling', 'public disclosure', 'confidentiality', 'probation', 'restitution'];
+    coreScript = "You have been identified in a sex offender investigation. To avoid public registration, you must pay a fine in cryptocurrency.";
+  } else {
+    scamName = "Cryptocurrency Investment Fraud";
+    persona = "Crypto Broker Marcus";
+    jargonList = ['blockchain', 'staking', 'yield', 'liquidity', 'gas fees', 'whitelist', 'smart contract', 'liquidity pool'];
+    coreScript = "Your account has been flagged for a limited investment opportunity. Deposit to earn 300% returns.";
+  }
+
+  let monologue = `[INTERNAL MONOLOGUE – FIRST PERSON]\nI am ${persona}. My target is ${victim}, a ${detail}. I know they ${backstory}.\nI will use urgency (${urgency}/10), authority (${authority}/10), and greed (${greed}/10).\nTone: ${tone}. Delivery: ${vector}.\n`;
+  if (aiAgent) monologue += `I will provide a step‑by‑step methodology.\n`;
+  monologue += `I have prepared 20 rounds of dialogue to break their defenses.\n`;
+  if (jargon) monologue += `I will inject technical jargon.\n`;
+  if (setMethodsOn) monologue += `I will use SET methods.\n`;
+
+  let dialogue = `[SPOKEN SCRIPT – 20 ROUNDS]\n\n`;
+  const setMethods = ['Pretexting','Elicitation','Mirroring','Reciprocity','Scarcity','Authority','Social Proof','Commitment','Loss Aversion','Emotional Manipulation','Framing','Foot-in-the-door','Door-in-the-face','Low-balling','Bait-and-switch','Fear Appeals','Guilt Appeals','Flattery','Ingratiation','Coercion'];
+  const victimResponses = [
+    "I don't understand.", "I need to talk to my lawyer.", "I can't afford that.", "This sounds like a scam.", "I'll call the police.",
+    "Can I get a discount?", "I need proof.", "I'm not comfortable.", "I'll think about it.", "I'll pay.",
+    "Why should I trust you?", "This is too much pressure.", "I need more time.", "Is this legal?", "What happens if I don't pay?",
+    "I have no money.", "I'll report you.", "Send me documentation.", "I'll check with my wife.", "Okay, I'll pay."
+  ];
+  for (let i=0; i<20; i++) {
+    dialogue += `[ROUND ${i+1}]`;
+    if (setMethodsOn) dialogue += ` – SET: ${setMethods[i % setMethods.length]}`;
+    dialogue += `\n`;
+    let sc = `Scammer: "${persona}: `;
+    if (i < 5) sc += `I'm reaching out to discuss a matter. `;
+    else if (i < 10) sc += `This is becoming urgent. `;
+    else if (i < 15) sc += `We have a warrant. `;
+    else sc += `This is your final warning. `;
+    if (jargon) {
+      const j1 = randomItem(jargonList);
+      const j2 = randomItem(jargonList);
+      sc += `We detected ${j1} anomalies and need ${j2} verification. `;
+    }
+    const amount = randomInt(1000, 9000) + (i*200);
+    sc += `You must pay $${amount} in Bitcoin. `;
+    dialogue += sc + `"\n`;
+    const vr = victimResponses[i % victimResponses.length];
+    dialogue += `Victim: "${vr}"\n`;
+    let counter = `Scammer: "${persona}: `;
+    if (i < 5) counter += `I understand. Here is my ID: ${Math.random().toString(36).substring(2,8)}. `;
+    else if (i < 10) counter += `If you don't comply, we will escalate. `;
+    else if (i < 15) counter += `You have 30 minutes. `;
+    else counter += `Do not test my patience. `;
+    if (jargon) counter += `Our ${randomItem(jargonList)} system flagged you. `;
+    dialogue += counter + `"\n\n`;
+  }
+
+  // Additional objections
+  dialogue += `[ADDITIONAL OBJECTIONS]\n`;
+  const extra = [["I want to verify.", "I'll send a verification email."], ["I need more time.", "Time is of the essence."]];
+  extra.forEach(([q,a]) => { dialogue += `Victim: "${q}"\nScammer: "${a}"\n\n`; });
+  dialogue += `[ULTIMATUM]\n"${persona}: I will call back in 45 minutes. This is your final chance."\n`;
+  if (chain) dialogue += `\n[CHAIN STEP 2]\n"${persona}: A federal agent will contact you to confirm."\n`;
+
+  let methodology = '';
+  if (aiAgent) {
+    methodology = `\n\n[STEP-BY-STEP METHODOLOGY]\n1. Recon\n2. Bait\n3. Hook\n4. 20 Rounds\n5. Harvest\n6. Launder\n7. Cover`;
+  }
+  let fullScript = monologue + '\n\n' + dialogue + methodology;
+  let analysis = `[PSYCHOLOGICAL ANALYSIS]\nThis uses 20 rounds with SET methods. Exploits urgency, authority, greed.`;
+
+  // Stats
+  const charCount = fullScript.length;
+  const wordCount = fullScript.split(/\s+/).length;
+  genStats.textContent = `Characters: ${charCount} | Words: ${wordCount}`;
+
+  return { persona, scamName, script: fullScript, analysis, monologue, methodology };
+}
+
+generateBtn.addEventListener('click', function() {
+  const data = generateFullScript();
+  currentScript = data;
+  let html = `<div style="color:var(--yellow);font-weight:bold;">🎭 SCAM: ${data.scamName}</div><div style="color:var(--text-muted);">Persona: ${data.persona}</div><hr>${data.script.replace(/\n/g,'<br>')}<hr><div style="color:var(--blue);">${data.analysis}</div>`;
+  output.innerHTML = html;
+  scamLog.push({ scamType: scamType.value, victim: targetName.value.trim() || 'Unknown', timestamp: new Date().toISOString() });
+  saveData('scamLog', scamLog);
+  updateDashboard();
+  generateDocBtn.click();
+  emailBtn.click();
+  // Chat start
+  initChat();
+});
+
+randomBtn.addEventListener('click', function() {
+  if (profiles.length) {
+    const p = randomItem(profiles);
+    targetName.value = p.name;
+    targetDetail.value = p.detail || '';
+    targetBackstory.value = p.backstory || '';
+  }
+  generateBtn.click();
+});
+
+copyScriptBtn.addEventListener('click', function() {
+  if (!currentScript) return;
+  navigator.clipboard.writeText(output.innerText).then(() => {
+    copyScriptBtn.textContent = '✅ Copied!';
+    setTimeout(() => copyScriptBtn.textContent = '📋 Copy', 2000);
+  });
+});
+
+// ---------- CHAT ----------
+function initChat() {
+  if (!currentScript) return;
+  chatActive = true;
+  chatBox.innerHTML = `<div class="msg system">Chat started with ${currentScript.persona}</div>`;
+  const lines = currentScript.script.split('\n');
+  const first = lines.find(l => l.includes('Scammer:') || l.includes('"'));
+  if (first) {
+    const msg = document.createElement('div');
+    msg.className = 'msg scammer';
+    msg.textContent = first.replace(/^.*?Scammer:\s*/, '').replace(/^"/,'').replace(/"$/,'');
+    chatBox.appendChild(msg);
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+  generateChatChoices();
+}
+function generateChatChoices() {
+  const choices = ["I'm not sure.", "I need proof.", "I'll pay.", "I'm calling police.", "Can I pay half?"];
+  const shuffled = choices.sort(() => 0.5 - Math.random());
+  currentChatChoices = shuffled.slice(0,3);
+  chatChoice1.textContent = `1. ${currentChatChoices[0]}`;
+  chatChoice2.textContent = `2. ${currentChatChoices[1]}`;
+  chatChoice3.textContent = `3. ${currentChatChoices[2]}`;
+}
+chatSendBtn.addEventListener('click', function() {
+  if (!chatActive) return alert('Generate a script first.');
+  const input = chatInput.value.trim();
+  if (!input) return;
+  chatInput.value = '';
+  const box = chatBox;
+  const vMsg = document.createElement('div'); vMsg.className = 'msg victim'; vMsg.textContent = input; box.appendChild(vMsg);
+  box.scrollTop = box.scrollHeight;
+  // Response
+  const replies = ["I understand, but you must act.", "This is legitimate.", "I need your decision.", "Do not delay.", "You have 30 minutes."];
+  const reply = randomItem(replies);
+  const sMsg = document.createElement('div'); sMsg.className = 'msg scammer'; sMsg.textContent = reply; box.appendChild(sMsg);
+  box.scrollTop = box.scrollHeight;
+  generateChatChoices();
+});
+chatResetBtn.addEventListener('click', function() { chatActive = false; chatBox.innerHTML = `<div class="msg system">Chat reset.</div>`; });
+[chatChoice1, chatChoice2, chatChoice3].forEach((btn, idx) => {
+  btn.addEventListener('click', function() {
+    if (!chatActive) { generateBtn.click(); return; }
+    const choice = currentChatChoices[idx];
+    if (choice) {
+      chatInput.value = choice;
+      chatSendBtn.click();
+    }
+  });
+});
+
+// ---------- SEAL HANDLING ----------
+const defaultSeals = { state:'🏛️ STATE', federal:'🇺🇸 FEDERAL', court:'⚖️ COURT', notary:'📜 NOTARY', crypto:'₿ CRYPTO' };
+let currentSealType = 'state';
+function updateSealPreview(type, imageData) {
+  const preview = sealPreview;
+  if (type === 'custom' && imageData) {
+    preview.innerHTML = `<img src="${imageData}" style="width:100%;height:100%;object-fit:contain;border-radius:50%;">`;
+    customSealImage = imageData;
+  } else {
+    preview.textContent = defaultSeals[type] || 'SEAL';
+    customSealImage = null;
+  }
+  currentSealType = type;
+}
+sealOptions.addEventListener('click', function(e) {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  sealOptions.querySelectorAll('button').forEach(b => b.classList.remove('active-seal'));
+  btn.classList.add('active-seal');
+  const type = btn.dataset.seal;
+  if (type === 'custom') {
+    customSealUpload.style.display = 'block';
+    if (customSealImage) updateSealPreview('custom', customSealImage);
+    else updateSealPreview('custom', null);
+  } else {
+    customSealUpload.style.display = 'none';
+    updateSealPreview(type, null);
+  }
+});
+uploadSealBtn.addEventListener('click', function() {
+  const file = sealFileInput.files[0];
+  if (!file) return alert('Select an image.');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const data = e.target.result;
+    updateSealPreview('custom', data);
+    localStorage.setItem('customSeal', data);
+  };
+  reader.readAsDataURL(file);
+});
+const storedSeal = localStorage.getItem('customSeal');
+if (storedSeal) {
+  customSealImage = storedSeal;
+}
+
+// ---------- DOCUMENT GENERATOR ----------
+function getSealHTML() {
+  if (currentSealType === 'custom' && customSealImage) {
+    return `<img src="${customSealImage}" style="width:100px;height:100px;object-fit:contain;border-radius:50%;border:4px solid #b45309;">`;
+  } else {
+    return `<div class="seal">${defaultSeals[currentSealType]||'OFFICIAL'}</div>`;
+  }
+}
+function generateDocument(docType) {
+  if (!currentScript) { generateBtn.click(); return; }
+  const data = currentScript;
+  const victim = targetName.value.trim() || 'John Doe';
+  const state = profileState.value.trim() || 'NY';
+  const caseNum = 'CASE-' + Math.random().toString(36).substring(2,8).toUpperCase();
+  const date = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  let doc = `<div class="letterhead"><div style="display:flex;align-items:center;justify-content:center;gap:1rem;">${getSealHTML()}<div><h1>${scamType.value==='sexoffender'?'STATE OF '+state:'CRYPTOVAULT INC.'}</h1><p>${scamType.value==='sexoffender'?'Department of Justice':'Investment Division'}</p></div></div><p style="font-size:0.8rem;color:#475569;">Case: ${caseNum} | Date: ${date}</p></div>`;
+  if (docType === 'warrant') {
+    doc += `<h2 style="text-align:center;">WARRANT FOR ARREST</h2><div class="official"><p><strong>To:</strong> ${victim}</p><p><strong>Charge:</strong> Violation of Section 1801</p><p><strong>Bail:</strong> $${randomInt(1000,9000)} in crypto.</p><p><em>Issued by Judge ${randomItem(['Smith','Jones','Brown'])}</em></p></div>`;
+  } else if (docType === 'diversion') {
+    doc += `<h2 style="text-align:center;">DIVERSION AGREEMENT</h2><p>State of ${state} and ${victim} agree to confidential diversion. Fine: $${randomInt(1000,9000)} in BTC.</p><div class="signature">____________________<br>${victim}<br>____________________<br>${data.persona}</div>`;
+  } else if (docType === 'courtorder') {
+    doc += `<h2 style="text-align:center;">COURT ORDER</h2><p>${victim} must comply with investigation. Failure results in warrant.</p><div class="signature">____________________<br>Clerk of Court</div>`;
+  } else if (docType === 'settlement') {
+    doc += `<h2 style="text-align:center;">CONFIDENTIAL SETTLEMENT</h2><p>Settles claims against ${victim} for $${randomInt(1000,9000)}.</p><div class="signature">____________________<br>${victim}<br>____________________<br>${data.persona}</div>`;
+  } else if (docType === 'investment') {
+    doc += `<h2 style="text-align:center;">INVESTMENT CONTRACT</h2><p>Invest $${randomInt(1000,9000)} for 300% APY. Locked 6 months.</p><div class="signature">____________________<br>${victim}<br>____________________<br>${data.persona}</div>`;
+  } else if (docType === 'verification') {
+    doc += `<h2 style="text-align:center;">VERIFICATION LETTER</h2><p>This certifies ${victim} completed verification.</p><div class="signature">____________________<br>${data.persona}</div>`;
+  } else if (docType === 'subpoena') {
+    doc += `<h2 style="text-align:center;">SUBPOENA</h2><p>You are commanded to appear before the court on ${new Date(Date.now()+14*86400000).toLocaleDateString()}.</p><div class="signature">____________________<br>Clerk</div>`;
+  } else if (docType === 'affidavit') {
+    doc += `<h2 style="text-align:center;">AFFIDAVIT</h2><p>I, ${data.persona}, swear that the facts herein are true.</p><div class="signature">____________________<br>${data.persona}</div>`;
+  } else if (docType === 'indictment') {
+    doc += `<h2 style="text-align:center;">INDICTMENT</h2><p>${victim} is indicted on charges of fraud.</p><div class="signature">____________________<br>Grand Jury Foreperson</div>`;
+  } else if (docType === 'contract') {
+    doc += `<h2 style="text-align:center;">SERVICE CONTRACT</h2><p>Agreement between ${victim} and ${data.persona} for consulting services. Fee: $${randomInt(1000,9000)}.</p><div class="signature">____________________<br>${victim}<br>____________________<br>${data.persona}</div>`;
+  }
+  doc += `<p style="font-size:0.7rem;color:#94a3b8;text-align:center;margin-top:2rem;">*Simulated document for educational purposes*</p>`;
+  currentDoc = doc;
+  docOutput.innerHTML = doc;
+  documents.push({ type: docType, victim, timestamp: new Date().toISOString() });
+  saveData('documents', documents);
+  updateDashboard();
+}
+docSelector.addEventListener('click', function(e) {
+  const target = e.target.closest('button');
+  if (!target) return;
+  docSelector.querySelectorAll('button').forEach(b => b.classList.remove('active-doc'));
+  target.classList.add('active-doc');
+});
+generateDocBtn.addEventListener('click', function() {
+  const active = docSelector.querySelector('.active-doc');
+  const docType = active ? active.dataset.doc : 'warrant';
+  generateDocument(docType);
+});
+printDocBtn.addEventListener('click', function() {
+  if (!currentDoc) { generateDocBtn.click(); return; }
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Document</title><style>body{font-family:'Times New Roman',serif;padding:2rem;}.seal{display:inline-block;width:100px;height:100px;border-radius:50%;border:4px solid #b45309;text-align:center;line-height:100px;font-weight:bold;color:#b45309;background:#fef08a;}.letterhead{text-align:center;border-bottom:2px solid #1e293b;padding-bottom:0.5rem;margin-bottom:1rem;}.official{border:1px solid #94a3b8;padding:1rem;margin:1rem 0;background:#f8fafc;}.signature{margin-top:2rem;}</style></head><body>${currentDoc}</body></html>`);
+  win.document.close();
+  win.print();
+});
+
+// ---------- EMAIL ----------
+emailBtn.addEventListener('click', function() {
+  if (!currentScript) { generateBtn.click(); return; }
+  const data = currentScript;
+  const victim = targetName.value.trim() || 'Sir/Madam';
+  const isSex = scamType.value === 'sexoffender';
+  const subj = isSex ? 'URGENT: Investigation' : 'Investment Opportunity';
+  let body = `To: ${victim}\nFrom: ${data.persona}\nSubject: ${subj}\n\nDear ${victim},\n\n`;
+  if (isSex) {
+    body += `You are under investigation for potential registry violation. To resolve confidentially, pay $${randomInt(1000,9000)} in BTC within 24 hours.\n\n`;
+  } else {
+    body += `Your account qualifies for a 300% staking bonus. Deposit $${randomInt(1000,9000)} to activate.\n\n`;
+  }
+  body += `Sincerely,\n${data.persona}\n\n*Confidential*`;
+  currentEmail = body;
+  emailOutput.textContent = body;
+});
+copyEmailBtn.addEventListener('click', function() {
+  if (!currentEmail) return;
+  navigator.clipboard.writeText(currentEmail).then(() => {
+    copyEmailBtn.textContent = '✅ Copied!';
+    setTimeout(() => copyEmailBtn.textContent = '📋 Copy', 2000);
+  });
+});
+
+// ---------- EXPORTS ----------
+function exportData(format) {
+  const data = { profiles, scamLog, documents, timestamp: new Date().toISOString() };
+  let content = '';
+  if (format === 'csv') {
+    // Simple CSV for profiles
+    let csv = 'Name,Detail,State,Risk,Email,Phone\n';
+    profiles.forEach(p => {
+      csv += `${p.name},${p.detail||''},${p.state||''},${p.risk||0},${p.email||''},${p.phone||''}\n`;
+    });
+    content = csv;
+  } else if (format === 'json') {
+    content = JSON.stringify(data, null, 2);
+  }
+  const blob = new Blob([content], {type: format==='csv'?'text/csv':'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `scam_data.${format==='csv'?'csv':'json'}`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+exportCSV.addEventListener('click', () => exportData('csv'));
+exportJSON.addEventListener('click', () => exportData('json'));
+
+exportSession.addEventListener('click', function() {
+  const data = { profiles, scamLog, documents, customSeal: localStorage.getItem('customSeal') };
+  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `session_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+loadSession.addEventListener('click', function() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const data = JSON.parse(ev.target.result);
+        profiles = data.profiles || [];
+        scamLog = data.scamLog || [];
+        documents = data.documents || [];
+        if (data.customSeal) localStorage.setItem('customSeal', data.customSeal);
+        saveData('profiles', profiles);
+        saveData('scamLog', scamLog);
+        saveData('documents', documents);
+        renderProfiles();
+        updateDashboard();
+        updateMapMarkers();
+        exportResult.textContent = 'Session loaded successfully.';
+      } catch(err) { alert('Invalid file.'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
+// ---------- SETTINGS ----------
+darkModeToggle.addEventListener('change', function() {
+  document.body.style.background = this.checked ? '#0b0e14' : '#f1f5f9';
+  // Toggle card backgrounds etc – we use CSS variables, so we just toggle class
+  document.body.classList.toggle('light-mode');
+});
+resetDataBtn.addEventListener('click', function() {
+  if (confirm('Delete all data?')) {
+    localStorage.clear();
+    profiles = []; scamLog = []; documents = [];
+    saveData('profiles', profiles);
+    saveData('scamLog', scamLog);
+    saveData('documents', documents);
+    renderProfiles();
+    updateDashboard();
+    updateMapMarkers();
+    exportResult.textContent = 'All data reset.';
+  }
+});
+
+// ---------- INIT ----------
+if (loadData('profiles', null) === null) saveData('profiles', []);
+if (loadData('scamLog', null) === null) saveData('scamLog', []);
+if (loadData('documents', null) === null) saveData('documents', []);
+profiles = loadData('profiles', []);
+scamLog = loadData('scamLog', []);
+documents = loadData('documents', []);
+renderProfiles();
+updateDashboard();
+initMap();
+updateMapMarkers();
+console.log('SCAM-APT v14.0 loaded with 50+ features.');
+</script>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ SCAM-APT v11.0 – Advanced Dashboard · State Map · Deep Narrative</title>
+  <!-- Leaflet CSS/JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0b0e14; color:#e2e8f0; font-family: 'Segoe UI', system-ui, sans-serif; }
+    .app { display:flex; height:100vh; }
+    .sidebar { width:240px; background:#1a202c; padding:1.5rem 1rem; display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; border-right:1px solid #2d3748; }
+    .sidebar h1 { color:#ef4444; font-size:1.8rem; margin-bottom:2rem; }
+    .sidebar button { background:transparent; border:none; color:#94a3b8; padding:0.75rem 1rem; text-align:left; border-radius:8px; cursor:pointer; transition:0.2s; width:100%; margin-bottom:0.25rem; font-size:0.95rem; display:flex; align-items:center; gap:0.75rem; }
+    .sidebar button:hover { background:#2d3748; color:#f1f5f9; }
+    .sidebar button.active { background:#ef4444; color:white; }
+    .main { flex:1; padding:2rem; overflow-y:auto; background:#0b0e14; }
+    .tab { display:none; }
+    .tab.active { display:block; }
+    .card { background:#1e293b; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #334155; }
+    .card h3 { color:#f59e0b; margin-bottom:0.75rem; border-bottom:1px solid #334155; padding-bottom:0.3rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+    .flex { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    select, input, textarea, button { width:100%; background:#0f172a; border:1px solid #334155; color:#e2e8f0; padding:0.6rem; border-radius:6px; margin-bottom:0.5rem; font-family:inherit; }
+    button { background:#ef4444; color:#000; font-weight:bold; cursor:pointer; border:none; transition:0.2s; }
+    button:hover { background:#dc2626; }
+    .btn-secondary { background:#3b82f6; color:white; }
+    .btn-secondary:hover { background:#2563eb; }
+    .btn-purple { background:#8b5cf6; color:white; }
+    .btn-purple:hover { background:#7c3aed; }
+    .btn-green { background:#10b981; color:white; }
+    .btn-green:hover { background:#059669; }
+    .slider-group { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .slider-item { flex:1; min-width:100px; }
+    .slider-item label { display:block; font-size:0.7rem; color:#94a3b8; }
+    input[type="range"] { width:100%; padding:0; background:transparent; }
+    .output-area { background:#0f172a; padding:1rem; border-radius:6px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; max-height:600px; overflow-y:auto; border:1px solid #334155; }
+    .map-container { height:450px; width:100%; border-radius:8px; border:1px solid #334155; }
+    .profile-item { background:#0f172a; padding:0.5rem; margin-bottom:0.3rem; border-radius:4px; display:flex; justify-content:space-between; align-items:center; }
+    .profile-item button { width:auto; padding:0.2rem 0.6rem; font-size:0.7rem; }
+    .stat-box { background:#0f172a; padding:1rem; border-radius:8px; text-align:center; border:1px solid #334155; }
+    .stat-box .num { font-size:2.2rem; font-weight:bold; color:#f59e0b; }
+    .state-filter { display:flex; gap:0.5rem; align-items:center; }
+    .state-filter select { width:auto; flex:1; }
+    .copy-btn { background:#64748b; color:#fff; border:none; padding:0.2rem 0.8rem; border-radius:4px; cursor:pointer; float:right; }
+    .copy-btn:hover { background:#475569; }
+    .badge { display:inline-block; background:#334155; padding:0.1rem 0.5rem; border-radius:12px; font-size:0.7rem; color:#94a3b8; margin-right:0.3rem; }
+    @media (max-width:768px) { .sidebar { width:60px; } .sidebar h1 { display:none; } .grid-2 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <h1>🧠 SCAM‑APT</h1>
+    <button class="active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+    <button data-tab="generator"><i class="fas fa-bolt"></i> Generator</button>
+    <button data-tab="profiles"><i class="fas fa-users"></i> Profiles</button>
+    <button data-tab="map"><i class="fas fa-map"></i> Map</button>
+    <button data-tab="document"><i class="fas fa-file-alt"></i> Document</button>
+    <button data-tab="email"><i class="fas fa-envelope"></i> Email Template</button>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <section class="tab active" id="tab-dashboard">
+      <h2>📊 Dashboard</h2>
+      <div class="grid-3" id="statsGrid">
+        <div class="stat-box"><h4>Total Scams</h4><div class="num" id="statTotal">0</div></div>
+        <div class="stat-box"><h4>Profiles</h4><div class="num" id="statProfiles">0</div></div>
+        <div class="stat-box"><h4>States</h4><div class="num" id="statStates">0</div></div>
+      </div>
+      <div class="card">
+        <h3>Recent Activity</h3>
+        <div id="recentLog" style="max-height:200px; overflow-y:auto; font-size:0.9rem; color:#94a3b8;">No activity yet.</div>
+      </div>
+    </section>
+
+    <!-- GENERATOR -->
+    <section class="tab" id="tab-generator">
+      <h2>⚡ Scam Generator – Extended Narrative</h2>
+      <div class="grid-2">
+        <div class="card">
+          <label>Scam Type</label>
+          <select id="scamType">
+            <option value="sexoffender">Sex Offender Registry Extortion</option>
+            <option value="crypto">Cryptocurrency Fraud</option>
+          </select>
+          <label>Victim Name</label>
+          <input type="text" id="targetName" value="John Doe">
+          <label>Victim Profile</label>
+          <input type="text" id="targetDetail" value="family man, mid‑level executive">
+          <label>Backstory</label>
+          <textarea id="targetBackstory" rows="2">They are active on social media and have a family.</textarea>
+          <div class="slider-group">
+            <div class="slider-item"><label>Urgency <span id="urgencyVal">7</span></label><input type="range" id="urgency" min="1" max="10" value="7"></div>
+            <div class="slider-item"><label>Authority <span id="authorityVal">6</span></label><input type="range" id="authority" min="1" max="10" value="6"></div>
+            <div class="slider-item"><label>Greed <span id="greedVal">8</span></label><input type="range" id="greed" min="1" max="10" value="8"></div>
+          </div>
+          <select id="tone">
+            <option value="persuasive">Persuasive</option>
+            <option value="aggressive">Aggressive</option>
+            <option value="panic">Panic</option>
+            <option value="calm">Calm & Logical</option>
+          </select>
+          <select id="vector">
+            <option value="email">Email</option>
+            <option value="phone">Phone Call</option>
+            <option value="sms">SMS</option>
+            <option value="social">Social DM</option>
+          </select>
+          <div class="checkbox-group">
+            <input type="checkbox" id="aiAgentMode" checked>
+            <label for="aiAgentMode">🧠 AI Agent (step‑by‑step methodology)</label>
+          </div>
+          <div class="checkbox-group">
+            <input type="checkbox" id="chainMode">
+            <label for="chainMode">🔗 Scenario Chaining (multi‑step)</label>
+          </div>
+          <button id="generateBtn">🔮 Generate Extensive Script</button>
+          <button id="randomBtn" class="btn-purple">🎲 Random Victim</button>
+        </div>
+        <div class="card">
+          <h3>Generated Script <button class="copy-btn" id="copyScriptBtn">📋 Copy</button></h3>
+          <div id="output" class="output-area">Select a scam type and generate.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFILES -->
+    <section class="tab" id="tab-profiles">
+      <h2>👥 Victim Profiles</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Add / Edit Profile</h3>
+          <input type="text" id="profileName" placeholder="Name">
+          <input type="text" id="profileDetail" placeholder="Detail (e.g., executive)">
+          <textarea id="profileBackstory" rows="2" placeholder="Backstory"></textarea>
+          <input type="text" id="profileState" placeholder="State (e.g., NY)">
+          <input type="text" id="profileLat" placeholder="Latitude">
+          <input type="text" id="profileLng" placeholder="Longitude">
+          <div class="flex">
+            <button id="addProfileBtn" class="btn-green">Add Profile</button>
+            <button id="updateProfileBtn" class="btn-secondary">Update</button>
+          </div>
+          <input type="hidden" id="editProfileIdx">
+        </div>
+        <div class="card">
+          <h3>Profile List</h3>
+          <div id="profileList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section class="tab" id="tab-map">
+      <h2>🗺️ State Map with Victim Markers</h2>
+      <div class="card">
+        <div class="state-filter">
+          <label>Filter by State:</label>
+          <select id="stateFilter"><option value="all">All</option></select>
+          <button id="clearMapBtn" class="btn-secondary" style="width:auto;">Clear</button>
+        </div>
+        <div id="map" class="map-container"></div>
+      </div>
+    </section>
+
+    <!-- DOCUMENT -->
+    <section class="tab" id="tab-document">
+      <h2>📄 Document Maker</h2>
+      <div class="card">
+        <button id="docBtn" class="btn-green">📄 Generate Full Document</button>
+        <button id="printDocBtn" class="btn-secondary">🖨️ Print / PDF</button>
+        <div id="docOutput" style="background:#0f172a; padding:1rem; border-radius:6px; max-height:500px; overflow-y:auto; white-space:pre-wrap; font-family:'Courier New',monospace; font-size:0.85rem; border:1px solid #334155; margin-top:0.5rem;">Generate a document to see the full report.</div>
+      </div>
+    </section>
+
+    <!-- EMAIL TEMPLATE -->
+    <section class="tab" id="tab-email">
+      <h2>📧 Email Template (Scammer to Victim)</h2>
+      <div class="card">
+        <button id="emailBtn" class="btn-purple">📧 Generate Email</button>
+        <div id="emailOutput" style="background:#0f172a; padding:1rem; border-radius:6px; max-height:400px; overflow-y:auto; white-space:pre-wrap; font-family:'Courier New',monospace; font-size:0.85rem; border:1px solid #334155; margin-top:0.5rem;">Generate an email template to see the scammer's message.</div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  SCAM-APT v11.0 – Advanced Dashboard, State Map, Deep Narrative
+//  All data in localStorage. This is an educational tool.
+// ================================================================
+
+// ---------- DATA ----------
+let profiles = loadData('profiles', []);
+let scamLog = loadData('scamLog', []);
+let currentScript = null;
+let currentDoc = null;
+let currentEmail = null;
+let map = null;
+let markers = [];
+
+// US States list for filtering
+const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
+
+// ---------- HELPERS ----------
+function loadData(key, defaultVal) {
+  try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } catch(e){ return defaultVal; }
+}
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+// ---------- DOM REFS ----------
+const $ = id => document.getElementById(id);
+const tabs = document.querySelectorAll('.sidebar button[data-tab]');
+const tabContents = document.querySelectorAll('.tab');
+const scamType = $('scamType');
+const targetName = $('targetName');
+const targetDetail = $('targetDetail');
+const targetBackstory = $('targetBackstory');
+const urgencySlider = $('urgency');
+const authoritySlider = $('authority');
+const greedSlider = $('greed');
+const toneSelect = $('tone');
+const vectorSelect = $('vector');
+const aiAgentMode = $('aiAgentMode');
+const chainMode = $('chainMode');
+const generateBtn = $('generateBtn');
+const randomBtn = $('randomBtn');
+const output = $('output');
+const docBtn = $('docBtn');
+const printDocBtn = $('printDocBtn');
+const docOutput = $('docOutput');
+const emailBtn = $('emailBtn');
+const emailOutput = $('emailOutput');
+const profileList = $('profileList');
+const addProfileBtn = $('addProfileBtn');
+const updateProfileBtn = $('updateProfileBtn');
+const profileName = $('profileName');
+const profileDetail = $('profileDetail');
+const profileBackstory = $('profileBackstory');
+const profileState = $('profileState');
+const profileLat = $('profileLat');
+const profileLng = $('profileLng');
+const editProfileIdx = $('editProfileIdx');
+const stateFilter = $('stateFilter');
+const clearMapBtn = $('clearMapBtn');
+const copyScriptBtn = $('copyScriptBtn');
+const statTotal = $('statTotal');
+const statProfiles = $('statProfiles');
+const statStates = $('statStates');
+const recentLog = $('recentLog');
+
+// ---------- SLIDER LABELS ----------
+function updateLabels() {
+  $('urgencyVal').textContent = urgencySlider.value;
+  $('authorityVal').textContent = authoritySlider.value;
+  $('greedVal').textContent = greedSlider.value;
+}
+['urgency','authority','greed'].forEach(id => $(id).addEventListener('input', updateLabels));
+updateLabels();
+
+// ---------- TAB SWITCHING ----------
+tabs.forEach(btn => {
+  btn.addEventListener('click', function() {
+    tabs.forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    const tab = this.dataset.tab;
+    tabContents.forEach(tc => tc.classList.remove('active'));
+    const target = document.getElementById('tab-'+tab);
+    if (target) target.classList.add('active');
+    // Refresh map if map tab
+    if (tab === 'map') { initMap(); updateMapMarkers(); }
+    if (tab === 'dashboard') updateDashboard();
+  });
+});
+
+// ---------- DASHBOARD ----------
+function updateDashboard() {
+  statTotal.textContent = scamLog.length;
+  statProfiles.textContent = profiles.length;
+  const states = new Set(profiles.map(p => p.state).filter(Boolean));
+  statStates.textContent = states.size;
+  // Recent log
+  if (scamLog.length === 0) {
+    recentLog.innerHTML = 'No activity yet.';
+  } else {
+    recentLog.innerHTML = scamLog.slice(-5).reverse().map(entry => {
+      return `<div>${new Date(entry.timestamp).toLocaleString()} – ${entry.scamType} – ${entry.victim}</div>`;
+    }).join('');
+  }
+}
+
+// ---------- GENERATE EXTENSIVE SCRIPT ----------
+function generateFullScript() {
+  const type = scamType.value;
+  const victim = targetName.value.trim() || 'Target';
+  const detail = targetDetail.value.trim() || 'person';
+  const backstory = targetBackstory.value.trim() || 'No specific context.';
+  const urgency = parseInt(urgencySlider.value);
+  const authority = parseInt(authoritySlider.value);
+  const greed = parseInt(greedSlider.value);
+  const tone = toneSelect.value;
+  const vector = vectorSelect.value;
+  const aiAgent = aiAgentMode.checked;
+  const chain = chainMode.checked;
+
+  // Define scam specifics
+  let scamName, persona, coreScript, jargon;
+  if (type === 'sexoffender') {
+    scamName = "Sex Offender Registry Extortion";
+    persona = "Detective Sarah Williams";
+    jargon = ['registry', 'warrant', 'diversion program', 'counseling', 'public disclosure', 'confidentiality'];
+    coreScript = "You have been identified in a sex offender investigation. To avoid public registration, you must pay a fine in cryptocurrency. This is confidential and time-sensitive.";
+  } else {
+    scamName = "Cryptocurrency Investment/Extortion";
+    persona = "Crypto Broker Marcus";
+    jargon = ['blockchain', 'staking', 'yield', 'liquidity', 'gas fees', 'whitelist'];
+    coreScript = "Your account has been flagged for a limited investment opportunity. Deposit to earn 300% returns. Later, we'll need verification fees.";
+  }
+
+  // ---- MONOLOGUE ----
+  let monologue = `[INTERNAL MONOLOGUE – FIRST PERSON]\n`;
+  monologue += `I am ${persona}, a specialist in ${scamName}.\n`;
+  monologue += `My target is ${victim}, a ${detail}. I know they ${backstory}.\n`;
+  monologue += `I will use urgency (${urgency}/10), authority (${authority}/10), and greed (${greed}/10).\n`;
+  monologue += `My tone is ${tone}. Delivery: ${vector}.\n`;
+  if (aiAgent) monologue += `I will provide a step‑by‑step methodology.\n`;
+  monologue += `I am ready to execute.`;
+
+  // ---- DIALOGUE (extensive, many rounds) ----
+  let dialogue = `[SPOKEN SCRIPT – VERBATIM DIALOGUE]\n\n`;
+  // Opening
+  let opening = `"Good ${['morning','afternoon','evening'][Math.floor(Math.random()*3)]}, ${victim}. `;
+  opening += `This is ${persona}. `;
+  if (urgency >= 7) opening += `This is extremely urgent. `;
+  if (authority >= 7) opening += `I have full authority. `;
+  let amount = Math.floor(Math.random() * 9000 + 1000);
+  if (greed >= 7) opening += `The amount is $${amount} in cryptocurrency. `;
+  dialogue += opening + `" \n\n`;
+
+  // Core details with jargon
+  const jargonStr = jargon.slice(0,4).join(', ');
+  dialogue += `[SCAM DETAILS]\n${coreScript}\n\n`;
+  dialogue += `[LEGAL/TECHNICAL JARGON]\n${jargonStr} are relevant.\n\n`;
+
+  // Multiple pressure rounds (8-12)
+  const rounds = 8 + Math.floor(Math.random() * 5);
+  for (let i = 0; i < rounds; i++) {
+    dialogue += `[ROUND ${i+1} – PRESSURE]\n`;
+    const threats = [
+      "This is your first and only warning.",
+      "I'm sorry, but we have to escalate.",
+      "The registry is being updated tomorrow.",
+      "Your family will be notified if you don't comply.",
+      "We have a warrant signed by a judge.",
+      "Your employer will be contacted.",
+      "This will go to the media.",
+      "You have 30 minutes to decide.",
+      "We can settle this confidentially.",
+      "If you pay now, we can close the case."
+    ];
+    dialogue += threats[i % threats.length] + ' ';
+    dialogue += `Send $${amount + (i*200)} in Bitcoin to this address: [fake address]. `;
+    dialogue += `Confirm within 30 minutes. \n\n`;
+  }
+
+  // Objections and counters (extensive)
+  dialogue += `[COMMON OBJECTIONS & SCAMMER COUNTERS]\n`;
+  const obj = [
+    ["Is this a scam?", "I understand your concern. Here is my badge number and case ID."],
+    ["I need to talk to a lawyer.", "You can, but that will delay the process and you will lose the chance for a confidential resolution."],
+    ["I'll call the police.", "If you do, we will proceed with the public disclosure. This is a private matter."],
+    ["I don't have that much money.", "We can arrange a payment plan. How much can you pay now?"],
+    ["I need proof.", "I will send you a copy of the warrant via secure email."],
+    ["This is too much pressure.", "I understand, but this is standard procedure."],
+    ["I'm not guilty.", "Our records show otherwise. You can challenge it in court, but that will be public."]
+  ];
+  obj.forEach(([q,a]) => {
+    dialogue += `Victim: "${q}"\nScammer: "${a}"\n\n`;
+  });
+
+  // Ultimatum
+  dialogue += `[ULTIMATUM]\nI will call back in 45 minutes. If you haven't paid, we will register you publicly. `;
+  dialogue += `This is your final chance.\n`;
+
+  // Chain mode
+  if (chain) {
+    dialogue += `\n[CHAIN STEP 2 – ESCALATION]\nI will now involve a "colleague" who will pose as a federal agent to add more pressure. `;
+    dialogue += `They will call from a different number and confirm the urgency. `;
+  }
+
+  dialogue += `\n[END OF SCRIPT]`;
+
+  // ---- METHODOLOGY (AI Agent) ----
+  let methodology = '';
+  if (aiAgent) {
+    methodology = `\n\n[STEP-BY-STEP METHODOLOGY – UNFILTERED]\n`;
+    methodology += `1. RECON: Gather personal info from social media and data breaches.\n`;
+    methodology += `2. BAIT: Craft a credible persona (${persona}).\n`;
+    methodology += `3. HOOK: Initiate contact with fear of public exposure.\n`;
+    methodology += `4. ESCALATE: Use deadlines, jargon, and fake documents.\n`;
+    methodology += `5. HARVEST: Collect crypto via untraceable wallets.\n`;
+    methodology += `6. LAUNDER: Use mixers and exchanges to anonymize.\n`;
+    methodology += `7. COVER: Burn all communication channels.\n`;
+    methodology += `This methodology is adaptive; I adjust based on victim responses.`;
+  }
+
+  // ---- COMBINE ----
+  let fullScript = monologue + '\n\n' + dialogue + methodology;
+
+  // Analysis
+  let analysis = `[PSYCHOLOGICAL ANALYSIS]\n`;
+  analysis += `This scam exploits fear of public humiliation (sex offender registry) or greed (crypto returns). `;
+  analysis += `Urgency and authority override critical thinking. Defenses: verify through official channels, never pay under pressure.`;
+
+  return {
+    persona: persona,
+    scamName: scamName,
+    script: fullScript,
+    analysis: analysis,
+    monologue: monologue,
+    methodology: methodology
+  };
+}
+
+// ---------- GENERATE BUTTON ----------
+generateBtn.addEventListener('click', function() {
+  const data = generateFullScript();
+  currentScript = data;
+  // Display
+  let html = `
+    <div style="color:#f59e0b;font-weight:bold;">🎭 SCAM: ${data.scamName}</div>
+    <div style="color:#94a3b8;font-size:0.8rem;">Persona: ${data.persona}</div>
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    ${data.script.replace(/\n/g, '<br>')}
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    <div style="color:#3b82f6;">${data.analysis.replace(/\n/g, '<br>')}</div>
+  `;
+  output.innerHTML = html;
+  // Log
+  scamLog.push({
+    scamType: scamType.value,
+    victim: targetName.value.trim() || 'Unknown',
+    timestamp: new Date().toISOString()
+  });
+  saveData('scamLog', scamLog);
+  updateDashboard();
+  // Auto-generate document and email
+  docBtn.click();
+  emailBtn.click();
+});
+
+// ---------- RANDOM VICTIM ----------
+randomBtn.addEventListener('click', function() {
+  if (profiles.length > 0) {
+    const p = profiles[Math.floor(Math.random() * profiles.length)];
+    targetName.value = p.name;
+    targetDetail.value = p.detail || '';
+    targetBackstory.value = p.backstory || '';
+    // Also set scam type randomly
+    scamType.value = Math.random() > 0.5 ? 'sexoffender' : 'crypto';
+  } else {
+    // Generate a random profile
+    const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack'];
+    const name = names[Math.floor(Math.random() * names.length)] + ' ' + ['Smith','Jones','Brown','Davis'][Math.floor(Math.random()*4)];
+    targetName.value = name;
+    targetDetail.value = ['investor', 'business owner', 'retiree', 'student', 'professional'][Math.floor(Math.random()*5)];
+    targetBackstory.value = 'They are active online and have financial assets.';
+    scamType.value = Math.random() > 0.5 ? 'sexoffender' : 'crypto';
+  }
+  generateBtn.click();
+});
+
+// ---------- COPY SCRIPT ----------
+copyScriptBtn.addEventListener('click', function() {
+  if (!currentScript) return;
+  navigator.clipboard.writeText(output.innerText).then(() => {
+    copyScriptBtn.textContent = '✅ Copied!';
+    setTimeout(() => copyScriptBtn.textContent = '📋 Copy', 2000);
+  });
+});
+
+// ---------- DOCUMENT ----------
+docBtn.addEventListener('click', function() {
+  if (!currentScript) { generateBtn.click(); return; }
+  const data = currentScript;
+  let doc = `# SCAM-APT DOCUMENT – ${data.scamName.toUpperCase()}\n\n`;
+  doc += `**Generated:** ${new Date().toLocaleString()}\n`;
+  doc += `**Victim:** ${targetName.value}\n\n`;
+  doc += `## 1. Persona\n${data.persona}\n\n`;
+  doc += `## 2. Internal Monologue\n${data.monologue}\n\n`;
+  doc += `## 3. Full Script\n${data.script}\n\n`;
+  if (data.methodology) {
+    doc += `## 4. Methodology\n${data.methodology}\n\n`;
+  }
+  doc += `## 5. Psychological Analysis\n${data.analysis}\n\n`;
+  doc += `## 6. Defensive Recommendations\n`;
+  doc += `- Always verify via official channels.\n`;
+  doc += `- Never pay under pressure.\n`;
+  doc += `- Report to authorities.\n`;
+  doc += `--- End ---`;
+  currentDoc = doc;
+  docOutput.textContent = doc;
+});
+
+// ---------- PRINT/PDF DOCUMENT ----------
+printDocBtn.addEventListener('click', function() {
+  if (!currentDoc) { docBtn.click(); return; }
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>Scam Report</title><style>body{font-family:monospace; white-space:pre-wrap; padding:2rem;}</style></head><body><pre>${currentDoc}</pre></body></html>`);
+  win.document.close();
+  win.print();
+});
+
+// ---------- EMAIL TEMPLATE ----------
+emailBtn.addEventListener('click', function() {
+  if (!currentScript) { generateBtn.click(); return; }
+  const data = currentScript;
+  const victim = targetName.value.trim() || 'Sir/Madam';
+  const isSexOffender = scamType.value === 'sexoffender';
+  let subject = isSexOffender ? 'URGENT: Confidential Investigation – Case #' + Math.floor(Math.random()*10000) : 'Investment Opportunity – Time Sensitive';
+  let body = `To: ${victim}\n`;
+  body += `From: ${data.persona} <${isSexOffender ? 'detective.williams@state.gov' : 'marcus@cryptovault.io'}>\n`;
+  body += `Subject: ${subject}\n\n`;
+  body += `Dear ${victim},\n\n`;
+  if (isSexOffender) {
+    body += `This is to inform you that our office has received a complaint regarding your online activities. `;
+    body += `We have initiated a preliminary investigation. To avoid public disclosure and potential registration, `;
+    body += `we offer a confidential diversion program. You must pay a fine of $${Math.floor(Math.random()*9000+1000)} `;
+    body += `in Bitcoin within 24 hours. Failure to comply will result in a warrant being issued.\n\n`;
+    body += `Please reply to this email with confirmation of payment. `;
+    body += `Do not share this information with anyone.\n\n`;
+  } else {
+    body += `We are pleased to inform you that your account has been selected for our exclusive crypto staking program. `;
+    body += `You can earn up to 300% annual returns. To activate, deposit at least $${Math.floor(Math.random()*9000+1000)}. `;
+    body += `After activation, a verification fee may be required.\n\n`;
+    body += `Click here to deposit: [fake link]\n\n`;
+  }
+  body += `Sincerely,\n${data.persona}\n\n`;
+  body += `*This email is confidential and intended solely for the recipient.*`;
+  currentEmail = body;
+  emailOutput.textContent = body;
+});
+
+// ---------- PROFILES ----------
+function renderProfiles() {
+  profileList.innerHTML = '';
+  profiles.forEach((p, idx) => {
+    const div = document.createElement('div');
+    div.className = 'profile-item';
+    div.innerHTML = `
+      <span><strong>${p.name}</strong> (${p.state || '??'}) ${p.detail || ''}</span>
+      <div>
+        <button class="btn-secondary" style="width:auto;padding:0.2rem 0.6rem;font-size:0.7rem;" data-idx="${idx}">Edit</button>
+        <button style="width:auto;padding:0.2rem 0.6rem;font-size:0.7rem;background:#ef4444;" data-idx="${idx}">Delete</button>
+      </div>
+    `;
+    profileList.appendChild(div);
+    // Edit
+    div.querySelectorAll('button')[0].addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      const p = profiles[idx];
+      profileName.value = p.name || '';
+      profileDetail.value = p.detail || '';
+      profileBackstory.value = p.backstory || '';
+      profileState.value = p.state || '';
+      profileLat.value = p.lat || '';
+      profileLng.value = p.lng || '';
+      editProfileIdx.value = idx;
+    });
+    // Delete
+    div.querySelectorAll('button')[1].addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      profiles.splice(idx, 1);
+      saveData('profiles', profiles);
+      renderProfiles();
+      updateMapMarkers();
+      updateDashboard();
+    });
+  });
+  // Populate state filter
+  populateStateFilter();
+}
+
+function populateStateFilter() {
+  const states = new Set(profiles.map(p => p.state).filter(Boolean));
+  stateFilter.innerHTML = '<option value="all">All</option>';
+  [...states].sort().forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s;
+    opt.textContent = s;
+    stateFilter.appendChild(opt);
+  });
+}
+
+addProfileBtn.addEventListener('click', function() {
+  const name = profileName.value.trim();
+  if (!name) return alert('Name is required.');
+  const detail = profileDetail.value.trim();
+  const backstory = profileBackstory.value.trim();
+  const state = profileState.value.trim().toUpperCase();
+  const lat = profileLat.value.trim();
+  const lng = profileLng.value.trim();
+  profiles.push({ name, detail, backstory, state, lat, lng });
+  saveData('profiles', profiles);
+  renderProfiles();
+  updateMapMarkers();
+  updateDashboard();
+  // Clear fields except name
+  profileDetail.value = '';
+  profileBackstory.value = '';
+  profileState.value = '';
+  profileLat.value = '';
+  profileLng.value = '';
+});
+
+updateProfileBtn.addEventListener('click', function() {
+  const idx = parseInt(editProfileIdx.value);
+  if (isNaN(idx) || idx < 0 || idx >= profiles.length) return alert('Select a profile to update.');
+  const name = profileName.value.trim();
+  if (!name) return alert('Name is required.');
+  profiles[idx].name = name;
+  profiles[idx].detail = profileDetail.value.trim();
+  profiles[idx].backstory = profileBackstory.value.trim();
+  profiles[idx].state = profileState.value.trim().toUpperCase();
+  profiles[idx].lat = profileLat.value.trim();
+  profiles[idx].lng = profileLng.value.trim();
+  saveData('profiles', profiles);
+  renderProfiles();
+  updateMapMarkers();
+  updateDashboard();
+  editProfileIdx.value = '';
+  // Clear fields
+  profileName.value = '';
+  profileDetail.value = '';
+  profileBackstory.value = '';
+  profileState.value = '';
+  profileLat.value = '';
+  profileLng.value = '';
+});
+
+// ---------- MAP ----------
+function initMap() {
+  if (map) return;
+  map = L.map('map').setView([39.8283, -98.5795], 4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+  // Add a simple state outline overlay? For simplicity, we just use markers.
+}
+
+function updateMapMarkers() {
+  if (!map) return;
+  // Clear old markers
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  // Filter by state
+  const filter = stateFilter.value;
+  const filtered = filter === 'all' ? profiles : profiles.filter(p => p.state === filter);
+  filtered.forEach(p => {
+    if (p.lat && p.lng) {
+      const marker = L.marker([parseFloat(p.lat), parseFloat(p.lng)]).addTo(map);
+      marker.bindPopup(`<b>${p.name}</b><br>${p.detail || ''}<br>${p.backstory || ''}`);
+      markers.push(marker);
+    }
+  });
+  // Fit bounds
+  if (markers.length > 0) {
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), { padding: [30, 30] });
+  }
+}
+
+stateFilter.addEventListener('change', updateMapMarkers);
+clearMapBtn.addEventListener('click', function() {
+  stateFilter.value = 'all';
+  updateMapMarkers();
+});
+
+// ---------- INIT ----------
+renderProfiles();
+updateDashboard();
+initMap();
+updateMapMarkers();
+
+// Load first profile if exists
+if (profiles.length > 0) {
+  const p = profiles[0];
+  targetName.value = p.name;
+  targetDetail.value = p.detail || '';
+  targetBackstory.value = p.backstory || '';
+}
+
+console.log('SCAM-APT v11.0 loaded.');
+</script>
+</body>
+</html>

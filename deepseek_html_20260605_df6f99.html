@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>╳ NIGHTSHADE BAZAAR ╳ | Darknet Marketplace</title>
+  <!-- Tailwind + Font Awesome + Chart.js + dayjs -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+  <style>
+    body { background: #0b0e14; font-family: 'Inter', monospace; }
+    .market-card { background: #11161f; border: 1px solid #2a3342; border-radius: 1rem; transition: all 0.2s; }
+    .market-card:hover { border-color: #00b8ff; box-shadow: 0 0 12px rgba(0,184,255,0.2); }
+    .glow-text { text-shadow: 0 0 4px #0ff; }
+    .escrow-badge { background: #1e2a3a; color: #ffb347; }
+    .vendor-badge { background: #2a1e2a; color: #ff66cc; }
+    .btn-primary { background: linear-gradient(135deg, #00b8ff, #0066cc); }
+    .danger-zone { border-left: 4px solid #ff3366; }
+    .chat-bubble { background: #1a1f2c; border-radius: 1rem; padding: 0.5rem; margin: 0.25rem 0; }
+  </style>
+</head>
+<body class="text-gray-200">
+
+<div id="app" class="max-w-7xl mx-auto px-4 py-5">
+  <!-- HEADER with DRACO aggressive branding -->
+  <div class="flex flex-wrap justify-between items-center border-b border-cyan-900 pb-4 mb-6">
+    <div class="flex items-center gap-3">
+      <i class="fas fa-skull-crossbones text-3xl text-red-500"></i>
+      <h1 class="text-3xl font-black tracking-tighter"><span class="text-cyan-400">NIGHTSHADE</span><span class="text-white"> BAZAAR</span></h1>
+      <div class="hidden md:flex gap-2 ml-4 text-xs">
+        <span class="bg-black/60 px-2 py-1 rounded-full border border-red-700"><i class="fas fa-shield-haltered"></i> ESCROW + MULTISIG</span>
+        <span class="bg-black/60 px-2 py-1 rounded-full border border-cyan-700"><i class="fas fa-user-secret"></i> VENDOR MODE</span>
+      </div>
+    </div>
+    <div class="flex gap-3 items-center mt-2 md:mt-0">
+      <div class="bg-black/50 rounded-full px-3 py-1 text-sm"><i class="fas fa-coins text-yellow-400"></i> BAL: <span id="userBalance">0.00</span> XMR</div>
+      <button id="depositModalBtn" class="bg-green-800/80 px-3 py-1 rounded-md text-sm border border-green-500">DEPOSIT</button>
+      <button id="withdrawBtn" class="bg-gray-700 px-3 py-1 rounded-md text-sm">WITHDRAW</button>
+      <div class="relative">
+        <i class="fas fa-shopping-cart text-xl cursor-pointer" id="cartIcon"></i>
+        <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main grid: sidebar categories + product listing -->
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- CATEGORIES (darknet style) -->
+    <div class="lg:w-1/5 space-y-3">
+      <div class="market-card p-4">
+        <div class="font-bold text-cyan-300 mb-2"><i class="fas fa-bars"></i> DEPARTMENTS</div>
+        <div id="catList" class="space-y-2 text-sm">
+          <div data-cat="firearms" class="cat-item cursor-pointer hover:text-cyan-400 p-1 rounded"><i class="fas fa-gun"></i> Firearms & Ammo <span class="text-gray-500">(12)</span></div>
+          <div data-cat="malware" class="cat-item cursor-pointer hover:text-cyan-400 p-1 rounded"><i class="fas fa-bug"></i> Rootkits / Exploits <span class="text-gray-500">(8)</span></div>
+          <div data-cat="drugs" class="cat-item cursor-pointer hover:text-cyan-400 p-1 rounded"><i class="fas fa-capsules"></i> Narcotics (Molly, LSD, Opis) <span class="text-gray-500">(19)</span></div>
+          <div data-cat="lab" class="cat-item cursor-pointer hover:text-cyan-400 p-1 rounded"><i class="fas fa-flask"></i> Lab Equipment / Precursors <span class="text-gray-500">(7)</span></div>
+          <div data-cat="counterfeit" class="cat-item cursor-pointer hover:text-cyan-400 p-1 rounded"><i class="fas fa-passport"></i> IDs / CC / Cloned <span class="text-gray-500">(11)</span></div>
+          <div data-cat="malware" class="cat-item cursor-pointer hover:text-cyan-400 p-1 rounded"><i class="fas fa-database"></i> Stolen DBs / RDP <span class="text-gray-500">(6)</span></div>
+        </div>
+      </div>
+      <div class="market-card p-4 text-xs">
+        <div><i class="fas fa-chart-line"></i> MARKET STATS</div>
+        <canvas id="volumeChart" height="120"></canvas>
+        <div class="mt-2 text-green-300">24h volume: <span id="dailyVolume">₿0.00</span> equiv</div>
+      </div>
+      <div class="market-card p-4">
+        <div><i class="fab fa-bitcoin"></i> ESCROW RATING: 98.4%</div>
+        <div class="w-full bg-gray-700 h-1 rounded mt-1"><div class="bg-green-500 w-[98%] h-1 rounded"></div></div>
+        <button id="adminOverride" class="mt-3 text-red-400 text-xs w-full text-center border-t border-gray-700 pt-2">[ADMIN OVERRIDE - force release]</button>
+      </div>
+    </div>
+
+    <!-- PRODUCT GRID -->
+    <div class="lg:w-4/5">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xl font-bold"><span id="currentCategory">All Items</span></h2>
+        <input type="text" id="searchInput" placeholder="🔍 search listings..." class="bg-black/50 border border-gray-600 rounded px-3 py-1 text-sm w-48">
+      </div>
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </div>
+  </div>
+
+  <!-- CART SIDEBAR MODAL -->
+  <div id="cartModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden justify-end z-50">
+    <div class="bg-gray-900 w-full max-w-md h-full p-5 overflow-y-auto border-l border-cyan-800">
+      <div class="flex justify-between"><h3 class="text-xl"><i class="fas fa-shopping-cart"></i> CART</h3><i id="closeCart" class="fas fa-times cursor-pointer text-2xl"></i></div>
+      <div id="cartItemsList" class="my-4 space-y-3"></div>
+      <div class="border-t border-gray-700 pt-3 text-right">TOTAL: <span id="cartTotal">0.00</span> XMR</div>
+      <button id="checkoutBtn" class="btn-primary w-full mt-4 py-2 rounded-md font-bold">FINALIZE ORDER (ESCROW)</button>
+      <p class="text-[10px] text-gray-400 mt-2">* escrow held 14 days | vendor dispute handled by Draco</p>
+    </div>
+  </div>
+
+  <!-- DEPOSIT MODAL (simulated) -->
+  <div id="depositModal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-xl w-96 border border-cyan-600">
+      <h3>DEPOSIT MONERO (XMR)</h3>
+      <input type="number" id="depositAmountInput" placeholder="Amount XMR" class="w-full bg-black p-2 rounded my-2">
+      <button id="confirmDepositBtn" class="bg-blue-700 w-full py-2 rounded">Generate Deposit Address</button>
+      <p class="text-xs text-gray-400 mt-2">Simulated for analysis - no real blockchain tx</p>
+    </div>
+  </div>
+
+  <!-- VENDOR MESSAGE / DISPUTE PANEL (Draco aggressive chat) -->
+  <div class="fixed bottom-4 right-4 z-40">
+    <div id="msgToggle" class="bg-red-800 rounded-full w-14 h-14 flex items-center justify-center cursor-pointer shadow-lg border border-cyan-400"><i class="fas fa-envelope text-white"></i></div>
+    <div id="msgPanel" class="hidden market-card w-80 mt-2 overflow-hidden">
+      <div class="bg-black/70 p-2 font-bold flex justify-between"><span>✉ DISPUTE / ESCROW</span><i id="closeMsg" class="fas fa-times cursor-pointer"></i></div>
+      <div id="msgLog" class="h-64 overflow-y-auto p-2 text-sm space-y-2"></div>
+      <input id="msgInput" placeholder="Message admin Draco..." class="w-full p-2 text-sm bg-black/60">
+      <button id="sendMsgBtn" class="bg-cyan-800 w-full py-1 text-xs">SEND TO ADMIN</button>
+    </div>
+  </div>
+
+  <script>
+    // -------------------- DARKNET MARKETPLACE DATA --------------------
+    // Products: guns, rootkits, drugs, lab equipment, counterfeit, etc.
+    const products = [
+      { id: 1, name: "Glock 19 Gen5", category: "firearms", price: 1250, vendor: "ArmoryX", rating: 4.9, image: "🔫", desc: "Unserialized, 3 mags, shipping discreet" },
+      { id: 2, name: "AR-15 Lower Receiver", category: "firearms", price: 890, vendor: "IronPipe", rating: 4.8, image: "🔧", desc: "80% lower + jig" },
+      { id: 3, name: "Full Auto Sear (M16)", category: "firearms", price: 3400, vendor: "DeepGear", rating: 5.0, image: "⚙️", desc: "Drop-in auto sear" },
+      { id: 4, name: "Windows Ring0 Rootkit", category: "malware", price: 450, vendor: "rootkit.lab", rating: 4.7, image: "💀", desc: "Stealth, bypass EDR, persist" },
+      { id: 5, name: "Android Banking Trojan src", category: "malware", price: 1200, vendor: "malvault", rating: 4.6, image: "📱", desc: "Full source + builder" },
+      { id: 6, name: "CVE-2024-30051 Exploit", category: "malware", price: 2800, vendor: "zeroday", rating: 5.0, image: "⚡", desc: "LPE for Windows 11" },
+      { id: 7, name: "Molly (MDMA) - 1g", category: "drugs", price: 90, vendor: "PsycheDel", rating: 4.9, image: "💊", desc: "Dutch tested, 84% purity" },
+      { id: 8, name: "LSD blotter (100ug x10)", category: "drugs", price: 110, vendor: "AlbertH", rating: 4.8, image: "🌈", desc: "Needlepoint" },
+      { id: 9, name: "Cocaine HCl - 3.5g", category: "drugs", price: 280, vendor: "SnowGod", rating: 4.9, image: "❄️", desc: "Fishscale" },
+      { id: 10, name: "2-CB 25mg pellets x5", category: "drugs", price: 75, vendor: "ChemCloud", rating: 4.7, image: "🌀", desc: "Psychedelic research chem" },
+      { id: 11, name: "Buchner Filtration Kit", category: "lab", price: 220, vendor: "Glasswerk", rating: 4.8, image: "🧪", desc: "For recrystallization" },
+      { id: 12, name: "Heating Mantle 500ml", category: "lab", price: 340, vendor: "LabCoat", rating: 4.9, image: "🔥", desc: "Digital, with stirrer" },
+      { id: 13, name: "Benzaldehyde (precursor)", category: "lab", price: 95, vendor: "SynthKing", rating: 4.6, image: "🧴", desc: "1L, 99% purity" },
+      { id: 14, name: "Fentanyl Test Strips x50", category: "drugs", price: 45, vendor: "SafeUse", rating: 4.9, image: "📊", desc: "Harm reduction" },
+      { id: 15, name: "Clone Cards (EU/US)", category: "counterfeit", price: 180, vendor: "MagStripe", rating: 4.5, image: "💳", desc: "Track 1+2, dumps included" },
+      { id: 16, name: "Scannable DL Template", category: "counterfeit", price: 400, vendor: "IDGod", rating: 4.8, image: "🪪", desc: "PSD + UV layer" },
+      { id: 17, name: "RDP Access (Corporate)", category: "malware", price: 35, vendor: "AccessBroker", rating: 4.7, image: "🖥️", desc: "Admin rights, USA" },
+      { id: 18, name: "HackForums Database 2025", category: "malware", price: 150, vendor: "LeakLord", rating: 4.6, image: "📀", desc: "2M rows + emails" },
+    ];
+    
+    let userXMR = 500.00;   // starting test funds
+    let cart = [];
+    let orderHistory = [];
+
+    // Helper functions
+    function updateBalanceUI() { document.getElementById("userBalance").innerText = userXMR.toFixed(2); }
+    function renderProducts(filterCat = "all", search = "") {
+      let filtered = products.filter(p => (filterCat === "all" || p.category === filterCat) && (p.name.toLowerCase().includes(search) || p.vendor.toLowerCase().includes(search)));
+      let container = document.getElementById("productGrid");
+      if(filtered.length===0) { container.innerHTML = "<div class='col-span-full text-center text-gray-400'>No black market listings found</div>"; return; }
+      container.innerHTML = filtered.map(p => `
+        <div class="market-card p-4 flex flex-col">
+          <div class="text-3xl">${p.image}</div>
+          <div class="font-bold text-lg mt-1">${p.name}</div>
+          <div class="text-sm text-gray-400">vendor: ${p.vendor} ★ ${p.rating}</div>
+          <div class="text-cyan-300 font-mono mt-1">${p.price} XMR</div>
+          <div class="text-xs text-gray-500 mt-2">${p.desc}</div>
+          <button data-id="${p.id}" class="addToCartBtn mt-3 bg-gray-800 hover:bg-cyan-900 py-1 rounded text-sm">🛒 Add to Cart</button>
+        </div>
+      `).join("");
+      document.querySelectorAll(".addToCartBtn").forEach(btn => {
+        btn.addEventListener("click", (e) => { let id = parseInt(btn.dataset.id); addToCart(id); });
+      });
+    }
+    function addToCart(prodId) {
+      let prod = products.find(p => p.id === prodId);
+      let existing = cart.find(i => i.id === prodId);
+      if(existing) existing.qty++;
+      else cart.push({ ...prod, qty: 1 });
+      updateCartUI();
+    }
+    function updateCartUI() {
+      let cartDiv = document.getElementById("cartItemsList");
+      if(!cartDiv) return;
+      if(cart.length===0) { cartDiv.innerHTML = "<div class='text-gray-400'>Empty</div>"; document.getElementById("cartTotal").innerText = "0.00"; document.getElementById("cartCount").innerText = "0"; return; }
+      let total = 0;
+      cartDiv.innerHTML = cart.map(item => {
+        total += item.price * item.qty;
+        return `<div class="flex justify-between text-sm border-b border-gray-700 py-2"><span>${item.name} x${item.qty}</span><span>${(item.price*item.qty).toFixed(2)} XMR</span><button data-id="${item.id}" class="removeCartItem text-red-400 text-xs">remove</button></div>`;
+      }).join("");
+      document.getElementById("cartTotal").innerText = total.toFixed(2);
+      document.getElementById("cartCount").innerText = cart.reduce((s,i)=>s+i.qty,0);
+      document.querySelectorAll(".removeCartItem").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          let id = parseInt(btn.dataset.id);
+          cart = cart.filter(i => i.id !== id);
+          updateCartUI();
+        });
+      });
+    }
+    function checkout() {
+      let total = cart.reduce((s,i)=>s + i.price * i.qty, 0);
+      if(userXMR < total) { alert("Insufficient XMR balance. Deposit more (simulated deposit allowed)."); return; }
+      userXMR -= total;
+      updateBalanceUI();
+      orderHistory.push({ items: [...cart], total, date: new Date().toISOString(), status: "ESCROW - awaiting release" });
+      cart = [];
+      updateCartUI();
+      alert(`Order placed! ₿${total} XMR held in multisig escrow. Vendor will ship. Dispute via admin panel.`);
+      document.getElementById("cartModal").classList.add("hidden");
+      renderProducts(document.getElementById("currentCategory").dataset.currentCat || "all", document.getElementById("searchInput").value.toLowerCase());
+    }
+
+    // Deposit simulation
+    document.getElementById("depositModalBtn").onclick = () => { document.getElementById("depositModal").classList.remove("hidden"); };
+    document.getElementById("confirmDepositBtn").onclick = () => {
+      let amt = parseFloat(document.getElementById("depositAmountInput").value);
+      if(isNaN(amt) || amt <=0) alert("enter amount");
+      else { userXMR += amt; updateBalanceUI(); document.getElementById("depositModal").classList.add("hidden"); alert("XMR added to wallet (simulated)."); }
+    };
+    document.getElementById("withdrawBtn").onclick = () => {
+      let amt = parseFloat(prompt("Withdraw XMR amount (min 10):", "50"));
+      if(amt && amt <= userXMR && amt>=10) { userXMR -= amt; updateBalanceUI(); alert("Withdrawal request sent to Draco. Expect 6-12h manual approval (scam friction layer)."); }
+      else alert("Invalid amount or insufficient funds");
+    };
+    // Cart modal
+    document.getElementById("cartIcon").onclick = () => { document.getElementById("cartModal").classList.remove("hidden"); updateCartUI(); };
+    document.getElementById("closeCart").onclick = () => { document.getElementById("cartModal").classList.add("hidden"); };
+    document.getElementById("checkoutBtn").onclick = checkout;
+    // Category filtering + search
+    document.querySelectorAll(".cat-item").forEach(cat => {
+      cat.addEventListener("click", (e) => {
+        let catVal = cat.dataset.cat;
+        document.getElementById("currentCategory").innerText = cat.innerText;
+        document.getElementById("currentCategory").dataset.currentCat = catVal;
+        renderProducts(catVal, document.getElementById("searchInput").value.toLowerCase());
+      });
+    });
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+      let cat = document.getElementById("currentCategory").dataset.currentCat || "all";
+      renderProducts(cat, e.target.value.toLowerCase());
+    });
+    // Admin aggressive override (force release funds)
+    document.getElementById("adminOverride").onclick = () => {
+      alert("⚠️ ADMIN OVERRIDE: Escrow released. All pending orders marked 'FINALIZED'. This is a simulation kill-chain feature.");
+    };
+    // Messaging / dispute panel (Draco aggressive)
+    const msgLog = document.getElementById("msgLog");
+    function addMsg(text, fromUser=true) {
+      let div = document.createElement("div");
+      div.className = `chat-bubble text-xs ${fromUser ? "text-right" : "text-left border-l-2 border-red-500"}`;
+      div.innerHTML = fromUser ? `<span>👤 You: ${text}</span>` : `<span>🐉 DRACO: ${text}</span>`;
+      msgLog.appendChild(div);
+      msgLog.scrollTop = msgLog.scrollHeight;
+    }
+    document.getElementById("sendMsgBtn").onclick = () => {
+      let input = document.getElementById("msgInput");
+      if(!input.value.trim()) return;
+      addMsg(input.value, true);
+      setTimeout(() => {
+        let reply = "Your dispute is noted. Provide order ID or tracking. No cooperation = funds burned. I am the law here.";
+        if(input.value.toLowerCase().includes("scam")) reply = "Calling scam? I decide. Pay 15% arbitration fee or lose escrow.";
+        if(input.value.toLowerCase().includes("refund")) reply = "Refund only if vendor fails finalize. Upload evidence within 48h.";
+        addMsg(reply, false);
+      }, 800);
+      input.value = "";
+    };
+    document.getElementById("msgToggle").onclick = () => { document.getElementById("msgPanel").classList.toggle("hidden"); };
+    document.getElementById("closeMsg").onclick = () => { document.getElementById("msgPanel").classList.add("hidden"); };
+    // chart volume simulation
+    const ctx = document.getElementById('volumeChart').getContext('2d');
+    new Chart(ctx, { type: 'line', data: { labels: ['Mon','Tue','Wed','Thu','Fri','Sat'], datasets: [{ label: 'Volume (BTC)', data: [5.2, 7.8, 6.4, 9.1, 12.3, 15.7], borderColor: '#0ff', fill: false }] }, options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { labels: { color: '#aaa' } } } } });
+    document.getElementById("dailyVolume").innerText = "15.7 BTC";
+    // initial render
+    renderProducts("all", "");
+    updateBalanceUI();
+    addMsg("Welcome to Nightshade Bazaar. Escrow terms: no chargebacks. Admin eyes everywhere.", false);
+  </script>
+</body>
+</html>

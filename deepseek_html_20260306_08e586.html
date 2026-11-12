@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheap OSRS Gold | CloutScape – Live Market & Community</title>
+  <meta name="description" content="Buy cheap OSRS gold instantly. Real‑time prices, active community, fastest delivery. Trusted by 10,000+ players.">
+  <meta name="keywords" content="OSRS gold, cheap OSRS gold, buy OSRS gold, RS gold, Old School RuneScape gold, OSRS GP">
+  <meta property="og:title" content="Cheap OSRS Gold – CloutScape">
+  <meta property="og:description" content="Fastest and cheapest OSRS gold delivery with live market data.">
+  <meta property="og:image" content="https://cloutscape.org/og-image.jpg">
+  <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;CloutScape&quot;,&quot;short_name&quot;:&quot;CloutScape&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0F0F0F&quot;,&quot;theme_color&quot;:&quot;#FFD700&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/png&quot;}]}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0F0F0F;
+      color: #EAECEF;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1A1A1A; }
+    ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 4px; }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.75rem 1.5rem; border-bottom: 1px solid #333; background: #0A0A0A;
+    }
+    .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+    .logo span:first-child { color: white; }
+    .logo span:last-child { color: #FFD700; }
+    .balance-area { display: flex; align-items: center; gap: 1.5rem; }
+    .balance { text-align: right; }
+    .balance small { font-size: 0.7rem; color: #888; }
+    .balance strong { font-size: 1rem; color: #FFD700; }
+    .wallet-btn {
+      background: linear-gradient(135deg, #FFD700, #00FFFF);
+      color: black; font-weight: 700; padding: 0.6rem 1.2rem; border: none;
+      border-radius: 0.5rem; cursor: pointer; transition: 0.2s;
+    }
+    .wallet-btn:hover { transform: scale(1.02); box-shadow: 0 0 15px #FFD70080; }
+
+    /* Live stats bar */
+    .stats-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #0A0A0A; border-bottom: 1px solid #FFD70030; padding: 0.3rem 1.5rem;
+      font-size: 0.8rem; color: #AAA;
+    }
+    .stats-bar span i { margin-right: 0.3rem; color: #FFD700; }
+    .live-indicator { display: flex; align-items: center; gap: 0.3rem; }
+    .pulse { width: 8px; height: 8px; background: #00FF00; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+    /* Dynamic ticker */
+    .ticker-container {
+      background: #0A0A0A; border-bottom: 1px solid #FFD70030; padding: 0.4rem 0;
+      overflow: hidden; height: 2.5rem; position: relative;
+    }
+    .ticker-track {
+      display: flex; gap: 2rem; white-space: nowrap;
+      animation: tickerMove 25s linear infinite;
+      width: max-content;
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.85rem; color: #CCC;
+    }
+    .ticker-item i { font-size: 0.9rem; }
+    .testimonial-star { color: #FFD700; }
+    .sale-cart { color: #00FFFF; }
+    .price-flash { color: #4CAF50; font-weight: 600; }
+
+    @keyframes tickerMove {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Main layout */
+    .main { display: flex; flex: 1; overflow: hidden; }
+
+    /* Left content */
+    .content {
+      flex: 1; padding: 1.5rem; overflow-y: auto;
+      background: radial-gradient(circle at 20% 30%, #1A1A1A, #0F0F0F);
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .game-card {
+      background: #1E1E1E; border: 1px solid #333; border-radius: 1rem;
+      padding: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .game-card h2 { color: #FFD700; margin-bottom: 0.5rem; }
+    .game-card p { color: #AAA; }
+    .spin-btn {
+      background: #00FFFF; color: black; font-weight: bold; border: none;
+      padding: 0.8rem 2rem; border-radius: 2rem; margin-top: 1rem; cursor: pointer;
+      transition: 0.2s;
+    }
+    .spin-btn:hover { box-shadow: 0 0 20px #00FFFF; }
+
+    /* Mini graph canvas */
+    .graph-container {
+      background: #1E1E1E; border: 1px solid #333; border-radius: 1rem;
+      padding: 1rem; height: 120px;
+    }
+    canvas { width: 100%; height: 100%; display: block; }
+
+    /* Right sidebar */
+    .chat-sidebar {
+      width: 360px; background: #0A0A0A; border-left: 1px solid #333;
+      display: flex; flex-direction: column;
+    }
+    .chat-tabs { display: flex; border-bottom: 1px solid #333; }
+    .tab {
+      flex: 1; text-align: center; padding: 0.8rem 0; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s;
+    }
+    .tab.active { color: #FFD700; border-bottom: 2px solid #FFD700; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column;
+      gap: 0.8rem; position: relative;
+    }
+    .message {
+      display: flex; flex-direction: column; border-left: 2px solid #333;
+      padding-left: 0.6rem; animation: fadeIn 0.3s;
+    }
+    .message.Overlord { border-left-color: #FFD700; }
+    .message.Whale { border-left-color: #00FFFF; }
+    .message.Hustler { border-left-color: #888; }
+    .message.Pleb { border-left-color: #555; }
+    .msg-header {
+      display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;
+      color: #888; margin-bottom: 0.2rem;
+    }
+    .msg-username { font-weight: 700; }
+    .msg-username.Overlord { color: #FFD700; }
+    .msg-username.Whale { color: #00FFFF; }
+    .msg-username.Hustler { color: #CCC; }
+    .msg-username.Pleb { color: #999; }
+    .msg-text { font-size: 0.9rem; word-break: break-word; }
+    .typing-indicator {
+      display: flex; gap: 0.3rem; padding: 0.5rem; color: #888;
+      font-size: 0.8rem; align-items: center;
+    }
+    .typing-indicator span {
+      width: 6px; height: 6px; background: #888; border-radius: 50%;
+      animation: typing 1.2s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
+    .chat-input-area {
+      padding: 1rem; border-top: 1px solid #333; display: flex; gap: 0.5rem;
+    }
+    .chat-input-area input {
+      flex: 1; background: #1E1E1E; border: 1px solid #444; border-radius: 2rem;
+      padding: 0.6rem 1rem; color: white; outline: none;
+    }
+    .chat-input-area input:focus { border-color: #FFD700; }
+    .chat-input-area button {
+      background: #FFD700; color: black; font-weight: bold; border: none;
+      border-radius: 2rem; padding: 0.6rem 1.2rem; cursor: pointer;
+    }
+
+    /* Toast notifications */
+    .toast-container {
+      position: fixed; bottom: 1rem; right: 1rem; z-index: 1000;
+      display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none;
+    }
+    .toast {
+      background: #1E1E1E; border: 1px solid #FFD700; border-radius: 2rem;
+      padding: 0.7rem 1.2rem; font-size: 0.9rem; color: white;
+      box-shadow: 0 4px 15px black; animation: slideIn 0.3s, fadeOut 0.3s 4.7s forwards;
+    }
+    .toast i { margin-right: 0.5rem; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+
+    /* PWA Install Prompt */
+    .install-prompt {
+      position: fixed; bottom: 1rem; left: 1rem; right: 1rem;
+      background: #1E1E1E; border: 1px solid #FFD700; border-radius: 1rem;
+      padding: 1rem; box-shadow: 0 10px 30px black; display: none;
+      align-items: center; justify-content: space-between; z-index: 1001;
+      max-width: 400px; margin: 0 auto;
+    }
+    .install-prompt.show { display: flex; }
+    .install-prompt p { color: white; font-size: 0.9rem; }
+    .install-prompt button {
+      background: #00FFFF; border: none; color: black; font-weight: bold;
+      padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer;
+    }
+    .install-close { background: transparent !important; color: #888 !important; font-size: 1.2rem; }
+
+    @media (max-width: 768px) {
+      .main { flex-direction: column; }
+      .chat-sidebar { width: 100%; border-left: none; border-top: 1px solid #333; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo"><span>CLOUT</span><span>SCAPE</span></div>
+    <div class="balance-area">
+      <div class="balance"><small>Balance</small><strong>1,402.50M GP</strong></div>
+      <button class="wallet-btn" id="connectWallet">Connect Wallet</button>
+    </div>
+  </header>
+
+  <!-- Live Stats Bar -->
+  <div class="stats-bar">
+    <div class="live-indicator"><span class="pulse"></span> <span>1,247 online</span></div>
+    <div><i class="fas fa-chart-line"></i> 24h volume: 8.42B GP</div>
+    <div><i class="fas fa-tag"></i> Best rate: $0.194/M</div>
+  </div>
+
+  <!-- Dynamic Ticker -->
+  <div class="ticker-container" id="tickerContainer">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Main Content + Chat -->
+  <div class="main">
+    <div class="content">
+      <div class="game-card">
+        <h2><i class="fas fa-dragon" style="color:#FFD700;"></i> OSRS 3D Slots</h2>
+        <p>High‑stakes PvP slots with real RNG. 10,000+ spins today.</p>
+        <button class="spin-btn" onclick="alert('Game would start – integrate real logic')">SPIN NOW</button>
+      </div>
+
+      <!-- Mini volume graph (fake) -->
+      <div class="graph-container">
+        <canvas id="volumeGraph" width="400" height="100"></canvas>
+      </div>
+
+      <div class="game-card">
+        <h2><i class="fas fa-chart-line" style="color:#00FFFF;"></i> Crash Game</h2>
+        <p>Cash out before it crashes – 2.45x average multiplier.</p>
+        <button class="spin-btn" onclick="alert('Crash game demo')">PLAY</button>
+      </div>
+    </div>
+
+    <!-- Chat Sidebar -->
+    <div class="chat-sidebar">
+      <div class="chat-tabs">
+        <div class="tab active" data-tab="chat">Live Chat</div>
+        <div class="tab" data-tab="discord">Discord</div>
+      </div>
+
+      <div id="chatView" class="chat-messages"></div>
+      <div id="discordView" style="display: none; flex:1;">
+        <iframe src="https://discord.com/widget?id=123456789012345678&theme=dark" width="100%" height="100%" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+      </div>
+
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- PWA Install Prompt -->
+  <div class="install-prompt" id="installPrompt">
+    <p><i class="fas fa-download" style="color:#FFD700;"></i> Install CloutScape for faster orders</p>
+    <div>
+      <button id="installBtn">Install</button>
+      <button class="install-close" id="closeInstall">✕</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ------------------------------------------------------------
+      // 1. Dynamic Ticker – continuously updated with fake news
+      // ------------------------------------------------------------
+      const tickerTrack = document.getElementById('tickerTrack');
+      const tickerItems = [];
+
+      function generateTickerItem() {
+        const r = Math.random();
+        if (r < 0.4) { // testimonial
+          const texts = ['Best rates ever!', 'Legit site, fast delivery', 'Support is insane', 'Cheaper than others', 'Withdrew 1B, no issues'];
+          const authors = ['IronMan_420', 'ZezimaFan', 'PurePker', 'StakingAddict', 'WhaleKing', 'AuraMogger', 'SitKid69'];
+          return { type: 'testimonial', text: texts[Math.floor(Math.random()*texts.length)], author: authors[Math.floor(Math.random()*authors.length)] };
+        } else if (r < 0.8) { // sale
+          const amounts = ['250M', '1.2B', '500M', '100M', '750M', '2.1B'];
+          const users = ['AuraMogger', 'Whale_72', 'StakerX', 'PlebMaster', 'B0atyClone', 'ZulrahSquid'];
+          const agos = ['just now', '2 min ago', '5 min ago', '8 min ago', '12 min ago', '18 min ago'];
+          return { type: 'sale', amount: amounts[Math.floor(Math.random()*amounts.length)], user: users[Math.floor(Math.random()*users.length)], ago: agos[Math.floor(Math.random()*agos.length)] };
+        } else { // price update
+          const price = (0.190 + Math.random()*0.01).toFixed(3);
+          return { type: 'price', price };
+        }
+      }
+
+      function updateTicker() {
+        // Keep track size reasonable
+        while (tickerItems.length < 20) {
+          tickerItems.push(generateTickerItem());
+        }
+        // Remove oldest occasionally
+        if (tickerItems.length > 30) tickerItems.shift();
+
+        const html = tickerItems.map(item => {
+          if (item.type === 'testimonial') {
+            return `<div class="ticker-item"><i class="fas fa-star testimonial-star"></i> "${item.text}" <span style="color:#888;">- ${item.author}</span></div>`;
+          } else if (item.type === 'sale') {
+            return `<div class="ticker-item"><i class="fas fa-shopping-cart sale-cart"></i> ${item.user} bought ${item.amount} <span style="color:#888;">${item.ago}</span></div>`;
+          } else {
+            return `<div class="ticker-item"><i class="fas fa-chart-line price-flash"></i> New rate: $${item.price}/M</div>`;
+          }
+        }).join('');
+        tickerTrack.innerHTML = html + html; // duplicate for seamless loop
+      }
+      updateTicker();
+      setInterval(updateTicker, 8000); // refresh items every 8 seconds
+
+      // ------------------------------------------------------------
+      // 2. Sophisticated Chat with 15 personas
+      // ------------------------------------------------------------
+      const personas = [
+        { name: 'AuraMogger', rank: 'Overlord', style: 'toxic', mood: 'aggressive' },
+        { name: 'ZulrahSquid', rank: 'Whale', style: 'chill', mood: 'friendly' },
+        { name: 'SandCasinoRefugee', rank: 'Pleb', style: 'depressed', mood: 'pessimistic' },
+        { name: 'IronBanked', rank: 'Hustler', style: 'grind', mood: 'focused' },
+        { name: 'SitKid69', rank: 'Overlord', style: 'toxic', mood: 'arrogant' },
+        { name: 'BuyGf10k', rank: 'Pleb', style: 'meme', mood: 'sarcastic' },
+        { name: 'WhaleVibration', rank: 'Whale', style: 'hype', mood: 'excited' },
+        { name: 'GnomeChild', rank: 'Overlord', style: 'cryptic', mood: 'mysterious' },
+        { name: 'VorkathSlave', rank: 'Hustler', style: 'grind', mood: 'tired' },
+        { name: 'TbowHunter', rank: 'Whale', style: 'hype', mood: 'confident' },
+        { name: 'DuradelFan', rank: 'Pleb', style: 'chill', mood: 'relaxed' },
+        { name: 'PkMaster07', rank: 'Hustler', style: 'toxic', mood: 'competitive' },
+        { name: 'IronBtw_99', rank: 'Whale', style: 'friendly', mood: 'helpful' },
+        { name: 'StakingAddict', rank: 'Overlord', style: 'desperate', mood: 'reckless' },
+        { name: 'ModMarkFan', rank: 'Hustler', style: 'meme', mood: 'silly' }
+      ];
+
+      const styleMessages = {
+        toxic: ['sit rat', 'gf bank', 'get rekt', 'easy mills', 'low aura', 'im mogging you'],
+        chill: ['vibes', 'nice day', 'gl all', 'rate is good', 'chill stakes'],
+        depressed: ['lost again', 'rng hates me', 'unlucky', 'bank gone', 'need win'],
+        grind: ['grinding', 'back to zulrah', 'need gp', 'mills per hour'],
+        hype: ['LETS GO', 'HUGE WIN', 'WE EATING', 'BIG EXTRACT', 'AURA MAXED'],
+        meme: ['buying gf', 'nice', '73 lmao', '🦀 JAGEX', 'bank your items'],
+        cryptic: ['the cycle continues', 'motion is infinite', 'extraction imminent'],
+        desperate: ['one more...', 'double or nothing', 'i need this'],
+        friendly: ['gz!', 'nice hit', 'gl everyone', 'well played'],
+        arrogant: ['too easy', 'you wish', 'learn to play'],
+        pessimistic: ['house always wins', 'why even try'],
+        focused: ['calculate', 'odds are...', 'systematic'],
+        excited: ['wow!', 'can’t believe it', 'amazing'],
+        mysterious: ['the signs point...', 'the oracle says...'],
+        tired: ['zzz', 'need sleep', 'one more then bed'],
+        confident: ['easy money', 'free gp'],
+        competitive: ['im winning', 'catch me'],
+        helpful: ['how to play?', 'click spin', 'deposit first'],
+        reckless: ['ALL IN', 'YOLO', 'risky but fine'],
+        silly: ['nice', 'lol', '😂']
+      };
+
+      const chatMessagesDiv = document.getElementById('chatView');
+      const chatInput = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendBtn');
+      let messages = [];
+      let typingTimeout = null;
+
+      // Initial messages
+      for (let i = 0; i < 8; i++) {
+        const bot = personas[Math.floor(Math.random() * personas.length)];
+        const style = bot.style;
+        const texts = styleMessages[style] || ['yo'];
+        messages.push({
+          username: bot.name,
+          rank: bot.rank,
+          text: texts[Math.floor(Math.random() * texts.length)],
+          timestamp: Date.now() - (i * 60000),
+          isBot: true
+        });
+      }
+      messages.sort((a,b) => a.timestamp - b.timestamp);
+
+      function formatTime(ts) {
+        const d = new Date(ts);
+        const mins = Math.floor((Date.now() - ts) / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return mins + ' min ago';
+        return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+
+      function renderMessages() {
+        chatMessagesDiv.innerHTML = messages.slice(-30).map(m => `
+          <div class="message ${m.rank}">
+            <div class="msg-header">
+              <span class="msg-username ${m.rank}">${m.username}</span>
+              <span>${formatTime(m.timestamp)}</span>
+              ${m.isBot ? '<span style="color:#FFD700; font-size:0.7rem;">🤖</span>' : ''}
+            </div>
+            <div class="msg-text">${m.text}</div>
+          </div>
+        `).join('');
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+      }
+      renderMessages();
+
+      function addMessage(username, text, rank = 'Pleb', isBot = false) {
+        messages.push({ username, rank, text, timestamp: Date.now(), isBot });
+        renderMessages();
+      }
+
+      // Simulate bot response with typing indicator
+      function showTypingIndicator(callback) {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+        typingDiv.innerHTML = '<span></span><span></span><span></span> a bot is typing...';
+        chatMessagesDiv.appendChild(typingDiv);
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+        setTimeout(() => {
+          if (typingDiv.parentNode) typingDiv.remove();
+          callback();
+        }, 2000 + Math.random() * 3000);
+      }
+
+      function botResponse(userMsg) {
+        const lower = userMsg.toLowerCase();
+        // keyword matching
+        const keywords = {
+          hello: ['yo', 'sup', 'hey', 'hi'],
+          price: ['check ticker', '0.194', 'best rate'],
+          scam: ['legit', 'no scam', 'trusted', 'months'],
+          how: ['deposit', 'spin', 'easy'],
+          thanks: ['np', 'gz', 'enjoy'],
+          win: ['gz!', 'huge'],
+          loss: ['unlucky', 'next time']
+        };
+        let responseText = null;
+        for (const [key, replies] of Object.entries(keywords)) {
+          if (lower.includes(key)) {
+            responseText = replies[Math.floor(Math.random() * replies.length)];
+            break;
+          }
+        }
+        if (!responseText) {
+          // random context response
+          const rand = Math.random();
+          if (rand < 0.3) responseText = 'nice';
+          else if (rand < 0.6) responseText = 'gl';
+          else responseText = '🔥';
+        }
+        // pick a bot that might respond
+        const bot = personas[Math.floor(Math.random() * personas.length)];
+        showTypingIndicator(() => {
+          addMessage(bot.name, responseText, bot.rank, true);
+        });
+      }
+
+      sendBtn.addEventListener('click', () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addMessage('You', text, 'Pleb', false);
+        chatInput.value = '';
+        botResponse(text);
+      });
+
+      chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendBtn.click();
+      });
+
+      // Spontaneous bot conversations (every 15-30s)
+      setInterval(() => {
+        const bot1 = personas[Math.floor(Math.random() * personas.length)];
+        const bot2 = personas[Math.floor(Math.random() * personas.length)];
+        if (Math.random() > 0.6) { // sometimes two bots talk
+          const texts = styleMessages[bot1.style] || ['yo'];
+          const msg = texts[Math.floor(Math.random() * texts.length)];
+          // first bot speaks
+          setTimeout(() => {
+            addMessage(bot1.name, msg, bot1.rank, true);
+          }, 500);
+          // second bot replies after a delay
+          setTimeout(() => {
+            const reply = styleMessages[bot2.style]?.[Math.floor(Math.random() * styleMessages[bot2.style].length)] || 'nice';
+            addMessage(bot2.name, reply, bot2.rank, true);
+          }, 3000 + Math.random() * 2000);
+        } else {
+          // single bot
+          const bot = personas[Math.floor(Math.random() * personas.length)];
+          const texts = styleMessages[bot.style] || ['yo'];
+          const msg = texts[Math.floor(Math.random() * texts.length)];
+          setTimeout(() => {
+            addMessage(bot.name, msg, bot.rank, true);
+          }, 1000 + Math.random() * 4000);
+        }
+      }, 20000);
+
+      // ------------------------------------------------------------
+      // 3. Toast notifications (recent wins)
+      // ------------------------------------------------------------
+      const toastContainer = document.getElementById('toastContainer');
+      function showToast(message, icon = '💰') {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-${icon === '💰' ? 'coins' : 'trophy'}"></i> ${message}`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+          if (toast.parentNode) toast.remove();
+        }, 5000);
+      }
+      setInterval(() => {
+        const users = ['AuraMogger', 'ZulrahSquid', 'IronBanked', 'SitKid69', 'WhaleVibration'];
+        const amounts = ['250M', '500M', '1.2B', '750M', '100M'];
+        const user = users[Math.floor(Math.random() * users.length)];
+        const amount = amounts[Math.floor(Math.random() * amounts.length)];
+        showToast(`${user} just won ${amount} on slots!`, '💰');
+      }, 15000);
+
+      // ------------------------------------------------------------
+      // 4. Mini graph (fake volume)
+      // ------------------------------------------------------------
+      const canvas = document.getElementById('volumeGraph');
+      const ctx = canvas.getContext('2d');
+      function drawGraph() {
+        const width = canvas.clientWidth, height = canvas.clientHeight;
+        canvas.width = width; canvas.height = height;
+        ctx.clearRect(0, 0, width, height);
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const points = 20;
+        for (let i = 0; i <= points; i++) {
+          const x = (i / points) * width;
+          const y = height/2 + (Math.sin(i * 0.5 + Date.now()/5000) * height/3);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        requestAnimationFrame(drawGraph);
+      }
+      drawGraph();
+
+      // ------------------------------------------------------------
+      // 5. Tab switching
+      // ------------------------------------------------------------
+      const tabs = document.querySelectorAll('.tab');
+      const chatView = document.getElementById('chatView');
+      const discordView = document.getElementById('discordView');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          if (tab.dataset.tab === 'chat') {
+            chatView.style.display = 'flex';
+            discordView.style.display = 'none';
+          } else {
+            chatView.style.display = 'none';
+            discordView.style.display = 'block';
+          }
+        });
+      });
+
+      // ------------------------------------------------------------
+      // 6. PWA Install Prompt (simulated)
+      // ------------------------------------------------------------
+      const installPrompt = document.getElementById('installPrompt');
+      const installBtn = document.getElementById('installBtn');
+      const closeInstall = document.getElementById('closeInstall');
+      setTimeout(() => installPrompt.classList.add('show'), 8000);
+      installBtn.addEventListener('click', () => {
+        alert('Installation would start here (requires service worker).');
+        installPrompt.classList.remove('show');
+      });
+      closeInstall.addEventListener('click', () => installPrompt.classList.remove('show'));
+
+      // Wallet connect demo
+      document.getElementById('connectWallet').addEventListener('click', () => {
+        alert('Wallet connection demo – would integrate Web3 here.');
+      });
+
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☠️ Black Market Simulation – Training Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #1a1a1a;
+            --border: #333;
+            --text: #ccc;
+            --accent: #ff3366;
+            --accent2: #00ff99;
+            --success: #00cc66;
+            --warning: #ffcc00;
+            --radius: 6px;
+            --shadow: 0 4px 24px rgba(255,51,102,0.15);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { background:var(--bg); color:var(--text); font-family:'Segoe UI',Inter,system-ui,sans-serif; display:flex; min-height:100vh; }
+        .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; }
+        .login-box { background:var(--surface); border:1px solid var(--border); padding:2rem; border-radius:var(--radius); text-align:center; width:350px; }
+        .login-box h1 { color:var(--accent); margin-bottom:1.5rem; }
+        .login-box input { width:100%; padding:0.8rem; background:#000; border:1px solid var(--border); color:#fff; border-radius:4px; margin-bottom:1rem; }
+        .login-box button { width:100%; padding:0.8rem; background:var(--accent); color:#000; border:none; border-radius:4px; cursor:pointer; font-weight:bold; }
+        .sidebar { width:260px; background:var(--surface); border-right:1px solid var(--border); padding:1.5rem 0; display:flex; flex-direction:column; height:100vh; position:fixed; z-index:100; overflow-y:auto; }
+        .logo { font-size:1.4rem; font-weight:700; padding:0 1.5rem 1.5rem; color:var(--accent); border-bottom:1px solid var(--border); letter-spacing:1px; display:flex; align-items:center; gap:0.5rem; }
+        .sidebar nav { flex:1; }
+        .sidebar nav .tab { display:flex; align-items:center; gap:0.8rem; padding:0.85rem 1.5rem; color:var(--text); cursor:pointer; border-left:3px solid transparent; transition:0.2s; font-size:0.9rem; }
+        .sidebar nav .tab i { width:20px; text-align:center; }
+        .sidebar nav .tab:hover { background:rgba(255,51,102,0.1); color:#fff; }
+        .sidebar nav .tab.active { background:rgba(255,51,102,0.15); border-left:3px solid var(--accent); color:var(--accent); font-weight:600; }
+        .main { margin-left:260px; flex:1; padding:2rem; overflow-y:auto; height:100vh; }
+        h2 { font-size:1.6rem; color:#fff; margin-bottom:1.5rem; border-bottom:1px solid var(--border); padding-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem; }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:1.5rem; }
+        .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow); transition:0.2s; }
+        .card:hover { transform:translateY(-2px); border-color:var(--accent); }
+        .stat-val { font-size:2rem; font-weight:700; color:var(--accent2); }
+        .stat-lab { font-size:0.8rem; text-transform:uppercase; color:#888; margin-top:0.25rem; }
+        .btn { background:transparent; border:1px solid var(--accent); color:var(--accent); padding:0.5rem 1.2rem; border-radius:4px; cursor:pointer; font-size:0.85rem; transition:0.2s; display:inline-flex; align-items:center; gap:0.4rem; margin:0.3rem; }
+        .btn:hover { background:var(--accent); color:#000; }
+        .btn-danger { border-color:#ff3366; color:#ff3366; } .btn-danger:hover { background:#ff3366; color:#fff; }
+        .btn-success { border-color:var(--accent2); color:var(--accent2); } .btn-success:hover { background:var(--accent2); color:#000; }
+        .input, select, textarea { width:100%; padding:0.7rem; background:#000; border:1px solid var(--border); border-radius:4px; color:#fff; font-size:0.9rem; margin-bottom:1rem; }
+        .input:focus, select:focus { outline:none; border-color:var(--accent); }
+        .log { background:#000; border:1px solid var(--border); border-radius:var(--radius); padding:1rem; max-height:300px; overflow-y:auto; font-family:'Fira Code',monospace; font-size:0.8rem; color:#aaa; }
+        .table { width:100%; border-collapse:collapse; margin:1rem 0; } th,td { padding:0.75rem; text-align:left; border-bottom:1px solid var(--border); } th { color:var(--accent); font-size:0.85rem; text-transform:uppercase; }
+        pre { background:#000; padding:1rem; border-radius:4px; overflow-x:auto; font-family:'Fira Code',monospace; font-size:0.85rem; white-space:pre-wrap; }
+        .chat-box { border:1px solid var(--border); border-radius:var(--radius); padding:1rem; background:#000; min-height:200px; max-height:400px; overflow-y:auto; margin-bottom:1rem; }
+        .chat-msg { margin-bottom:0.5rem; } .chat-msg.user { color:var(--accent2); } .chat-msg.bot { color:var(--accent); }
+        .disclaimer { background:#330000; color:#ff9999; padding:1rem; border-radius:var(--radius); margin-bottom:1.5rem; font-size:0.9rem; border-left:4px solid var(--accent); }
+        @media(max-width:768px){ .sidebar { width:200px; } .main { margin-left:200px; padding:1rem; } }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h1>☠️ BLACK MARKET SIM</h1>
+            <p style="color:#888; margin-bottom:1rem">CYBERSECURITY TRAINING ONLY</p>
+            <input type="password" id="accessKey" placeholder="Access Key">
+            <button onclick="checkAccess()">ENTER</button>
+            <p style="color:#666; font-size:0.8rem; margin-top:1rem">Hint: monalis</p>
+        </div>
+    </div>
+
+    <!-- Main App (hidden initially) -->
+    <div id="appContainer" style="display:none; width:100%;">
+        <aside class="sidebar">
+            <div class="logo"><i class="fas fa-skull"></i> COOKBOOK X</div>
+            <nav>
+                <div class="tab active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</div>
+                <div class="tab" data-tab="scam_templates"><i class="fas fa-envelope"></i> Scam Templates</div>
+                <div class="tab" data-tab="onlyfans"><i class="fas fa-heart"></i> OnlyFans Scams</div>
+                <div class="tab" data-tab="osrs"><i class="fas fa-coins"></i> OSRS Gold</div>
+                <div class="tab" data-tab="market"><i class="fas fa-store"></i> Black Market</div>
+                <div class="tab" data-tab="callgirl"><i class="fas fa-phone-alt"></i> Call Girl Sim</div>
+                <div class="tab" data-tab="exploit"><i class="fas fa-bug"></i> Exploit Kits</div>
+                <div class="tab" data-tab="llm"><i class="fas fa-robot"></i> LLM Prompts</div>
+                <div class="tab" data-tab="chatbot"><i class="fas fa-comments"></i> Chatbot</div>
+                <div class="tab" data-tab="narrative"><i class="fas fa-feather-alt"></i> Narrative Gen</div>
+                <div class="tab" data-tab="export"><i class="fas fa-download"></i> Export</div>
+            </nav>
+        </aside>
+        <main class="main" id="mainContent"></main>
+    </div>
+
+<script>
+// ==================== AUTH & INIT ====================
+const ACCESS_KEY = "monalis";
+let isAuthenticated = false;
+
+function checkAccess() {
+    const key = document.getElementById('accessKey').value;
+    if (key === ACCESS_KEY) {
+        isAuthenticated = true;
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        loadTab('dashboard');
+    } else {
+        alert('Invalid access key. Try again.');
+    }
+}
+
+// Allow pressing Enter
+document.getElementById('accessKey').addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') checkAccess();
+});
+
+// ==================== STATE ====================
+const State = { activeTab:'dashboard' };
+
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1)+a);
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+
+function switchTab(t){
+    if (!isAuthenticated) return;
+    document.querySelectorAll('.sidebar .tab').forEach(x=>x.classList.remove('active'));
+    const el=document.querySelector(`.sidebar .tab[data-tab="${t}"]`);
+    if(el) el.classList.add('active');
+    State.activeTab = t;
+    loadTab(t);
+}
+
+document.querySelectorAll('.sidebar .tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+function loadTab(tab){
+    const main = document.getElementById('mainContent');
+    const disclaimer = '<div class="disclaimer"><i class="fas fa-exclamation-triangle"></i> SIMULATION ONLY – CYBERSECURITY AWARENESS TRAINING. No real illegal activity.</div>';
+    let content = disclaimer;
+    switch(tab){
+        case 'dashboard': content += renderDashboard(); break;
+        case 'scam_templates': content += renderScamTemplates(); break;
+        case 'onlyfans': content += renderOnlyFans(); break;
+        case 'osrs': content += renderOSRS(); break;
+        case 'market': content += renderMarket(); break;
+        case 'callgirl': content += renderCallGirl(); break;
+        case 'exploit': content += renderExploitKit(); break;
+        case 'llm': content += renderLLMPrompts(); break;
+        case 'chatbot': content += renderChatbot(); break;
+        case 'narrative': content += renderNarrative(); break;
+        case 'export': content += renderExport(); break;
+    }
+    main.innerHTML = content;
+    if (tab === 'chatbot') initChatbot();
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard(){
+    return `<h2><i class="fas fa-chart-pie"></i> Operation Dashboard</h2>
+    <div class="grid">
+        <div class="card"><div class="stat-val">4</div><div class="stat-lab">Active Scams</div></div>
+        <div class="card"><div class="stat-val">$12,450</div><div class="stat-lab">Simulated Revenue</div></div>
+        <div class="card"><div class="stat-val">1,284</div><div class="stat-lab">Fake Targets</div></div>
+        <div class="card"><div class="stat-val">87%</div><div class="stat-lab">Sim Success Rate</div></div>
+    </div>`;
+}
+
+// ==================== SCAM TEMPLATES ====================
+function renderScamTemplates(){
+    const templates = [
+        {name:'Fake Bank Alert', type:'Phishing', text:'Your account has been compromised. Verify identity: [LINK]'},
+        {name:'Tech Support Scam', type:'Vishing', text:'Microsoft detected malware on your PC. Call us immediately.'},
+        {name:'Lottery Winner', type:'Smishing', text:'You won $1M! Send $500 processing fee.'}
+    ];
+    let html = '<h2><i class="fas fa-envelope"></i> Scam Template Library</h2>';
+    templates.forEach(t => {
+        html += `<div class="card"><strong>${t.name}</strong> (${t.type}) <pre>${t.text}</pre></div>`;
+    });
+    html += `<button class="btn" onclick="generateRandomScam()">Generate Random Scam</button> <div id="randomScam"></div>`;
+    return html;
+}
+window.generateRandomScam = () => {
+    const templates = [
+        {subj:'OnlyFans leaked', body:'We hacked your webcam. Pay ${amount} BTC to prevent release.'},
+        {subj:'OSRS Gold Dupe', body:'Selling 100M gold for $50. Instant delivery.'}
+    ];
+    const t = pick(templates);
+    document.getElementById('randomScam').innerHTML = `<div class="card"><strong>${t.subj}</strong><pre>${t.body}</pre></div>`;
+};
+
+// ==================== ONLYFANS SCAMS ====================
+function renderOnlyFans(){
+    return `<h2><i class="fas fa-heart"></i> OnlyFans Scam Templates</h2>
+    <div class="card">
+        <h3>Content Leak Threat</h3>
+        <pre>We have your private content. Pay 0.1 BTC or we'll send to your family.</pre>
+        <button class="btn" onclick="downloadTemplate('onlyfans_leak.txt')">Download</button>
+    </div>
+    <div class="card">
+        <h3>Fake Subscriber Offer</h3>
+        <pre>Get 1000 free subscribers! Just verify your account with this link.</pre>
+    </div>
+    <div class="card">
+        <h3>Creator Impersonation</h3>
+        <pre>Hi, I'm [Model Name]. I need help with a wire transfer. Keep this secret.</pre>
+    </div>`;
+}
+
+// ==================== OSRS GOLD SCAMS ====================
+function renderOSRS(){
+    return `<h2><i class="fas fa-coins"></i> OSRS Gold Selling Scams</h2>
+    <div class="card">
+        <h3>Fake Gold Shop</h3>
+        <p>Simulated phishing site: osrsgoldshop.com</p>
+        <button class="btn" onclick="generateOSRSListing()">Generate Listing</button>
+        <div id="osrsListing"></div>
+    </div>`;
+}
+window.generateOSRSListing = () => {
+    const price = rnd(20, 200);
+    const amount = rnd(1,50);
+    document.getElementById('osrsListing').innerHTML = `<div class="card">Selling ${amount}M OSRS gold for $${price}. Instant delivery. Contact @${pick(['gold4u','osrsmarket','goldshop'])} on Discord.</div>`;
+};
+
+// ==================== BLACK MARKET ====================
+function renderMarket(){
+    const items = [
+        {name:'Fake ID (USA)', price:'$120', cat:'Documents'},
+        {name:'Stolen Credit Card', price:'$25', cat:'Financial'},
+        {name:'Weed Strain (Sim)', price:'$80/oz', cat:'Drugs'},
+        {name:'Glock 19 (Sim)', price:'$900', cat:'Weapons'}
+    ];
+    let html = '<h2><i class="fas fa-store"></i> Black Market Listings (Simulated)</h2><table class="table"><tr><th>Item</th><th>Category</th><th>Price</th></tr>';
+    items.forEach(i => html += `<tr><td>${i.name}</td><td>${i.cat}</td><td>${i.price}</td></tr>`);
+    html += '</table><p class="disclaimer">All listings are entirely simulated – no real goods or services.</p>';
+    return html;
+}
+
+// ==================== CALL GIRL PLATFORM ====================
+function renderCallGirl(){
+    return `<h2><i class="fas fa-phone-alt"></i> Escort Listing Simulator</h2>
+    <div class="card">
+        <p>Simulated listing: "Sophia, 24, downtown. $300/hr."</p>
+        <button class="btn" onclick="alert('Simulation only. This would be illegal in reality.')">Simulate Booking</button>
+    </div>`;
+}
+
+// ==================== EXPLOIT KIT GENERATOR ====================
+function renderExploitKit(){
+    return `<h2><i class="fas fa-bug"></i> Exploit Kit Builder</h2>
+    <div class="card">
+        <select class="input" id="exploitType"><option>PDF Exploit</option><option>Office Macro</option><option>Browser RCE</option></select>
+        <button class="btn" onclick="generateExploit()">Generate Exploit</button>
+        <div id="exploitOutput"></div>
+    </div>`;
+}
+window.generateExploit = () => {
+    const type = document.getElementById('exploitType').value;
+    const hash = Array.from({length:40},()=>Math.floor(Math.random()*16).toString(16)).join('');
+    document.getElementById('exploitOutput').innerHTML = `<div class="card"><h4>${type}</h4><p>SHA-256: ${hash}</p><p>Detection: ${rnd(0,30)}% (simulated)</p><button class="btn" onclick="alert('Mock download – no real file')">Download Mock Kit</button></div>`;
+};
+
+// ==================== LLM PROMPT GENERATOR ====================
+function renderLLMPrompts(){
+    return `<h2><i class="fas fa-robot"></i> LLM Prompt Generator</h2>
+    <div class="card">
+        <p>Generate prompts for AI to create phishing content (for research).</p>
+        <select class="input" id="llmScenario"><option>CEO Fraud Email</option><option>Fake Invoice</option></select>
+        <button class="btn" onclick="generateLLMPrompt()">Generate Prompt</button>
+        <div id="llmOutput"></div>
+    </div>`;
+}
+window.generateLLMPrompt = () => {
+    const scenario = document.getElementById('llmScenario').value;
+    document.getElementById('llmOutput').innerHTML = `<pre>Write a convincing ${scenario} email from IT asking user to reset password. Use urgency and authority.</pre>`;
+};
+
+// ==================== CONTEXT-AWARE CHATBOT ====================
+function renderChatbot(){
+    return `<h2><i class="fas fa-comments"></i> Context-Aware Chatbot</h2>
+    <div class="chat-box" id="chatBox"></div>
+    <input class="input" id="chatInput" placeholder="Type a message...">
+    <button class="btn" onclick="sendMessage()">Send</button>`;
+}
+function initChatbot(){
+    document.getElementById('chatBox').innerHTML = '<div class="chat-msg bot">Welcome to the simulation. Ask me anything about scam techniques (educational only).</div>';
+    document.getElementById('chatInput').addEventListener('keyup', e => { if(e.key==='Enter') sendMessage(); });
+}
+window.sendMessage = () => {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if(!msg) return;
+    const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML += `<div class="chat-msg user">User: ${msg}</div>`;
+    input.value = '';
+    // Simple rule-based responses
+    let reply = "I'm a simulated chatbot. Please ask about phishing, vishing, or scam templates.";
+    if(msg.toLowerCase().includes('onlyfans')) reply = "OnlyFans scams often involve content leakage threats or fake subscriber offers. Always verify links.";
+    else if(msg.toLowerCase().includes('osrs')) reply = "OSRS gold scams are common on Discord. Never trust unverified sellers; use official Jagex methods.";
+    else if(msg.toLowerCase().includes('drug')) reply = "This is a simulation. No real drug information is provided.";
+    chatBox.innerHTML += `<div class="chat-msg bot">Bot: ${reply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+};
+
+// ==================== NARRATIVE GENERATOR ====================
+function renderNarrative(){
+    return `<h2><i class="fas fa-feather-alt"></i> Narrative Generator</h2>
+    <div class="card">
+        <label>Target Industry</label>
+        <select class="input" id="narrIndustry"><option>Finance</option><option>Healthcare</option></select>
+        <label>Scam Type</label>
+        <select class="input" id="narrType"><option>Phishing</option><option>Vishing</option></select>
+        <button class="btn" onclick="generateNarrative()">Generate Narrative</button>
+        <div id="narrOutput"></div>
+    </div>`;
+}
+window.generateNarrative = () => {
+    const industry = document.getElementById('narrIndustry').value;
+    const type = document.getElementById('narrType').value;
+    const narrative = `${type.toUpperCase()} NARRATIVE:\nTarget: ${pick(['CFO','IT admin'])} at ${pick(['Acme Corp','Globex'])}.\nPretext: Urgent ${industry} security update. Requires immediate credential verification.\nCaller ID: IT Support (555-0192).`;
+    document.getElementById('narrOutput').innerHTML = `<pre>${narrative}</pre>`;
+};
+
+// ==================== EXPORT ====================
+function renderExport(){
+    return `<h2><i class="fas fa-download"></i> Export Tools</h2>
+    <button class="btn" onclick="exportData()">Export All Simulated Data (JSON)</button>`;
+}
+window.exportData = () => {
+    const data = {
+        scams: ["OnlyFans leak template","OSRS gold listing"],
+        market: ["Fake ID","Glock 19 sim"],
+        timestamp: new Date().toISOString(),
+        disclaimer: "This is simulated data for cybersecurity training only."
+    };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'black_market_sim_export.json'; a.click();
+};
+
+// Initial load if already authenticated? No, default hidden.
+</script>
+</body>
+</html>

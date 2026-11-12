@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuneHall Admin Panel</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #071d2a;
+            color: #e2e8f0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: #05161f;
+            border-right: 1px solid #1e3a4a;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 0;
+        }
+
+        .sidebar .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffd700;
+            padding: 0 20px 24px;
+            border-bottom: 1px solid #1e3a4a;
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar .logo i {
+            margin-right: 10px;
+            color: #ffaa00;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+        }
+
+        .sidebar nav ul li {
+            padding: 12px 24px;
+            margin: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #94a3b8;
+            cursor: default;
+        }
+
+        .sidebar nav ul li.active {
+            background: #1e3a4a;
+            color: #ffd700;
+        }
+
+        .sidebar nav ul li:not(.active):hover {
+            background: #0f2a3b;
+            color: #fff;
+        }
+
+        .sidebar nav ul li i {
+            width: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+            background-color: #071d2a;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            color: white;
+        }
+
+        .header .admin-badge {
+            background: #1e3a4a;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .admin-badge i {
+            color: #ffd700;
+        }
+
+        /* Cards */
+        .card {
+            background: #0f2a3b;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 30px;
+            border: 1px solid #1e3a4a;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            font-size: 20px;
+            font-weight: 500;
+            color: #ffd700;
+        }
+
+        .card-header h2 i {
+            margin-right: 10px;
+            color: #ffaa00;
+        }
+
+        /* User table */
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th {
+            text-align: left;
+            padding: 12px 8px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 14px;
+            border-bottom: 1px solid #1e3a4a;
+        }
+
+        .user-table td {
+            padding: 16px 8px;
+            border-bottom: 1px solid #1e3a4a;
+            vertical-align: middle;
+        }
+
+        .user-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-table .role-select {
+            background: #1e3a4a;
+            color: white;
+            border: 1px solid #2d4b5e;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .user-table .balance-input {
+            background: #1e3a4a;
+            color: white;
+            border: 1px solid #2d4b5e;
+            border-radius: 6px;
+            padding: 6px 10px;
+            width: 110px;
+            font-size: 14px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 16px;
+            margin: 0 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .btn-icon:hover {
+            color: #ffd700;
+        }
+
+        .btn-icon.delete:hover {
+            color: #ef4444;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: #1e3a4a;
+            color: #fff;
+            border: 1px solid #2d4b5e;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #2d4b5e;
+        }
+
+        .add-user-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+            margin-top: 20px;
+            background: #1a3343;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            background: #0f2a3b;
+            border: 1px solid #2d4b5e;
+            color: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .config-item {
+            background: #1a3343;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .config-item label {
+            display: block;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .config-item input, .config-item select {
+            width: 100%;
+            background: #0f2a3b;
+            border: 1px solid #2d4b5e;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-top: 5px;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-switch input {
+            width: 40px;
+            height: 20px;
+            appearance: none;
+            background: #1e3a4a;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            border: 1px solid #2d4b5e;
+        }
+
+        .toggle-switch input:checked {
+            background: #ffd700;
+        }
+
+        .toggle-switch input::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 0px;
+            left: 0px;
+            transition: 0.2s;
+        }
+
+        .toggle-switch input:checked::before {
+            left: 20px;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: #0f2a3b;
+            border: 1px solid #1e3a4a;
+            border-radius: 16px;
+            padding: 20px 24px;
+            flex: 1 1 200px;
+        }
+
+        .stat-card .stat-title {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #ffd700;
+        }
+
+        .footer-links {
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+
+        .footer-links a:hover {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-crown"></i> RuneHall Admin
+        </div>
+        <nav>
+            <ul>
+                <li class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</li>
+                <li><i class="fas fa-users"></i> Users</li>
+                <li><i class="fas fa-user-tag"></i> Roles</li>
+                <li><i class="fas fa-sliders-h"></i> Configuration</li>
+                <li><i class="fas fa-chart-line"></i> Analytics</li>
+                <li><i class="fas fa-shield-alt"></i> Security</li>
+                <li><i class="fas fa-sign-out-alt"></i> Logout</li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>User Management</h1>
+            <div class="admin-badge">
+                <i class="fas fa-user-shield"></i> Admin · master
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card">
+                <div class="stat-title">Total Users</div>
+                <div class="stat-value">4,892</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Online Now</div>
+                <div class="stat-value">143</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Balance</div>
+                <div class="stat-value">₿ 12.45M</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">New Today</div>
+                <div class="stat-value">+28</div>
+            </div>
+        </div>
+
+        <!-- User Management Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-user-edit"></i> Edit Users & Balances</h2>
+                <button class="btn-secondary" onclick="alert('Export functionality demo')">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+
+            <!-- User Table -->
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Balance (RS)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i class="fas fa-user-circle" style="margin-right: 6px; color:#ffd700;"></i> rune_knight</td>
+                        <td>knight@runehall.com</td>
+                        <td>
+                            <select class="role-select">
+                                <option>user</option>
+                                <option>moderator</option>
+                                <option>admin</option>
+                                <option selected>vip</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="1250.50" class="balance-input">
+                        </td>
+                        <td>
+                            <button class="btn-icon" onclick="alert('User updated (demo)')"><i class="fas fa-save"></i></button>
+                            <button class="btn-icon delete" onclick="alert('Delete demo')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-user-circle" style="margin-right: 6px; color:#94a3b8;"></i> mage_master</td>
+                        <td>mage@runehall.com</td>
+                        <td>
+                            <select class="role-select">
+                                <option>user</option>
+                                <option selected>moderator</option>
+                                <option>admin</option>
+                                <option>vip</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="3450.75" class="balance-input">
+                        </td>
+                        <td>
+                            <button class="btn-icon" onclick="alert('User updated (demo)')"><i class="fas fa-save"></i></button>
+                            <button class="btn-icon delete" onclick="alert('Delete demo')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-user-circle" style="margin-right: 6px; color:#ffaa00;"></i> admin_god</td>
+                        <td>admin@runehall.com</td>
+                        <td>
+                            <select class="role-select">
+                                <option>user</option>
+                                <option>moderator</option>
+                                <option selected>admin</option>
+                                <option>vip</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="9999.99" class="balance-input">
+                        </td>
+                        <td>
+                            <button class="btn-icon" onclick="alert('User updated (demo)')"><i class="fas fa-save"></i></button>
+                            <button class="btn-icon delete" onclick="alert('Delete demo')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><i class="fas fa-user-circle" style="margin-right: 6px; color:#94a3b8;"></i> noob_slayer</td>
+                        <td>slayer@runehall.com</td>
+                        <td>
+                            <select class="role-select">
+                                <option selected>user</option>
+                                <option>moderator</option>
+                                <option>admin</option>
+                                <option>vip</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" step="0.01" value="75.20" class="balance-input">
+                        </td>
+                        <td>
+                            <button class="btn-icon" onclick="alert('User updated (demo)')"><i class="fas fa-save"></i></button>
+                            <button class="btn-icon delete" onclick="alert('Delete demo')"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Add New User Form -->
+            <div class="add-user-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" placeholder="e.g. new_player" value="new_player">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="player@example.com" value="player@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Initial Balance</label>
+                    <input type="number" step="0.01" value="100.00">
+                </div>
+                <button class="btn-primary" onclick="alert('User added (demo)')"><i class="fas fa-plus-circle"></i> Add User</button>
+            </div>
+        </div>
+
+        <!-- Configuration Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fas fa-cogs"></i> Site Configuration</h2>
+                <button class="btn-secondary" onclick="alert('Settings saved (demo)')">Save Changes</button>
+            </div>
+
+            <div class="config-grid">
+                <div class="config-item">
+                    <label><i class="fas fa-globe"></i> Site Title</label>
+                    <input type="text" value="RuneHall">
+                </div>
+                <div class="config-item">
+                    <label><i class="fas fa-toggle-on"></i> Maintenance Mode</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" checked> <span>Enabled</span>
+                    </div>
+                </div>
+                <div class="config-item">
+                    <label><i class="fas fa-coins"></i> Default Currency</label>
+                    <select>
+                        <option>USD ($)</option>
+                        <option>EUR (€)</option>
+                        <option>GBP (£)</option>
+                        <option selected>RS (RuneScape Gold)</option>
+                    </select>
+                </div>
+                <div class="config-item">
+                    <label><i class="fas fa-arrow-down"></i> Min. Deposit</label>
+                    <input type="number" value="10.00" step="0.01">
+                </div>
+                <div class="config-item">
+                    <label><i class="fas fa-arrow-up"></i> Max. Withdrawal</label>
+                    <input type="number" value="5000.00" step="0.01">
+                </div>
+                <div class="config-item">
+                    <label><i class="fas fa-percent"></i> Bonus Rate (%)</label>
+                    <input type="number" value="5.0" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer / Return to site -->
+        <div class="footer-links">
+            <a href="#"><i class="fas fa-arrow-left"></i> Back to Main Site</a>
+            <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+            <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </div>
+
+    <script>
+        // Any front-end demo interactivity can go here
+        // For now, we just use inline alerts on buttons to show demo actions.
+        // This simulates an admin panel without a backend.
+    </script>
+</body>
+</html>

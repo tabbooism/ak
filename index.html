@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>THOR Red Ops Platform - RuneHall Autonomous Security Suite</title>
+    <meta name="description" content="Dedicated Red Ops framework for cybersecurity assessments, domain recon, and automated security workflows." />
+    <meta property="og:title" content="THOR Red Ops Platform - RuneHall" />
+    <meta property="og:description" content="Autonomous cybersecurity assessment and penetration testing workflow suite." />
+    <script>
+      // Gracefully prevent unhandled WebSocket disconnections from surfacing in iframe runner
+      window.addEventListener('unhandledrejection', function(event) {
+        var reason = event.reason;
+        if (
+          reason &&
+          typeof reason.message === 'string' &&
+          (reason.message.includes('WebSocket') ||
+           reason.message.includes('vite') ||
+           reason.message.includes('closed without opened'))
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+      window.addEventListener('error', function(event) {
+        if (
+          event.message &&
+          typeof event.message === 'string' &&
+          (event.message.includes('WebSocket') ||
+           event.message.includes('vite'))
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

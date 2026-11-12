@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>OSRS Weaponized Scam Platform | 25 Pre‑Filled Scenarios + Deep Analysis</title>
+  <style>
+    /* ========== CORE VARIABLES ========== */
+    :root {
+      --bg: #0a0a0a;
+      --panel-bg: #121212;
+      --border: #2a2a2a;
+      --text: #d4d4d4;
+      --accent: #c0392b;
+      --accent-glow: #e74c3c;
+      --secondary: #34495e;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --info: #2980b9;
+      --font-mono: 'Courier New', monospace;
+      --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      --shadow: 0 4px 15px rgba(0,0,0,0.6);
+      --radius: 8px;
+      --transition: 0.2s ease;
+    }
+
+    body.light-mode {
+      --bg: #f0f0f0;
+      --panel-bg: #ffffff;
+      --border: #cccccc;
+      --text: #222222;
+      --accent: #b71c1c;
+      --accent-glow: #d32f2f;
+      --secondary: #607d8b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1rem;
+      transition: background-color var(--transition), color var(--transition);
+      background-image: radial-gradient(circle at 20% 20%, rgba(192,57,43,0.15) 0%, transparent 50%);
+    }
+
+    .app {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .header h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-shadow: 0 0 15px var(--accent-glow), 0 0 30px var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .header p {
+      color: var(--text);
+      opacity: 0.8;
+      font-size: 1rem;
+      margin-top: 0.3rem;
+    }
+    .theme-toggle {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--accent);
+      transition: all 0.2s;
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+
+    /* ========== NAVIGATION ========== */
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+    .nav-tab {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      padding: 0.6rem 1.3rem;
+      border-radius: 30px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: all var(--transition);
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .nav-tab.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+    .nav-tab:hover:not(.active) {
+      border-color: var(--accent);
+    }
+
+    /* ========== PANELS & CARDS ========== */
+    .tab-content {
+      display: none;
+      animation: fadeSlide 0.3s ease;
+    }
+    .tab-content.active { display: block; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: var(--secondary);
+      color: white;
+    }
+    .badge-scam { background: var(--accent); }
+    .badge-step { background: var(--info); }
+
+    /* ========== GRID & LISTS ========== */
+    .scam-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .scam-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      border-left: 4px solid var(--accent);
+      box-shadow: var(--shadow);
+    }
+    .scam-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+      border-left-color: var(--accent-glow);
+    }
+    .scam-card h3 {
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    .scam-card .meta {
+      font-size: 0.8rem;
+      color: var(--text);
+      opacity: 0.7;
+    }
+
+    /* ========== DETAIL VIEW ========== */
+    .detail-view {
+      display: none;
+    }
+    .detail-view.active { display: block; }
+
+    .first-person {
+      background: #1a1a1a;
+      border: 1px solid var(--accent);
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #d4d4d4;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+    .first-person::before {
+      content: 'SCAMMER NARRATIVE';
+      position: absolute;
+      top: -0.8rem;
+      left: 1rem;
+      background: var(--accent);
+      color: white;
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .steps-list {
+      list-style: none;
+      counter-reset: step;
+    }
+    .steps-list li {
+      counter-increment: step;
+      margin-bottom: 0.8rem;
+      padding: 0.6rem;
+      background: var(--panel-bg);
+      border-left: 3px solid var(--info);
+      border-radius: 4px;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .steps-list li::before {
+      content: 'STEP ' counter(step);
+      color: var(--info);
+      font-weight: bold;
+      font-size: 0.8rem;
+      min-width: 60px;
+    }
+
+    /* ========== PSYCH ANALYSIS ========== */
+    .psych-box {
+      background: rgba(192,57,43,0.1);
+      border: 1px dashed var(--accent);
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+    }
+    .psych-box h4 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* ========== BUTTONS & INPUTS ========== */
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 10px rgba(192,57,43,0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .btn:hover {
+      background: #e74c3c;
+      box-shadow: 0 0 15px var(--accent-glow);
+      transform: scale(1.02);
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      box-shadow: none;
+    }
+    .btn-outline:hover { background: rgba(192,57,43,0.1); }
+
+    input, select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.8rem;
+      border-radius: 4px;
+      color: var(--text);
+      font-family: var(--font-mono);
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 600px) {
+      .scam-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="theme-toggle" id="themeToggle">🌓</div>
+    <h1>⚔️ OSRS WEAPONIZED SCAM PLATFORM</h1>
+    <p>25 Pre‑Filled Scenarios · First‑Person Narratives · Step‑by‑Step Execution · Deep Analysis</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-tab="library">📚 Scam Library (25)</div>
+    <div class="nav-tab" data-tab="generator">🔧 Custom Generator</div>
+    <div class="nav-tab" data-tab="analysis">🧠 Psychological Analysis</div>
+  </div>
+
+  <!-- LIBRARY TAB -->
+  <div class="tab-content active" id="tab-library">
+    <div class="search-box">
+      <input type="text" id="searchScam" placeholder="Search scams..." style="flex:1;">
+      <select id="filterType">
+        <option value="all">All Types</option>
+        <option value="doubling">Money Doubling</option>
+        <option value="phishing">Phishing</option>
+        <option value="luring">Luring</option>
+        <option value="item">Item Scam</option>
+        <option value="social">Social Engineering</option>
+      </select>
+    </div>
+    <div class="scam-grid" id="scamGrid"></div>
+  </div>
+
+  <!-- SCAM DETAIL VIEW (hidden, shown when a scam is selected) -->
+  <div class="detail-view" id="scamDetailView"></div>
+
+  <!-- CUSTOM GENERATOR TAB -->
+  <div class="tab-content" id="tab-generator">
+    <div class="card">
+      <h3>Custom OSRS Scam Generator</h3>
+      <p>Configure your own scam scenario and get a first-person narrative + step-by-step plan.</p>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:1rem; margin-top:1rem;">
+        <div><label>Scam Type</label><select id="genType"></select></div>
+        <div><label>Target Profile</label><input id="genTarget" placeholder="e.g., wealthy skiller"></div>
+        <div><label>Item/Currency</label><input id="genItem" placeholder="e.g., partyhat, GP"></div>
+        <div><label>Urgency Level</label><select id="genUrgency"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+      </div>
+      <button class="btn" id="generateCustom" style="margin-top:1rem;">⚡ Generate Custom Scam</button>
+      <div id="customResult" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <!-- ANALYSIS TAB -->
+  <div class="tab-content" id="tab-analysis">
+    <div class="card">
+      <h3>🧠 Psychological Manipulation Matrix</h3>
+      <p>Common psychological levers used in OSRS scams – understand the attacker's mindset.</p>
+      <div id="psychMatrix" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap:1rem; margin-top:1rem;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  // ============================================
+  // 25 PREFILLED OSRS SCAM DATABASE
+  // ============================================
+  const scamsDB = [
+    {
+      id: 1,
+      name: "Classic Money Doubling",
+      type: "doubling",
+      items: "Cash, GP, Bonds",
+      narrative: `"Yo dude, I'm quitting RS so I'm doubling cash for the next 10 minutes! Send me any amount and I'll trade you back double instantly. I've already doubled like 200M for others – check the chat, they'll vouch. Hurry, I'm only doing this until my membership runs out. Trust me, it's legit, I hate scammers."`,
+      steps: [
+        "Approach target in crowded area (Grand Exchange).",
+        "Announce 'doubling money' with fake urgency.",
+        "Have an accomplice 'vouch' in public chat.",
+        "Ask target to trade small amount first to build trust.",
+        "Actually double that small amount (to build credibility).",
+        "Wait for target to send larger amount.",
+        "Log out immediately after receiving big trade.",
+        "Use alt account to continue scamming."
+      ],
+      psychology: "Exploits greed and the 'sunk cost' fallacy after the initial small win."
+    },
+    {
+      id: 2,
+      name: "Fake RuneLite Phishing",
+      type: "phishing",
+      items: "Account credentials, Bank PIN, Email",
+      narrative: `"Hey bro, I just downloaded this sick new RuneLite plugin that shows bank values and auto‑switches prayers – game changer! Go to this link to install it, just like the official site. It'll ask you to log in through the client, but that's normal. After that, you'll have the best PVM experience ever."`,
+      steps: [
+        "Send a message in a popular clan chat or Discord.",
+        "Provide a URL that mimics the RuneLite homepage.",
+        "The fake site asks for OSRS login credentials.",
+        "Optionally request bank PIN and authenticator code.",
+        "Once entered, credentials are harvested in real-time.",
+        "Access the victim's account and transfer all wealth."
+      ],
+      psychology: "Preys on desire for better gaming tools and trust in well‑known third‑party software."
+    },
+    {
+      id: 3,
+      name: "Wilderness Lure (Trust Game)",
+      type: "luring",
+      items: "Valuable gear, Rare items",
+      narrative: `"Wanna make easy 50M? There's a glitch where if you stand at level 1 Wilderness with your items on, the game thinks you're skulled and gives you bonus XP. Just trade me all your valuable gear so I can 'enchant' it, then we go into deep Wildy – but don't worry, you'll be safe because I'll protect you with my clan. Promise."`,
+      steps: [
+        "Befriend target over days/weeks, building trust.",
+        "Claim to know a bug that requires temporarily giving items.",
+        "Convince target to trade all valuables to you.",
+        "Lead them into multi‑combat Wilderness.",
+        "Have accomplices waiting to kill target.",
+        "Loot items and split with team."
+      ],
+      psychology: "Exploits trust developed over time and curiosity about rare glitches."
+    },
+    {
+      id: 4,
+      name: "Item Swap Scam (Rune -> Mithril)",
+      type: "item",
+      items: "Rune items, Mithril equivalents",
+      narrative: `"Selling rune platebody 40k! Quick trade, I need to go. I'll put up rune plate in trade window, then quickly swap it to mithril platebody while you're checking. By the time you notice, trade is accepted and I'm gone. Easy 30k profit for me, thanks."`,
+      steps: [
+        "Advertise a popular item at slightly below market price.",
+        "In trade window, show the genuine item first.",
+        "Distract victim with chat ('hurry, my mom's calling').",
+        "Quickly switch item to a lower-value lookalike.",
+        "If victim declines, blame lag and try again.",
+        "Accept trade and teleport away."
+      ],
+      psychology: "Uses time pressure and visual similarity to override careful checking."
+    },
+    {
+      id: 5,
+      name: "Jagex Moderator Impersonation",
+      type: "social",
+      items: "Account details, Password, Bank items",
+      narrative: `"This is Jagex Moderator Mike. Your account has been flagged for macroing. To avoid a ban, please reply with your login email and password so we can verify your account. This is an automated message, do not ignore. We'll also need your bank PIN for investigation."`,
+      steps: [
+        "Create an account with a name resembling a Jagex mod (e.g., 'Mod Mike_Jagex').",
+        "Contact players via private message or in-game chat.",
+        "Use official‑sounding language and threats.",
+        "Request credentials under the guise of 'verification'.",
+        "If victim complies, immediately lock them out and transfer wealth."
+      ],
+      psychology: "Authority bias – victims rarely question a supposed Jagex representative."
+    },
+    {
+      id: 6,
+      name: "Fake Double XP Weekend Link",
+      type: "phishing",
+      items: "Account credentials, RuneScape account",
+      narrative: `"DUDE, DOUBLE XP WEEKEND ANNOUNCED! Click this link to activate it on your account before it's full. It's the official RS forum but you need to log in. Hurry, slots are limited! I already activated mine, got 2M XP in an hour."`,
+      steps: [
+        "Post in highly populated areas (GE, banks).",
+        "Provide a shortened URL that leads to a fake forum login.",
+        "Victim enters credentials thinking it's the official site.",
+        "Credentials are stolen and account is hijacked."
+      ],
+      psychology: "FOMO (fear of missing out) combined with urgency."
+    },
+    {
+      id: 7,
+      name: "Luring with 'Anti‑Scam' Tutorial",
+      type: "luring",
+      items: "Valuable items, Cash stack",
+      narrative: `"I'm teaching people how to avoid lures. Follow me to a secluded area and I'll show you the common scam. Trust me, I hate lurers. Just bring your best gear and I'll demonstrate. I'll even give you 5M if you participate. No risk, I'll trade it all back."`,
+      steps: [
+        "Advertise 'free anti‑scam lessons' near banks.",
+        "Take victim to a remote location.",
+        "Ask them to trade valuables to you as part of the 'lesson'.",
+        "Once items are traded, teleport away or log out.",
+        "Use alt to continue the scam elsewhere."
+      ],
+      psychology: "Irony – the scammer pretends to be anti‑scam, lowering victim's defenses."
+    },
+    {
+      id: 8,
+      name: "Fake Drop Party (Entrana Trap)",
+      type: "luring",
+      items: "Armour, Weapons, Cash",
+      narrative: `"DROP PARTY AT ENTRANA! Bring your armour and weapons – we're going to the island to drop rares. You can only bring what you can wear, so equip your best gear. Trust me, it's gonna be huge. Once on Entrana, my friends will kill you for your stuff."`,
+      steps: [
+        "Announce a drop party on Entrana (no weapons allowed).",
+        "Victims must wear their best gear to bring it.",
+        "Upon arrival, a group of PKers kill them.",
+        "Loot all unprotected items."
+      ],
+      psychology: "Greed overrides caution; victims forget Entrana's PvP rules."
+    },
+    {
+      id: 9,
+      name: "Trust Trade with 'Video Proof'",
+      type: "social",
+      items: "Any valuable item",
+      narrative: `"I'm a YouTuber making a 'trust trade' video. Trade me your most valuable item and I'll trade it back plus 1M for participating. I'll record the whole thing so it's legit. Hundreds of people have done it, check my channel. Just need one more for the video."`,
+      steps: [
+        "Pose as a content creator in popular worlds.",
+        "Show a fake YouTube channel with fabricated trust trade clips.",
+        "Ask victim to trade rare item for a promised return.",
+        "Accept trade and log out or hop worlds."
+      ],
+      psychology: "Social proof (fake YouTube fame) lowers skepticism."
+    },
+    {
+      id: 10,
+      name: "Phishing via Fake OSRS Mobile Beta",
+      type: "phishing",
+      items: "Login credentials, Bank PIN",
+      narrative: `"Guys, OSRS Mobile closed beta invites are out! Go to this link and log in with your account to see if you got invited. I just got in, it's amazing! You'll need to verify your email and password. Hurry, only 1000 slots!"`,
+      steps: [
+        "Spread link on social media and in-game.",
+        "Fake site mimics official RuneScape mobile page.",
+        "Victim inputs username, password, and possibly bank PIN.",
+        "Scammer uses info to clean out account."
+      ],
+      psychology: "Excitement about new technology distracts from security."
+    },
+    {
+      id: 11,
+      name: "Doubling Rares Scam",
+      type: "doubling",
+      items: "Partyhats, Halloween masks, Santa hats",
+      narrative: `"Doubling rares! I'm quitting and giving away my collection. Trade me any rare and I'll trade back two of the same. Last chance before I log off forever. I've done this for 10 people already, check the trade log."`,
+      steps: [
+        "Show a fake inventory of doubled rares (multiple identical items).",
+        "Use accomplices to pretend they received doubles.",
+        "Receive rare item from victim, then log out."
+      ],
+      psychology: "Scarcity + high value tempts even cautious players."
+    },
+    {
+      id: 12,
+      name: "Twisted Bow Rental Scam",
+      type: "item",
+      items: "Twisted bow, other high‑value weapons",
+      narrative: `"Lending out my Twisted Bow for 500K per hour. Trade me the cash and I'll give you the bow. I'll be right here, you can use it at the bank. I need the money, so this is a win‑win. Once you trade me the cash, I'm out."`,
+      steps: [
+        "Offer to 'rent' a high‑value weapon.",
+        "Take collateral in GP but never hand over the weapon.",
+        "Log out once the cash is received."
+      ],
+      psychology: "Desire for temporary power overrides caution; no collateral is given."
+    },
+    {
+      id: 13,
+      name: "Fake Giveaway with 'Tax'",
+      type: "social",
+      items: "GP, Items for 'tax'",
+      narrative: `"WIN A FREE TANGLER ROOT PET! To enter, just comment your RSN. But winners need to pay a small 2M 'transfer fee' to receive the pet. It's just to cover the cost of the bond I used to buy the pet. Totally worth it, right?"`,
+      steps: [
+        "Announce a high‑value giveaway on social media.",
+        "Collect usernames and contact winners.",
+        "Request a 'tax' or 'transfer fee' before giving the prize.",
+        "Disappear after receiving payment."
+      ],
+      psychology: "Sunk cost fallacy – after 'winning', victims feel committed to paying."
+    },
+    {
+      id: 14,
+      name: "Fake Clan Recruitment Fee",
+      type: "social",
+      items: "GP (membership fee), Items for 'clan bank'",
+      narrative: `"Elite PvM clan recruiting! 120+ combat, daily raids. Requirement: 5M joining fee to prove you're serious. You'll get it back after your first week. We also need your best gear for the clan bank as a trust exercise. Welcome aboard!"`,
+      steps: [
+        "Advertise in high‑level areas.",
+        "Ask for an upfront fee and item deposit.",
+        "Take the items and disband the clan.",
+        "Repeat under a new name."
+      ],
+      psychology: "Legitimacy through exclusivity – high requirements make the clan seem real."
+    },
+    {
+      id: 15,
+      name: "Wilderness 'Item Retrieval' Service",
+      type: "luring",
+      items: "Items dropped on death",
+      narrative: `"Did you just die in the Wilderness? I can retrieve your items for a small fee. Trade me 500K and I'll run back and grab them. I'm a high level, it's safe. Once you pay, I'll just take the cash and leave."`,
+      steps: [
+        "Monitor death announcements or player conversations.",
+        "Offer a retrieval service.",
+        "Request upfront payment.",
+        "Never actually attempt retrieval, or steal items if possible."
+      ],
+      psychology: "Victim is in a vulnerable state and willing to grasp at any solution."
+    },
+    {
+      id: 16,
+      name: "Fake Account Recovery Assistance",
+      type: "phishing",
+      items: "Account recovery details, Email access",
+      narrative: `"I can help you recover your hacked account! Just give me the original email and the creation date, and I'll talk to Jagex support for you. They listen to me because I'm a community helper. I'll need your current password to verify identity."`,
+      steps: [
+        "Find players complaining about lost accounts.",
+        "Offer 'insider' help.",
+        "Gather enough details to submit a recovery request.",
+        "Hijack the account using the obtained info."
+      ],
+      psychology: "Exploits desperation and hope; scammers seem like heroes."
+    },
+    {
+      id: 17,
+      name: "Pump and Dump Merching Clan",
+      type: "social",
+      items: "GP, Specific items",
+      narrative: `"JOIN OUR MERCHING CLAN! We're about to pump 'Zulrah scales' to 500gp each. Buy now before the price skyrockets. We have 200 members ready to buy. I've already made 50M. Quick, buy from the GE!"`,
+      steps: [
+        "Create a clan focused on a specific low‑volume item.",
+        "Encourage members to buy the item, inflating the price.",
+        "Sell the item at the peak.",
+        "Price crashes, leaving members with worthless items."
+      ],
+      psychology: "FOMO and herd mentality; victims see others buying and join."
+    },
+    {
+      id: 18,
+      name: "Fake OSRS Streamer Giveaway",
+      type: "phishing",
+      items: "Login credentials, GP",
+      narrative: `"B0aty is quitting! He's giving away 10B on his last stream. Go to [fake Twitch link] and enter your RSN and password in the chat to win. Hurry before it's over!"`,
+      steps: [
+        "Create a fake Twitch page imitating a popular streamer.",
+        "Spread the link in-game or on Discord.",
+        "Collect credentials from the 'giveaway entry' form."
+      ],
+      psychology: "Celebrity endorsement and urgency lower critical thinking."
+    },
+    {
+      id: 19,
+      name: "Tele‑Tab Lure (Ice Plateau)",
+      type: "luring",
+      items: "High value items, GP",
+      narrative: `"Hey, want to try a new PvM spot? I have teletabs that take you right there. It's deep in the Wilderness but safe if you're with me. Just bring your gear and I'll supply the tab. Actually, the tab only works if you're wearing your best stuff."`,
+      steps: [
+        "Gain trust then offer a teletab to a 'safe' location.",
+        "The tab actually teleports to a multi‑combat PvP area.",
+        "Accomplices kill the victim and loot items."
+      ],
+      psychology: "Trust is abused; victims don't verify the teleport destination."
+    },
+    {
+      id: 20,
+      name: "Fake RuneFest Ticket Scam",
+      type: "phishing",
+      items: "GP, Personal information",
+      narrative: `"Selling RuneFest tickets at half price! I won two but can't go. Just need your real name, email, and a 10M deposit. I'll transfer the ticket to your account. Trust me, it's legit."`,
+      steps: [
+        "Advertise discounted tickets.",
+        "Collect personal info and deposit.",
+        "Never deliver ticket."
+      ],
+      psychology: "Scarcity and perceived high value make victims overlook red flags."
+    },
+    {
+      id: 21,
+      name: "Friendship into 'Loan' Scam",
+      type: "social",
+      items: "High value weapons/armour",
+      narrative: `"We've been friends for months. Can I borrow your Twisted Bow for a raid? I'll give it back right after, plus 5M for your trouble. You know I'm good for it. Once I have it, I'll block you and sell it."`,
+      steps: [
+        "Cultivate a long‑term in‑game friendship.",
+        "Ask to borrow a high‑value item.",
+        "Log out and block the victim."
+      ],
+      psychology: "Emotional manipulation – victims feel obligated to help a 'friend'."
+    },
+    {
+      id: 22,
+      name: "Fake Runecrafting Service",
+      type: "item",
+      items: "GP (payment for service)",
+      narrative: `"Leveling Runecrafting? I'll run essence for you, 1M per hour. Just give me the essence and payment upfront. I'll be back in an hour with your runes. Or maybe I won't."`,
+      steps: [
+        "Offer a service requiring upfront payment/materials.",
+        "Take the items and disappear."
+      ],
+      psychology: "Convenience and laziness exploited."
+    },
+    {
+      id: 23,
+      name: "Phishing via Fake Forums",
+      type: "phishing",
+      items: "Login credentials",
+      narrative: `"Check out my 99 Slayer guide on the official forums. Link in bio. You need to log in to view it. It's the real RuneScape forum, I promise."`,
+      steps: [
+        "Post a link to a fake forum requiring login.",
+        "Steal credentials."
+      ],
+      psychology: "Familiar platform (forums) lowers guard."
+    },
+    {
+      id: 24,
+      name: "Trust Game with Rolled Dice",
+      type: "doubling",
+      items: "GP, Items bet",
+      narrative: `"Let's play a dice game. Roll 55+ and I double your bet. I'm using the official RuneScape dice bag, it's fair. I'll even show you my rolls first. But I'll log out if I lose."`,
+      steps: [
+        "Use in‑game dice to gamble.",
+        "Only pay out on very small bets.",
+        "Refuse to pay or log out on large wins."
+      ],
+      psychology: "Gambling addiction and the illusion of fairness."
+    },
+    {
+      id: 25,
+      name: "Fake 'Tax Evasion' Scam",
+      type: "social",
+      items: "GP (payment for 'service')",
+      narrative: `"Avoid the Grand Exchange tax! I have a secret method to bypass it. Pay me 2M and I'll show you how. It's an exploit that Jagex doesn't know about. You'll save millions."`,
+      steps: [
+        "Sell a nonexistent 'exploit'.",
+        "Collect payment and provide fake or no information."
+      ],
+      psychology: "Desire to cheat the system blinds victims."
+    }
+  ];
+
+  // ============================================
+  // DOM REFERENCES & STATE
+  // ============================================
+  const themeToggle = document.getElementById('themeToggle');
+  const navTabs = document.querySelectorAll('.nav-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
+  const scamGrid = document.getElementById('scamGrid');
+  const searchInput = document.getElementById('searchScam');
+  const filterSelect = document.getElementById('filterType');
+  const detailView = document.getElementById('scamDetailView');
+  const customResult = document.getElementById('customResult');
+  const generateCustomBtn = document.getElementById('generateCustom');
+  const psychMatrix = document.getElementById('psychMatrix');
+
+  // ============================================
+  // THEME TOGGLE
+  // ============================================
+  function applyTheme() {
+    const saved = localStorage.getItem('osrsWeaponTheme');
+    if (saved === 'light') document.body.classList.add('light-mode');
+    else document.body.classList.remove('light-mode');
+  }
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    const isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('osrsWeaponTheme', isLight ? 'light' : 'dark');
+  });
+  applyTheme();
+
+  // ============================================
+  // TAB SWITCHING
+  // ============================================
+  navTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      navTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      tabContents.forEach(c => c.classList.remove('active'));
+      const target = document.getElementById(`tab-${tab.dataset.tab}`);
+      target.classList.add('active');
+      // Hide detail view when switching tabs
+      detailView.classList.remove('active');
+    });
+  });
+
+  // ============================================
+  // RENDER SCAM LIBRARY GRID
+  // ============================================
+  function renderScamGrid() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filter = filterSelect.value;
+
+    const filtered = scamsDB.filter(scam => {
+      const matchSearch = scam.name.toLowerCase().includes(searchTerm) || 
+                         scam.narrative.toLowerCase().includes(searchTerm);
+      const matchType = filter === 'all' || scam.type === filter;
+      return matchSearch && matchType;
+    });
+
+    scamGrid.innerHTML = filtered.map(scam => `
+      <div class="scam-card" data-id="${scam.id}">
+        <h3>${escHtml(scam.name)}</h3>
+        <div class="meta">
+          <span class="badge badge-scam">${scam.type}</span> · ${scam.items}
+        </div>
+      </div>
+    `).join('');
+
+    // Add click handlers
+    document.querySelectorAll('.scam-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = parseInt(card.dataset.id);
+        const scam = scamsDB.find(s => s.id === id);
+        showScamDetail(scam);
+      });
+    });
+  }
+
+  searchInput.addEventListener('input', renderScamGrid);
+  filterSelect.addEventListener('change', renderScamGrid);
+
+  // ============================================
+  // SHOW SCAM DETAIL VIEW
+  // ============================================
+  function showScamDetail(scam) {
+    // Hide grid, show detail
+    document.getElementById('tab-library').classList.remove('active');
+    detailView.classList.add('active');
+    detailView.innerHTML = `
+      <div class="card">
+        <div class="card-header">
+          <h2>${escHtml(scam.name)}</h2>
+          <button class="btn btn-outline" id="backToLibrary">← Back to Library</button>
+        </div>
+        <span class="badge badge-scam">${scam.type}</span> · ${scam.items}
+        <div class="first-person">${escHtml(scam.narrative)}</div>
+        <h4>📋 Step-by-Step Execution</h4>
+        <ol class="steps-list">
+          ${scam.steps.map(step => `<li>${escHtml(step)}</li>`).join('')}
+        </ol>
+        <div class="psych-box">
+          <h4>🧠 Psychological Analysis</h4>
+          <p>${escHtml(scam.psychology)}</p>
+        </div>
+      </div>
+    `;
+    document.getElementById('backToLibrary').addEventListener('click', () => {
+      detailView.classList.remove('active');
+      document.getElementById('tab-library').classList.add('active');
+    });
+  }
+
+  // ============================================
+  // CUSTOM GENERATOR (using templates)
+  // ============================================
+  // Populate type dropdown
+  const genTypeSelect = document.getElementById('genType');
+  const uniqueTypes = [...new Set(scamsDB.map(s => s.type))];
+  uniqueTypes.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+    genTypeSelect.appendChild(opt);
+  });
+
+  generateCustomBtn.addEventListener('click', () => {
+    const type = genTypeSelect.value;
+    const target = document.getElementById('genTarget').value || 'a player';
+    const item = document.getElementById('genItem').value || 'GP';
+    const urgency = document.getElementById('genUrgency').value;
+
+    // Find a template scam of the same type for structure
+    const template = scamsDB.filter(s => s.type === type)[0] || scamsDB[0];
+    // Build a custom narrative by replacing placeholders
+    let customNarrative = template.narrative
+      .replace(/GP|items|rares|partyhat/gi, item)
+      .replace(/target/gi, target)
+      .replace(/money/gi, item);
+    
+    let customSteps = template.steps.map(step => step.replace(/GP|items|rares/gi, item));
+
+    customResult.innerHTML = `
+      <div class="card">
+        <h3>Custom Scam Generated</h3>
+        <div class="first-person">${escHtml(customNarrative)}</div>
+        <h4>Steps</h4>
+        <ol class="steps-list">
+          ${customSteps.map(s => `<li>${escHtml(s)}</li>`).join('')}
+        </ol>
+        <div class="psych-box">
+          <h4>Psychology Used</h4>
+          <p>${escHtml(template.psychology)}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  // ============================================
+  // PSYCHOLOGICAL MATRIX (Analysis Tab)
+  // ============================================
+  const psychPrinciples = [
+    { principle: "Urgency & Scarcity", desc: "Limited time offers create panic, bypassing rational thought.", example: "Double XP only for next 10 mins!" },
+    { principle: "Authority Bias", desc: "Victims obey figures of authority without question.", example: "Impersonating Jagex Moderator or famous streamer." },
+    { principle: "Social Proof", desc: "If others are doing it, it must be safe.", example: "Fake vouches from 'other players'." },
+    { principle: "Reciprocity", desc: "After receiving a small favor, victims feel obligated to return it.", example: "Doubler actually doubles small amount first." },
+    { principle: "Commitment & Consistency", desc: "Once a small commitment is made, larger ones follow.", example: "Start with a small trade, then ask for big one." },
+    { principle: "Greed", desc: "Promises of huge returns override logic.", example: "Doubling money, unrealistic giveaways." },
+    { principle: "Fear & Intimidation", desc: "Threats of banning or account loss create panic.", example: "Your account will be banned unless..." },
+    { principle: "Trust Exploitation", desc: "Long‑term friendships are cultivated then abused.", example: "Borrowing rare items after months of friendship." }
+  ];
+
+  psychMatrix.innerHTML = psychPrinciples.map(p => `
+    <div class="psych-box">
+      <h4>${p.principle}</h4>
+      <p><strong>Description:</strong> ${p.desc}</p>
+      <p><em>Example:</em> ${p.example}</p>
+    </div>
+  `).join('');
+
+  // ============================================
+  // INITIAL RENDER
+  // ============================================
+  renderScamGrid();
+
+  // ============================================
+  // UTILS
+  // ============================================
+  function escHtml(text) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+  }
+})();
+</script>
+</body>
+</html>

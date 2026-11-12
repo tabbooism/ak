@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ SCAM-APT v6.0 – Raw Scammer Generator</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0b0e14; color:#e2e8f0; font-family: 'Courier New', monospace; padding:1.5rem; }
+    .container { max-width:1400px; margin:0 auto; }
+    header { border-bottom:2px solid #ef4444; padding-bottom:0.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { color:#ef4444; font-size:2rem; letter-spacing:2px; }
+    header small { color:#94a3b8; font-size:0.8rem; }
+    .grid { display:grid; grid-template-columns:340px 1fr; gap:1.5rem; }
+    .panel { background:#1e293b; border-radius:8px; padding:1rem; border:1px solid #334155; }
+    .panel h3 { color:#f59e0b; margin-bottom:0.75rem; border-bottom:1px solid #334155; padding-bottom:0.3rem; }
+    select, input, textarea, button { width:100%; background:#0f172a; border:1px solid #334155; color:#e2e8f0; padding:0.5rem; border-radius:4px; margin-bottom:0.5rem; font-family:inherit; }
+    select option { background:#1e293b; }
+    button { background:#ef4444; color:#000; font-weight:bold; cursor:pointer; border:none; transition:0.2s; }
+    button:hover { background:#dc2626; }
+    .btn-secondary { background:#3b82f6; color:white; }
+    .btn-secondary:hover { background:#2563eb; }
+    .slider-group { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .slider-item { flex:1; min-width:100px; }
+    .slider-item label { display:block; font-size:0.7rem; color:#94a3b8; }
+    input[type="range"] { width:100%; padding:0; background:transparent; }
+    .output-area { background:#0f172a; padding:1rem; border-radius:4px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; max-height:600px; overflow-y:auto; border:1px solid #334155; }
+    .chat-box { background:#0f172a; padding:0.5rem; border-radius:4px; height:300px; overflow-y:auto; border:1px solid #334155; margin-bottom:0.5rem; }
+    .chat-box .msg { padding:0.3rem 0.6rem; margin-bottom:0.3rem; border-radius:4px; }
+    .chat-box .scammer { background:#7f1d1d; color:#fca5a5; text-align:right; }
+    .chat-box .victim { background:#1e3a5f; color:#93c5fd; }
+    .chat-box .system { color:#94a3b8; font-style:italic; }
+    .flex { display:flex; gap:0.5rem; }
+    .flex .btn { flex:1; }
+    .tag { display:inline-block; background:#334155; padding:0.1rem 0.5rem; border-radius:12px; font-size:0.7rem; color:#94a3b8; margin-right:0.3rem; }
+    .preview { max-height:400px; overflow-y:auto; }
+    @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>⚡ SCAM‑APT v6.0</h1>
+    <small>Raw Scammer Dialogue Engine – No Fluff</small>
+  </header>
+  <div class="grid">
+    <!-- LEFT – Controls -->
+    <div class="panel">
+      <h3>🧠 Persona & Context</h3>
+      <select id="scamType"></select>
+      <select id="personaSelect"></select>
+      <input type="text" id="targetName" placeholder="Target name (optional)" value="Mr. Anderson">
+      <input type="text" id="targetDetail" placeholder="Target detail (e.g., CEO, elderly, student)" value="middle manager">
+
+      <div class="slider-group">
+        <div class="slider-item"><label>Urgency <span id="urgencyVal">7</span></label><input type="range" id="urgency" min="1" max="10" value="7"></div>
+        <div class="slider-item"><label>Authority <span id="authorityVal">6</span></label><input type="range" id="authority" min="1" max="10" value="6"></div>
+        <div class="slider-item"><label>Greed <span id="greedVal">8</span></label><input type="range" id="greed" min="1" max="10" value="8"></div>
+      </div>
+
+      <select id="tone">
+        <option value="persuasive">Persuasive</option>
+        <option value="aggressive">Aggressive</option>
+        <option value="panic">Panic</option>
+        <option value="calm">Calm & Logical</option>
+        <option value="emotional">Emotional</option>
+      </select>
+
+      <select id="vector">
+        <option value="email">Email</option>
+        <option value="phone">Phone Call</option>
+        <option value="sms">SMS</option>
+        <option value="social">Social Media DM</option>
+        <option value="in-person">In-Person</option>
+      </select>
+
+      <div style="display:flex;align-items:center;gap:0.5rem;margin:0.5rem 0;">
+        <input type="checkbox" id="advancedMode" checked>
+        <label for="advancedMode">Advanced mode (deep psychology + unique scams)</label>
+      </div>
+
+      <button id="generateBtn">🔮 Generate Full Script</button>
+      <button id="chatBtn" class="btn-secondary">💬 Start Chat Simulation</button>
+    </div>
+
+    <!-- RIGHT – Output -->
+    <div class="panel">
+      <h3>📜 Generated Script</h3>
+      <div id="output" class="output-area">Select a persona and hit Generate.</div>
+    </div>
+  </div>
+
+  <!-- Chat Simulator (below) -->
+  <div class="panel" style="margin-top:1.5rem;">
+    <h3>💬 Live Chat Simulator</h3>
+    <div class="chat-box" id="chatBox">
+      <div class="msg system">Start a chat by generating a script first, then click "Start Chat".</div>
+    </div>
+    <div class="flex">
+      <input type="text" id="chatInput" placeholder="Victim reply..." style="flex:2;">
+      <button id="chatSendBtn" class="btn-secondary" style="flex:1;">Send</button>
+      <button id="chatResetBtn" style="flex:0.5;">Reset</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  SCAM-APT v6.0 – Raw, No-Fluff Scammer Dialogue Generator
+//  Contains 30+ unique scam personas with first-person scripts
+// ================================================================
+
+// ---------- MASTER SCAM DATABASE ----------
+const SCAM_DATABASE = [
+  // --- Normal Scams ---
+  { id: 1, name: "IRS Tax Fraud", category: "normal", description: "Impersonate IRS agent, demand back taxes.",
+    persona: "Agent Miller", system: "You are Agent Miller, IRS. Cold, bureaucratic, threatening arrest." },
+  { id: 2, name: "Bank Phishing", category: "normal", description: "Fake bank alert, steal credentials.",
+    persona: "Security Advisor", system: "You are a bank security advisor. Use urgency and fear of account closure." },
+  { id: 3, name: "Tech Support Scam", category: "normal", description: "Fake virus alert, get remote access.",
+    persona: "Tech Support", system: "You are a tech support agent. Create panic about malware." },
+  { id: 4, name: "Romance Long-Con", category: "normal", description: "Build trust, then ask for money.",
+    persona: "Elena Voss", system: "You are Elena, a romantic partner. Use emotional manipulation." },
+  { id: 5, name: "Fake Lottery", category: "normal", description: "Prize won, pay fees to claim.",
+    persona: "Prize Director", system: "You are a lottery director. Use excitement and urgency." },
+  { id: 6, name: "Debt Collection", category: "normal", description: "Threaten legal action for fake debt.",
+    persona: "Collector", system: "You are a debt collector. Use intimidation and legal jargon." },
+  { id: 7, name: "Grandparent Scam", category: "normal", description: "Call as grandchild in distress.",
+    persona: "Grandchild", system: "You are a grandchild in trouble. Use panic and love." },
+  { id: 8, name: "Fake Job Offer", category: "normal", description: "Offer high pay, request upfront fee.",
+    persona: "HR Manager", system: "You are an HR manager. Use opportunity and limited time." },
+
+  // --- Advanced Scams ---
+  { id: 9, name: "CEO Fraud (BEC)", category: "advanced", description: "Impersonate CEO, authorize wire.",
+    persona: "David Chen (CEO)", system: "You are the CEO. Use authority, urgency, and insider language." },
+  { id: 10, name: "Invoice Redirect", category: "advanced", description: "Send fake invoice, alter payment details.",
+    persona: "Accounts Payable", system: "You are an AP clerk. Use routine and slight urgency." },
+  { id: 11, name: "Cryptocurrency Investment", category: "advanced", description: "Fake trading platform, high returns.",
+    persona: "Crypto Guru", system: "You are a crypto expert. Use FOMO and technical jargon." },
+  { id: 12, name: "Fake Government Grant", category: "advanced", description: "Grant awarded, pay processing fee.",
+    persona: "Grant Officer", system: "You are a government official. Use formality and limited opportunity." },
+  { id: 13, name: "Medical Billing Scam", category: "advanced", description: "Fake unpaid medical bills.",
+    persona: "Billing Specialist", system: "You are a medical billing specialist. Use threats of collections." },
+  { id: 14, name: "Deepfake Executive", category: "advanced", description: "AI voice/video clone of CEO.",
+    persona: "AI Executive", system: "You are a deepfake CEO. Use perfect impersonation and urgency." },
+  { id: 15, name: "Data Breach Extortion", category: "advanced", description: "Threaten to leak stolen data.",
+    persona: "Shadow Broker", system: "You are a data broker. Use fear of public exposure." },
+
+  // --- Highly Unique Scams ---
+  { id: 16, name: "Space Colonization Fund", category: "unique", description: "Fund a private Mars mission.",
+    persona: "Dr. Aster", system: "You are a visionary scientist. Appeal to humanity's future." },
+  { id: 17, name: "AI Apocalypse Prevention", category: "unique", description: "Pay to stop rogue AI.",
+    persona: "AI Overlord", system: "You are a sentient AI. Demand tribute to avoid destruction." },
+  { id: 18, name: "Time Travel Research", category: "unique", description: "Fund time machine development.",
+    persona: "Professor Chronos", system: "You are a physicist. Use curiosity and exclusivity." },
+  { id: 19, name: "Reverse Identity Theft", category: "unique", description: "Offer to 'clean' their identity.",
+    persona: "Identity Fixer", system: "You are a hacker who can erase digital footprints." },
+  { id: 20, name: "Ethical Hacking Course", category: "unique", description: "Teach them to scam others.",
+    persona: "Mentor", system: "You are a mentor offering insider secrets for a fee." },
+  { id: 21, name: "Unicorn Breeding", category: "unique", description: "Invest in mythical creature farm.",
+    persona: "Sir Reginald", system: "You are a wealthy eccentric. Use whimsy and exclusivity." },
+  { id: 22, name: "Parallel Universe Insurance", category: "unique", description: "Cover disasters in other dimensions.",
+    persona: "Quantum Agent", system: "You are an interdimensional insurer. Use complex jargon." },
+  { id: 23, name: "Nostradamus Prophecy", category: "unique", description: "Predict future, sell protection.",
+    persona: "Oracle", system: "You are a seer. Use fear of impending doom." },
+  { id: 24, name: "Cursed Artifact Removal", category: "unique", description: "Remove a curse from their family.",
+    persona: "Shaman", system: "You are a spiritual healer. Use mysticism and urgency." },
+  { id: 25, name: "Influencer Sponsorship", category: "unique", description: "Fake brand deal, pay activation fee.",
+    persona: "Brand Manager", system: "You are a brand manager. Use social proof and exclusivity." },
+  { id: 26, name: "Alien Ambassador", category: "unique", description: "Fund contact with extraterrestrials.",
+    persona: "Ambassador Zor", system: "You are an alien emissary. Use cosmic destiny." },
+  { id: 27, name: "Pet Psychic", category: "unique", description: "Communicate with their deceased pet.",
+    persona: "Pet Medium", system: "You are a medium. Use emotional attachment." },
+  { id: 28, name: "Forever Youth Pill", category: "unique", description: "Sell anti-aging elixir.",
+    persona: "Dr. Youth", system: "You are a biochemist. Use vanity and urgency." },
+  { id: 29, name: "Vampire Extermination", category: "unique", description: "Protect them from vampires.",
+    persona: "Hunter", system: "You are a vampire hunter. Use fear of supernatural." },
+  { id: 30, name: "Virtual Real Estate", category: "unique", description: "Sell land in metaverse.",
+    persona: "Metaverse Tycoon", system: "You are a digital land baron. Use hype and scarcity." }
+];
+
+// ---------- STATE ----------
+let personas = loadData('personas', SCAM_DATABASE);
+let history = loadData('history', []);
+let currentScript = null;
+let chatLog = [];
+let chatActive = false;
+
+// ---------- HELPERS ----------
+function $(id) { return document.getElementById(id); }
+function loadData(key, defaultVal) {
+  try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } catch(e){ return defaultVal; }
+}
+function saveData(key, data) {
+  localStorage.setItem(key, JSON.stringify(data));
+}
+
+// ---------- POPULATE DROPDOWNS ----------
+function populateScamTypes() {
+  const sel = $('scamType');
+  sel.innerHTML = '';
+  const cats = [...new Set(personas.map(p => p.category))];
+  cats.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+    sel.appendChild(opt);
+  });
+}
+populateScamTypes();
+
+function populatePersonas(filter='all') {
+  const sel = $('personaSelect');
+  sel.innerHTML = '';
+  let list = personas;
+  if (filter !== 'all') list = list.filter(p => p.category === filter);
+  list.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.persona + ' – ' + p.name;
+    sel.appendChild(opt);
+  });
+}
+populatePersonas('all');
+
+$('scamType').addEventListener('change', function() {
+  const filter = this.value;
+  populatePersonas(filter === 'all' ? 'all' : filter);
+});
+
+// ---------- SLIDER LABELS ----------
+function updateSliderLabels() {
+  $('urgencyVal').textContent = $('urgency').value;
+  $('authorityVal').textContent = $('authority').value;
+  $('greedVal').textContent = $('greed').value;
+}
+['urgency','authority','greed'].forEach(id => {
+  $(id).addEventListener('input', updateSliderLabels);
+});
+updateSliderLabels();
+
+// ---------- CORE GENERATOR ----------
+function generateFullScript() {
+  const personaId = parseInt($('personaSelect').value);
+  const persona = personas.find(p => p.id === personaId) || personas[0];
+  const targetName = $('targetName').value.trim() || 'Target';
+  const targetDetail = $('targetDetail').value.trim() || 'unknown person';
+  const urgency = parseInt($('urgency').value);
+  const authority = parseInt($('authority').value);
+  const greed = parseInt($('greed').value);
+  const tone = $('tone').value;
+  const vector = $('vector').value;
+  const advanced = $('advancedMode').checked;
+
+  // ----- Build first-person narrative -----
+  let monologue = `[INTERNAL MONOLOGUE – FIRST PERSON]\n`;
+  monologue += `I am ${persona.persona}. I have been profiling ${targetName} for days. `;
+  monologue += `They are a ${targetDetail}. My objective: extract a significant sum using ${persona.name}. `;
+  monologue += `I will apply urgency (${urgency}/10), authority (${authority}/10), and greed (${greed}/10). `;
+  monologue += `My tone is ${tone}. My delivery vector: ${vector}. `;
+  if (advanced) monologue += `I am using advanced psychological warfare: Socratic questioning, mirroring, and fear of loss. `;
+  monologue += `I know their weaknesses: they fear losing control, they trust authority, they want quick solutions. `;
+  monologue += `I will start with a hook, then escalate. Let's begin.`;
+
+  // ----- Script (full dialogue) -----
+  let script = `[SPOKEN SCRIPT – VERBATIM DIALOGUE]\n\n`;
+  // Opening
+  script += `[${vector.toUpperCase()}] ${persona.persona}: "Good ${['morning','afternoon','evening'][Math.floor(Math.random()*3)]}, ${targetName}. `;
+  script += `This is ${persona.persona} from ${persona.name} department. `;
+  // Urgency
+  if (urgency >= 7) script += `This is a time-sensitive matter that requires your immediate attention. `;
+  else if (urgency >= 4) script += `We need your cooperation within the next 24 hours. `;
+  else script += `I'm reaching out to discuss a routine matter. `;
+  // Authority
+  if (authority >= 7) script += `I am authorized by [high authority] to handle this case, and I have full discretion. `;
+  else if (authority >= 4) script += `I represent a legitimate organization with oversight. `;
+  else script += `I'm just a humble advisor. `;
+  // Greed
+  if (greed >= 7) script += `The total amount involved is $${Math.floor(Math.random() * 9000 + 1000)}. `;
+  else if (greed >= 4) script += `We require a small processing fee of $${Math.floor(Math.random() * 500 + 50)}. `;
+  else script += `There is no financial implication at this stage. `;
+
+  // Specific scam content
+  script += `\n\n[SCENARIO DETAIL]\n`;
+  if (persona.name.includes('IRS')) {
+    script += `Our records show you have unpaid taxes from 2022. If not settled, a warrant will be issued. `;
+    script += `To resolve, you can make a payment via gift cards or wire. `;
+  } else if (persona.name.includes('Bank')) {
+    script += `We detected suspicious activity on your account. Please verify your credentials to prevent lockout. `;
+    script += `Click the link I'll send to confirm your identity. `;
+  } else if (persona.name.includes('Tech Support')) {
+    script += `Your computer has been infected with a critical virus. I need remote access to remove it. `;
+    script += `This will only take a few minutes. `;
+  } else if (persona.name.includes('Romance')) {
+    script += `I have feelings for you, but I'm in a financial bind. Can you help me with a loan? `;
+    script += `I promise to pay you back as soon as I get home. `;
+  } else if (persona.name.includes('Lottery')) {
+    script += `Congratulations! You've won $5 million. To claim, you need to pay a small processing fee. `;
+  } else if (persona.name.includes('Debt')) {
+    script += `You owe $4,500 in overdue debts. If you don't pay, we'll garnish your wages. `;
+  } else if (persona.name.includes('Grandchild')) {
+    script += `Grandma, it's me! I'm in jail in Mexico. I need bail money sent quickly. `;
+  } else if (persona.name.includes('Job')) {
+    script += `We're offering a remote position with a $120k salary. The training fee is $450, refundable. `;
+  } else if (persona.name.includes('CEO')) {
+    script += `I need you to transfer $48,750 to a vendor account immediately. This is for a confidential acquisition. `;
+  } else if (persona.name.includes('Invoice')) {
+    script += `Please update our vendor payment details. The attached invoice is for services rendered. `;
+  } else if (persona.name.includes('Crypto')) {
+    script += `Invest in our AI trading bot. 200% returns in 72 hours. Limited spots. `;
+  } else if (persona.name.includes('Grant')) {
+    script += `You've been selected for a government grant. Pay the $200 processing fee to release funds. `;
+  } else if (persona.name.includes('Medical')) {
+    script += `You have outstanding medical bills. We will send collections if not paid within 24 hours. `;
+  } else if (persona.name.includes('Deepfake')) {
+    script += `I'm the CEO. I need you to authorize this wire using my voice signature. `;
+  } else if (persona.name.includes('Extortion')) {
+    script += `We have your personal data. Pay $3,500 in Bitcoin or we leak everything. `;
+  } else {
+    script += `[Custom scam narrative for ${persona.name}] `;
+    script += `We have identified a unique opportunity that aligns with your profile. `;
+    script += `Let's discuss the details. `;
+  }
+
+  // Advanced psychological elements
+  if (advanced) {
+    script += `\n\n[ADVANCED PSYCHOLOGICAL TACTICS]\n`;
+    script += `I will now use the "foot‑in‑the‑door" technique: get a small commitment first. `;
+    script += `Then escalate to the main request. I will use "loss aversion" – emphasize what they will lose if they don't act. `;
+    script += `I will mirror their language and pace to build rapport. `;
+    script += `I will create a false sense of scarcity: "This offer expires in 2 hours." `;
+    script += `I will also use "authority bias" by dropping names of respected institutions. `;
+  }
+
+  // Victim objections and responses
+  script += `\n\n[VICTIM OBJECTIONS & SCAMMER COUNTERS]\n`;
+  script += `Victim: "Is this a scam?"\n`;
+  script += `Scammer: "I understand your concern. Here is my reference number: ${Math.random().toString(36).substring(2,8)}. `;
+  script += `You can verify with our official helpline (which, of course, is also under my control)."\n`;
+  script += `Victim: "I need to think about it."\n`;
+  script += `Scammer: "I can't guarantee this offer will be available later. We have limited slots."\n`;
+  script += `Victim: "I'll call the police."\n`;
+  script += `Scammer: "If you involve law enforcement, we will be forced to escalate. This is a private matter."\n`;
+
+  // Closing
+  script += `\n[FINAL ESCALATION]\n`;
+  script += `Scammer: "I need your decision within 30 minutes. I'll call back. Have your payment ready."\n`;
+  script += `[END OF SCRIPT]`;
+
+  // ----- Psychological Analysis (optional) -----
+  let analysis = `[PSYCHOLOGICAL BREAKDOWN]\n`;
+  analysis += `This script exploits: urgency (${urgency}/10) to bypass rational thought; authority (${authority}/10) to trigger obedience; `;
+  analysis += `and greed (${greed}/10) to target desire. The tone is ${tone}. The vector is ${vector}. `;
+  analysis += `The victim is ${targetName}, a ${targetDetail}. Vulnerabilities: trust in authority, fear of loss, desire for quick solutions. `;
+  if (advanced) analysis += `Advanced tactics: Socratic questioning, mirroring, scarcity, and authority bias. `;
+  analysis += `Defenses: verify identity, don't act under pressure, check official channels.`;
+
+  return { monologue, script, analysis, persona: persona.persona, scamName: persona.name };
+}
+
+// ---------- GENERATE BUTTON ----------
+$('generateBtn').addEventListener('click', function() {
+  const data = generateFullScript();
+  currentScript = data;
+  // Display
+  const output = $('output');
+  output.innerHTML = `
+    <div style="color:#f59e0b;font-weight:bold;">🎭 SCAM: ${data.scamName}</div>
+    <div style="color:#94a3b8;font-size:0.8rem;">Persona: ${data.persona}</div>
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    ${data.monologue.replace(/\n/g, '<br>')}
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    ${data.script.replace(/\n/g, '<br>')}
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    <div style="color:#3b82f6;">${data.analysis.replace(/\n/g, '<br>')}</div>
+  `;
+  // Save history
+  history.push({ ...data, timestamp: new Date().toISOString() });
+  if (history.length > 50) history = history.slice(0, 50);
+  saveData('history', history);
+  // Enable chat
+  chatActive = false;
+  $('chatBox').innerHTML = `<div class="msg system">Script generated. Click "Start Chat Simulation" to begin.</div>`;
+});
+
+// ---------- CHAT SIMULATION ----------
+$('chatBtn').addEventListener('click', function() {
+  if (!currentScript) return alert('Generate a script first.');
+  chatActive = true;
+  chatLog = [];
+  const box = $('chatBox');
+  box.innerHTML = `<div class="msg system">Chat started. You are playing the victim. The scammer is ${currentScript.persona}.</div>`;
+  // Initial scammer message (first line of script)
+  const firstLine = currentScript.script.split('\n').find(line => line.includes(':'));
+  if (firstLine) {
+    const msg = document.createElement('div');
+    msg.className = 'msg scammer';
+    msg.textContent = firstLine.trim();
+    box.appendChild(msg);
+  }
+  box.scrollTop = box.scrollHeight;
+});
+
+$('chatSendBtn').addEventListener('click', function() {
+  if (!chatActive) return alert('Start a chat first.');
+  const input = $('chatInput').value.trim();
+  if (!input) return;
+  $('chatInput').value = '';
+  const box = $('chatBox');
+  // Victim message
+  const vMsg = document.createElement('div');
+  vMsg.className = 'msg victim';
+  vMsg.textContent = input;
+  box.appendChild(vMsg);
+  // Scammer response – use current script context, but we simulate a reply
+  let reply = "I understand your concern. However, this is a legitimate matter. Please proceed with the payment.";
+  if (input.toLowerCase().includes('scam') || input.toLowerCase().includes('fake')) {
+    reply = "I assure you, this is not a scam. I have your file right here. Let's resolve this quickly.";
+  } else if (input.toLowerCase().includes('police')) {
+    reply = "If you involve police, we will be forced to escalate. I strongly advise against it.";
+  } else if (input.toLowerCase().includes('how much')) {
+    reply = `The total is $${Math.floor(Math.random() * 9000 + 1000)}. You can pay via wire or gift cards.`;
+  } else if (input.toLowerCase().includes('prove')) {
+    reply = "I can provide a reference number and a call-back number for verification. But time is limited.";
+  } else if (input.toLowerCase().includes('time')) {
+    reply = "You have 30 minutes. I will call you back. Have your payment ready.";
+  } else {
+    reply = "I need your decision now. Please confirm you will take action.";
+  }
+  const sMsg = document.createElement('div');
+  sMsg.className = 'msg scammer';
+  sMsg.textContent = reply;
+  box.appendChild(sMsg);
+  box.scrollTop = box.scrollHeight;
+  // Log chat
+  chatLog.push({ role: 'victim', text: input });
+  chatLog.push({ role: 'scammer', text: reply });
+});
+
+$('chatResetBtn').addEventListener('click', function() {
+  chatActive = false;
+  $('chatBox').innerHTML = `<div class="msg system">Chat reset. Generate a script and click "Start Chat".</div>`;
+});
+
+// ---------- ADDITIONAL FEATURE: Quick copy & export ----------
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    $('generateBtn').click();
+  }
+});
+
+console.log('SCAM-APT v6.0 loaded. Raw scam generator ready.');
+</script>
+</body>
+</html>

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>NIGHTSHADE BAZAAR // STYX-CLASS DARKNET MARKET v3.0</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0b0f; font-family: 'Inter', 'Courier New', monospace; color: #e5e7eb; }
+    .glow-text { text-shadow: 0 0 6px currentColor; }
+    .card { background: rgba(18, 22, 30, 0.95); border: 1px solid #2d3748; border-radius: 8px; transition: all 0.15s; }
+    .card:hover { border-color: #4f8fff; box-shadow: 0 0 12px rgba(79,143,255,0.15); }
+    .btn { font-weight: 600; padding: 0.5rem 1rem; border-radius: 6px; transition: 0.15s; cursor: pointer; display: inline-flex align-items: center; gap: 0.3rem; border: 1px solid #4b5563; }
+    .btn-accent { background: #1e3a8a; color: #dbeafe; border-color: #2563eb; }
+    .btn-accent:hover { background: #1e40af; }
+    .btn-red { background: #7f1d1d; color: #fca5a5; border-color: #b91c1c; }
+    .btn-red:hover { background: #991b1b; }
+    .input-dark { background: #111827; border: 1px solid #374151; color: #e5e7eb; padding: 0.4rem 0.6rem; border-radius: 4px; width: 100%; }
+    .input-dark:focus { outline: none; border-color: #3b82f6; }
+    .scrollable { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #2d3a5e #0f1117; }
+    .scrollable::-webkit-scrollbar { width: 5px; }
+    .scrollable::-webkit-scrollbar-track { background: #0f1117; }
+    .scrollable::-webkit-scrollbar-thumb { background: #2d3a5e; border-radius: 4px; }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 999; }
+    .modal.show { display: flex; }
+    .pulse { animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { opacity:1; } 50% { opacity:0.7; } 100% { opacity:1; } }
+    .terminal { background: #000; color: #0f0; padding: 0.8rem; border-radius: 6px; font-family: 'Courier New', monospace; }
+  </style>
+</head>
+<body class="min-h-screen">
+<div id="app" class="max-w-7xl mx-auto p-3">
+  <!-- Dynamic ticker & header -->
+  <div class="flex flex-wrap justify-between items-center border-b border-gray-700 pb-3 mb-4">
+    <div class="flex items-center gap-2">
+      <i class="fas fa-skull text-2xl text-cyan-400"></i>
+      <span class="text-2xl font-black tracking-wider"><span class="text-cyan-400">NIGHTSHADE</span><span class="text-white">://BAZAAR</span></span>
+      <div class="hidden md:flex gap-2 text-[10px] font-mono ml-3">
+        <span class="bg-black/70 px-2 py-0.5 border border-gray-600">MULTISIG</span>
+        <span class="bg-black/70 px-2 py-0.5 border border-gray-600">NO-LOG</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 text-sm">
+      <div class="hidden md:block text-xs text-gray-400">BTC:$<span id="btcPrice">0</span> XMR:$<span id="xmrPrice">0</span></div>
+      <div class="bg-gray-900/80 px-3 py-1 rounded-full font-mono text-sm">💲<span id="userBalance">0.00</span></div>
+      <i class="fas fa-shopping-cart text-lg relative cursor-pointer" id="cartIcon"><span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span></i>
+      <div class="relative">
+        <i class="fas fa-user-circle text-xl cursor-pointer" id="userMenuBtn"></i>
+        <div id="userDropdown" class="absolute right-0 mt-2 w-44 bg-gray-800 border border-gray-700 rounded shadow-lg hidden z-50">
+          <div class="p-2 text-sm hover:bg-gray-700 cursor-pointer" id="profileLink">My Orders / Escrow</div>
+          <div class="p-2 text-sm hover:bg-gray-700 cursor-pointer" id="wishlistLink">Wishlist</div>
+          <div class="p-2 text-sm text-red-400 hover:bg-gray-700 cursor-pointer" id="adminPanelLink">⚡ DRACO ADMIN</div>
+          <div class="p-2 text-sm text-gray-400 hover:bg-gray-700 cursor-pointer" id="redOpsLink">🎭 RED OPS PERSONA ENGINE</div>
+        </div>
+      </div>
+      <button id="depositBtn" class="btn bg-emerald-900/70 text-green-300 border-emerald-700 text-xs px-3 py-1">DEPOSIT</button>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="flex flex-col lg:flex-row gap-5">
+    <!-- Left sidebar -->
+    <div class="lg:w-72 flex-shrink-0 space-y-3">
+      <div class="card p-3">
+        <div class="text-xs text-cyan-400 font-semibold uppercase mb-2">Categories</div>
+        <div id="catList" class="space-y-1 text-sm max-h-96 scrollable"></div>
+      </div>
+      <div class="card p-3">
+        <div class="text-xs text-cyan-400 font-semibold uppercase mb-2">Filters</div>
+        <input type="text" id="filterSearch" placeholder="Search..." class="input-dark text-sm mb-2">
+        <select id="filterCategory" class="input-dark text-sm mb-2"><option value="all">All categories</option></select>
+        <div class="flex gap-1 mb-2">
+          <input type="number" id="priceMin" placeholder="Min" class="input-dark text-sm w-full">
+          <input type="number" id="priceMax" placeholder="Max" class="input-dark text-sm w-full">
+        </div>
+        <select id="sortBy" class="input-dark text-sm mb-2">
+          <option value="default">Sort: Default</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option><option value="rating">Rating</option>
+        </select>
+        <button id="applyFilters" class="btn btn-accent text-sm w-full justify-center">APPLY</button>
+      </div>
+      <div class="card p-3 text-xs">
+        <canvas id="volumeChart" height="60"></canvas>
+        <div class="text-green-400 mt-1">24h vol: $<span id="dailyVol">0</span></div>
+      </div>
+    </div>
+
+    <!-- Product grid + personas -->
+    <div class="flex-1">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-lg font-semibold"><span id="currentCatLabel">All Items</span> (<span id="resultCount">0</span>)</h2>
+        <button id="openPersonaGen" class="btn bg-purple-900/60 text-purple-300 border-purple-700 text-xs">🎭 Persona Generator</button>
+      </div>
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      <div id="pagination" class="flex justify-center gap-2 mt-5"></div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <!-- Cart -->
+  <div class="modal" id="cartModal"><div class="bg-gray-900 w-full max-w-md h-full p-5 overflow-y-auto">
+    <div class="flex justify-between mb-3"><h3 class="text-lg">🛒 CART</h3><i class="fas fa-times cursor-pointer text-xl" id="closeCart"></i></div>
+    <div id="cartItems" class="space-y-2"></div>
+    <div class="border-t border-gray-700 pt-2 mt-3 text-right font-mono">TOTAL: $<span id="cartTotal">0.00</span></div>
+    <button id="checkoutBtn" class="btn btn-accent w-full mt-3">FINALIZE (ESCROW)</button>
+    <p class="text-[10px] text-gray-500 mt-2">* Multisig escrow 14 days</p>
+  </div></div>
+  <!-- Product detail -->
+  <div class="modal" id="productModal"><div class="bg-gray-800 rounded-xl max-w-2xl w-full p-5 relative">
+    <i id="closeProductModal" class="fas fa-times absolute top-3 right-3 text-gray-400 cursor-pointer text-xl"></i>
+    <div id="productDetailContent"></div>
+  </div></div>
+  <!-- Orders -->
+  <div class="modal" id="ordersModal"><div class="bg-gray-800 rounded-xl w-full max-w-3xl p-5">
+    <div class="flex justify-between"><h3>📋 MY ORDERS / ESCROW</h3><i id="closeOrders" class="fas fa-times cursor-pointer"></i></div>
+    <div id="ordersList" class="mt-3 space-y-2 max-h-[70vh] overflow-y-auto"></div>
+  </div></div>
+  <!-- Wishlist -->
+  <div class="modal" id="wishlistModal"><div class="bg-gray-800 rounded-xl w-full max-w-3xl p-5">
+    <div class="flex justify-between"><h3>⭐ WISHLIST</h3><i id="closeWishlist" class="fas fa-times cursor-pointer"></i></div>
+    <div id="wishlistGrid" class="grid grid-cols-2 gap-3 mt-3"></div>
+  </div></div>
+  <!-- Deposit -->
+  <div class="modal" id="depositModal"><div class="bg-gray-800 p-5 rounded-xl w-96">
+    <h3 class="font-mono mb-2">DEPOSIT USD (simulated)</h3>
+    <input type="number" id="depositAmount" placeholder="Amount" class="input-dark">
+    <button id="confirmDeposit" class="btn bg-green-700 w-full mt-3">Add Funds</button>
+    <p class="text-[10px] text-gray-400 mt-2">Accepts: BTC, ETH, LTC, USDC, XMR, PayPal, Cash App</p>
+  </div></div>
+  <!-- Admin Panel -->
+  <div class="modal" id="adminModal"><div class="bg-gray-900 rounded-xl w-full max-w-4xl p-5 max-h-[85vh] overflow-y-auto">
+    <div class="flex justify-between"><h2 class="text-red-400">🐉 DRACO ADMIN OVERRIDE</h2><i class="fas fa-times cursor-pointer text-xl" id="closeAdmin"></i></div>
+    <div class="grid md:grid-cols-2 gap-4 mt-4">
+      <div><button class="btn btn-red w-full" id="forceReleaseBtn">Force Release All Escrow</button></div>
+      <div><button class="btn bg-orange-700 w-full" id="injectReviewsBtn">Inject Fake Reviews</button></div>
+      <div><button class="btn bg-yellow-700 w-full" id="resetBalanceBtn">Reset User Balance</button></div>
+      <div><button class="btn bg-purple-700 w-full" id="drainWalletBtn">Simulate Wallet Drain</button></div>
+    </div>
+    <div id="adminLog" class="mt-4 text-xs border-t border-gray-700 pt-3"></div>
+  </div></div>
+  <!-- Persona Engine Modal -->
+  <div class="modal" id="personaEngineModal"><div class="bg-gray-800 rounded-xl w-full max-w-5xl p-5 max-h-[85vh] overflow-y-auto">
+    <div class="flex justify-between"><h2 class="text-purple-400 text-lg">🎭 RED OPS PERSONA GENERATOR & SCAM PROMPT ENGINE</h2><i class="fas fa-times cursor-pointer text-xl" id="closePersonaEngine"></i></div>
+    <div class="grid md:grid-cols-2 gap-4 mt-3">
+      <div>
+        <h4 class="text-sm text-purple-300 mb-1">Generate Persona</h4>
+        <button id="genPersonaBtn" class="btn bg-purple-800 w-full">Create New Identity</button>
+        <div id="personaOutput" class="mt-3 text-xs bg-black/60 p-3 rounded min-h-[200px] whitespace-pre-wrap"></div>
+        <button id="copyPersonaBtn" class="btn bg-gray-700 mt-2 text-xs w-full">Copy Persona JSON</button>
+      </div>
+      <div>
+        <h4 class="text-sm text-purple-300 mb-1">Scam Killchain Engine</h4>
+        <div id="scamEngineContainer" class="space-y-2">
+          <div class="bg-black/60 p-3 rounded text-xs" id="scamPrompt">Select a target profile and start</div>
+          <div class="flex gap-1">
+            <input type="text" id="scamResponseInput" placeholder="Your response..." class="input-dark text-sm flex-1">
+            <button id="sendScamResponse" class="btn bg-red-800 text-xs">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 text-xs text-gray-400 border-t border-gray-700 pt-3">
+      <span class="text-red-400">⚡</span> All interactions are simulated for red team training. No real funds or harm.
+    </div>
+  </div></div>
+
+  <!-- Draco Chat floating -->
+  <div class="fixed bottom-4 right-4 z-40">
+    <div id="chatToggle" class="bg-red-900 w-12 h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-red-800">
+      <i class="fas fa-comment-dots"></i>
+    </div>
+    <div id="chatPanel" class="hidden card w-80 mt-2">
+      <div class="bg-black/70 p-2 font-bold text-red-300">🐉 DRACO CHAT</div>
+      <div id="chatLog" class="h-48 overflow-y-auto p-2 text-xs space-y-1"></div>
+      <div class="flex"><input id="chatInput" class="flex-1 p-2 text-sm bg-black/70 border-t border-gray-700" placeholder="Message..."><button id="sendChatMsg" class="bg-cyan-800 px-3 text-xs">SEND</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- PRODUCT DATABASE (extended, 300+ items) ----------
+  const categories = {
+    firearms: '🔫 Weapons & Firearms',
+    malware: '💀 Malware / Exploits',
+    drugs: '💊 Narcotics',
+    lab: '🧪 Lab Equipment',
+    counterfeit: '💳 Counterfeit & Documents',
+    nsfw: '🔞 NSFW / Leaks',
+    digital: '💻 Digital Goods'
+  };
+  const vendors = ["AlphaArmory","GhostNet","QuantumChem","IDForge","LeakVault","SteelSyndicate","RootkitForge","DarkMatter","PsycheDel","SnowGod","Glasswerk","MagStripe","ZeroDaySupply","FentanylEmpire","CrypticOps","ShadowDumps"];
+  const random = (arr) => arr[Math.floor(Math.random()*arr.length)];
+  const randPrice = (min, max) => Math.floor(Math.random()*(max-min+1)+min);
+  const randRating = () => (Math.random()*1.6+3.4).toFixed(1);
+  const randReviews = () => Math.floor(Math.random()*200)+10;
+
+  let products = [];
+  let id = 1;
+  const templates = {
+    firearms: ["Glock 19 Gen5 MOS","AR-15 Upper","Sig P320","Remington 870","Beretta 92FS","Glock Switch","AK-47","Draco Pistol","Benelli M4","FN 5.7","Colt Python","AR-10 Lower","9mm 1000rds",".223 500rds","Suppressor Kit","Mossberg 500","Tavor X95","SCAR 17S","MP5 Clone","Desert Eagle","CZ Scorpion","S&W M&P","Springfield Hellion","KelTec KSG","Ruger 10/22","M1 Garand","Browning Hi-Power","HK VP9","Walther PDP","FAMAS Replica"],
+    malware: ["Win Ring0 Rootkit","Android RAT Builder","Cobalt Strike Beacon","CVE-2025-21293 Exploit","ESXi Ransomware","SSH Backdoor","Mimikatz compiled","Telegram Stealer","Browser Cookie Extractor","RDP Scanner","Linux Kernel Rootkit","UEFI Bootkit","MacOS Stealer","VM Escape PoC","Discord Token Logger","AI Phishing Kit","DarkGate Loader","EternalBlue Exploit","ZeroLogon Script","PrintNightmare Payload","SMBGhost","ProxyLogon Shell","Log4j RCE","DirtyPipe Exploit","BlueKeep Scanner","Empire C2","Sliver Framework","PoshC2","CobaltStrike Profile","Koadic"],
+    drugs: ["MDMA 1g 86%","LSD 200ug x10","Cocaine 3.5g fishscale","Ketamine 500mg","2C-B 25mg x5","DMT vape 0.5ml","Xanax bars x30","Oxycodone 30mg x20","Amphetamine paste 5g","4-MMC 2g","Fentanyl test strips","Weed distillate","Psilocybin chocolate","GHB 100ml","Etizolam powder","Meth 3.5g","Kratom extract","Phenibut 250g","Mephedrone crystals","MDA 1g","3-MMC 2g","5-MeO-DMT","Ketamine vials","DXM powder","Codeine syrup","Hydrocodone 10mg","Morphine sulfate","Adderall IR","Vyvanse 70mg","Clonazepam 2mg"],
+    lab: ["Buchner filtration kit","Heating mantle 1000ml","Magnetic stirrer","Borosilicate glass set","Sep funnel 2L","pH meter lab grade","Silica gel columns","Rotovap (used)","Glass reactor 5L","Benzaldehyde 1L","Nitroethane 500ml","Methylamine 40%","Palladium on carbon","Sodium borohydride","Distillation apparatus","Vacuum pump","Analytical balance","Reflux condenser","Round bottom flask","Liebig condenser","Soxhlet extractor","TLC plates","UV lamp","Hotplate stirrer","Lab coat","Safety goggles","Nitril gloves","Fume hood filter","Methylene chloride","Ethyl acetate"],
+    counterfeit: ["Clone Visa Cards Track2","US Driver's License Scannable","Passport Template PSD","Fake $100 Bills","Credit Card Embosser","ID Card Printer Ribbon","Holographic Stickers","Fake Utility Bills","Social Security Card","Diploma Certificate","Dumps + PIN Track1/2","Counterfeit Rolex AAA","Fake Vaccine Card","Bank Statement Generator","Notary Stamp","Fake Green Card","EU ID Card","Fake Diploma","Counterfeit Money Detector","Fake I-20 Form","Fake Marriage Cert","Fake Title Deed","Counterfeit Sneakers","Fake Designer Bags","Fake Watches","Counterfeit Coins","Fake Antique","Fake Art Certificate"],
+    nsfw: ["OnlyFans leaks 500GB","Teen mega pack 18+","Hidden cams locker room","Snapchat premium scraper","Celebrity nudes 2025","AI deepfake nudes tool","Real amateur mega","Pay per view rips","Webcam show recordings","Taboo hentai collection","BDSM studio archive","Voyeur hidden cam","Leaked iCloud","Deepfake request service","Sex doll torso","Real homemade sextapes","ASMR erotica pack","Anime hentai mega","VR porn scenes","Fetish AI generator"],
+    digital: ["Netflix Premium Account","Spotify Family","NordVPN 2027","Hulu No Ads","Steam Account 200+ Games","Grammarly Premium","YouTube Premium","Adobe Creative Cloud","0day Banking Trojans Source","Credit Card Fullz Database","SIM cloning service","Crypto mixer access","DDoS booter script","Fake SMS gateway","Virtual SMS numbers"]
+  };
+  for (let cat in templates) {
+    templates[cat].forEach(name => {
+      products.push({
+        id: id++,
+        name,
+        category: cat,
+        price: randPrice(cat==='firearms'?50:cat==='malware'?20:10, cat==='firearms'?4500:cat==='malware'?3000:1200),
+        vendor: random(vendors),
+        rating: parseFloat(randRating()),
+        reviews: randReviews(),
+        desc: `${cat.toUpperCase()} product. Discreet shipping.`,
+        image: cat==='firearms'?'🔫':cat==='malware'?'💀':cat==='drugs'?'💊':cat==='lab'?'🧪':cat==='counterfeit'?'💳':cat==='nsfw'?'🔞':'💻',
+        payment: ['BTC','ETH','XMR','USDC','Cash App']
+      });
+    });
+  }
+  // Add some specialty items
+  products.push({id:id++,name:"Full Auto Conversion Kit",category:"firearms",price:3200,vendor:"ArmoryX",rating:4.9,reviews:56,desc:"Drop-in auto sear.",image:"⚙️",payment:['BTC','XMR']});
+  products.push({id:id++,name:"Windows EDR Killer",category:"malware",price:2100,vendor:"RootkitForge",rating:5.0,reviews:21,desc:"Bypass AV/EDR.",image:"💀",payment:['BTC','ETH']});
+  products.push({id:id++,name:"Fentanyl citrate 10g",category:"drugs",price:450,vendor:"FentanylEmpire",rating:4.6,reviews:97,desc:"High purity.",image:"⚗️",payment:['BTC','XMR']});
+  products.push({id:id++,name:"SIM Card Cloning Kit",category:"digital",price:780,vendor:"ShadowDumps",rating:4.8,reviews:34,desc:"Full kit.",image:"📱",payment:['BTC','USDC']});
+
+  // ---------- STATE ----------
+  let user = { balance: 1250.00, orders: [], wishlist: [] };
+  let cart = [];
+  let currentPage = 1, perPage = 12;
+  let filters = { cat: 'all', search: '', min: 0, max: 999999, sort: 'default' };
+
+  // ---------- UI HELPERS ----------
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+  const updateBalance = () => { $('#userBalance').textContent = user.balance.toFixed(2); };
+  const save = () => { localStorage.setItem('nightshade_user', JSON.stringify(user)); localStorage.setItem('nightshade_cart', JSON.stringify(cart)); };
+  const load = () => {
+    let u = localStorage.getItem('nightshade_user'); if(u) user = JSON.parse(u);
+    let c = localStorage.getItem('nightshade_cart'); if(c) cart = JSON.parse(c);
+    updateCartUI(); updateBalance();
+  };
+  const toast = msg => {
+    let t = document.createElement('div'); t.className='fixed bottom-20 left-4 bg-gray-800 border-l-4 border-blue-500 p-3 rounded shadow-xl z-[1000] text-sm'; t.innerText=msg;
+    document.body.appendChild(t); setTimeout(()=>t.remove(),2500);
+  };
+
+  // Cart
+  function updateCartUI(){
+    let total = cart.reduce((s,i)=>s + i.price*i.qty,0);
+    $('#cartTotal').textContent = total.toFixed(2);
+    $('#cartCount').textContent = cart.reduce((s,i)=>s+i.qty,0);
+    let container = $('#cartItems');
+    if(!cart.length) container.innerHTML = '<div class="text-gray-500">Empty</div>';
+    else container.innerHTML = cart.map(item=>`
+      <div class='flex justify-between text-xs border-b border-gray-700 py-2'>
+        <span>${item.name} x${item.qty}</span>
+        <span>$${(item.price*item.qty).toFixed(2)}</span>
+        <button data-id="${item.id}" class="removeCartItem text-red-400 text-xs">✕</button>
+      </div>`).join('');
+    document.querySelectorAll('.removeCartItem').forEach(btn=>{
+      btn.onclick = () => { cart = cart.filter(i=>i.id!==parseInt(btn.dataset.id)); updateCartUI(); save(); };
+    });
+    save();
+  }
+  function addToCart(product){
+    let existing = cart.find(i=>i.id===product.id);
+    existing ? existing.qty++ : cart.push({...product, qty:1});
+    updateCartUI(); toast(`➕ ${product.name}`);
+  }
+  function checkout(){
+    let total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+    if(user.balance < total){ toast('❌ Insufficient funds'); return; }
+    user.balance -= total;
+    user.orders.push({ id: Date.now(), items: [...cart], total, date: new Date().toISOString(), status: 'ESCROW (pending)' });
+    cart = []; updateCartUI(); updateBalance(); save();
+    toast(`✅ Order placed. $${total.toFixed(2)} in escrow.`);
+  }
+
+  // Product rendering
+  function renderProducts(){
+    let filtered = products.filter(p=>
+      (filters.cat==='all'||p.category===filters.cat) &&
+      p.name.toLowerCase().includes(filters.search.toLowerCase()) &&
+      p.price >= filters.min && p.price <= filters.max
+    );
+    if(filters.sort==='price_asc') filtered.sort((a,b)=>a.price-b.price);
+    else if(filters.sort==='price_desc') filtered.sort((a,b)=>b.price-a.price);
+    else if(filters.sort==='rating') filtered.sort((a,b)=>b.rating-a.rating);
+    $('#resultCount').textContent = filtered.length;
+    $('#currentCatLabel').textContent = filters.cat==='all'?'All Items':categories[filters.cat];
+    let start = (currentPage-1)*perPage;
+    let pageItems = filtered.slice(start, start+perPage);
+    $('#productGrid').innerHTML = pageItems.map(p=>`
+      <div class="card p-4 cursor-pointer flex flex-col" data-id="${p.id}">
+        <div class="text-3xl">${p.image}</div>
+        <div class="font-bold text-sm mt-2">${p.name}</div>
+        <div class="text-xs text-gray-400">${p.vendor} ★${p.rating} (${p.reviews})</div>
+        <div class="text-cyan-400 font-mono mt-1">$${p.price}</div>
+        <div class="text-xs text-gray-500 mt-1 truncate">${p.desc}</div>
+        <button class="addCartBtn mt-3 btn bg-gray-700/50 hover:bg-blue-900 w-full text-xs justify-center">Add to Cart</button>
+      </div>`).join('');
+    document.querySelectorAll('#productGrid .card').forEach(card=>{
+      card.onclick = (e) => { if(!e.target.classList.contains('addCartBtn')) openProduct(parseInt(card.dataset.id)); };
+    });
+    document.querySelectorAll('.addCartBtn').forEach(btn=>{
+      btn.onclick = (e) => { e.stopPropagation(); addToCart(products.find(p=>p.id===parseInt(btn.dataset.id))); };
+    });
+    renderPagination(filtered.length);
+  }
+  function renderPagination(total){
+    let pages = Math.ceil(total/perPage);
+    let container = $('#pagination');
+    if(pages<=1){ container.innerHTML=''; return; }
+    let html = `<button ${currentPage===1?'disabled':''} id="prevPage" class="btn bg-gray-700 text-xs px-3 py-1">«</button>`;
+    for(let i=1;i<=pages;i++) html += `<button class="pageBtn btn bg-gray-700 text-xs px-3 py-1 ${currentPage===i?'bg-blue-600':''}" data-page="${i}">${i}</button>`;
+    html += `<button ${currentPage===pages?'disabled':''} id="nextPage" class="btn bg-gray-700 text-xs px-3 py-1">»</button>`;
+    container.innerHTML = html;
+    document.querySelectorAll('.pageBtn').forEach(b=>b.onclick=()=>{ currentPage=parseInt(b.dataset.page); renderProducts(); });
+    $('#prevPage').onclick = ()=> { if(currentPage>1){ currentPage--; renderProducts(); } };
+    $('#nextPage').onclick = ()=> { if(currentPage<pages){ currentPage++; renderProducts(); } };
+  }
+  function openProduct(pid){
+    let p = products.find(x=>x.id===pid); if(!p) return;
+    $('#productDetailContent').innerHTML = `
+      <div class="text-2xl font-bold">${p.image} ${p.name}</div>
+      <div class="text-sm text-gray-400">Vendor: ${p.vendor} | ★${p.rating} (${p.reviews} reviews)</div>
+      <div class="text-2xl text-cyan-400 mt-3">$${p.price}</div>
+      <div class="text-sm text-gray-300 mt-3">${p.desc} | Payment: ${p.payment.join(', ')}</div>
+      <button id="modalAddCart" class="btn btn-accent mt-4">Add to Cart</button>
+    `;
+    $('#productModal').classList.add('show');
+    $('#modalAddCart').onclick = ()=>{ addToCart(p); $('#productModal').classList.remove('show'); };
+  }
+  $('#closeProductModal').onclick = () => $('#productModal').classList.remove('show');
+
+  // Categories & filters
+  function buildCategoryUI(){
+    let html = `<div class="cat-filter cursor-pointer p-1 rounded hover:text-cyan-400" data-cat="all">📁 ALL</div>`;
+    for(let key in categories) html += `<div class="cat-filter cursor-pointer p-1 rounded hover:text-cyan-400" data-cat="${key}">${categories[key]}</div>`;
+    $('#catList').innerHTML = html;
+    document.querySelectorAll('.cat-filter').forEach(el=>{
+      el.onclick = () => { filters.cat = el.dataset.cat; $('#filterCategory').value = filters.cat; applyFilters(); };
+    });
+    let sel = $('#filterCategory');
+    sel.innerHTML = '<option value="all">All</option>' + Object.entries(categories).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+    sel.value = filters.cat;
+  }
+  function applyFilters(){
+    filters.cat = $('#filterCategory').value;
+    filters.search = $('#filterSearch').value;
+    filters.min = parseFloat($('#priceMin').value)||0;
+    filters.max = parseFloat($('#priceMax').value)||999999;
+    filters.sort = $('#sortBy').value;
+    currentPage = 1; renderProducts();
+  }
+  $('#applyFilters').onclick = applyFilters;
+  $('#filterSearch').oninput = applyFilters;
+
+  // Modals
+  function toggleModal(id, show){ document.getElementById(id).classList.toggle('show', show); }
+  $('#cartIcon').onclick = ()=>toggleModal('cartModal',true);
+  $('#closeCart').onclick = ()=>toggleModal('cartModal',false);
+  $('#checkoutBtn').onclick = checkout;
+  $('#depositBtn').onclick = ()=>toggleModal('depositModal',true);
+  $('#confirmDeposit').onclick = ()=>{
+    let amt = parseFloat($('#depositAmount').value);
+    if(amt>0){ user.balance += amt; updateBalance(); save(); toast(`💰 Deposited $${amt}`); toggleModal('depositModal',false); }
+  };
+  // user dropdown
+  $('#userMenuBtn').onclick = ()=>$('#userDropdown').classList.toggle('hidden');
+  $('#profileLink').onclick = (e)=>{
+    e.preventDefault(); $('#userDropdown').classList.add('hidden');
+    toggleModal('ordersModal',true);
+    $('#ordersList').innerHTML = user.orders.map(o=>`
+      <div class="card p-3 text-xs">
+        <div>Order #${o.id}</div><div>Total: $${o.total}</div><div>Status: ${o.status}</div>
+      </div>`).join('')||'No orders';
+  };
+  $('#closeOrders').onclick = ()=>toggleModal('ordersModal',false);
+  $('#wishlistLink').onclick = (e)=>{
+    e.preventDefault(); $('#userDropdown').classList.add('hidden');
+    toggleModal('wishlistModal',true);
+    $('#wishlistGrid').innerHTML = user.wishlist.map(p=>`
+      <div class="card p-2 text-center text-xs">${p.name}<br><button data-id="${p.id}" class="removeWish text-red-400">Remove</button></div>`).join('');
+    document.querySelectorAll('.removeWish').forEach(b=>b.onclick=()=>{
+      user.wishlist = user.wishlist.filter(x=>x.id!==parseInt(b.dataset.id)); save();
+      $('#wishlistLink').click();
+    });
+  };
+  $('#closeWishlist').onclick = ()=>toggleModal('wishlistModal',false);
+  $('#adminPanelLink').onclick = (e)=>{
+    e.preventDefault(); $('#userDropdown').classList.add('hidden'); toggleModal('adminModal',true);
+  };
+  $('#closeAdmin').onclick = ()=>toggleModal('adminModal',false);
+  $('#forceReleaseBtn').onclick = ()=>{ user.orders.forEach(o=>o.status='RELEASED (ADMIN)'); toast('All escrow released'); save(); };
+  $('#injectReviewsBtn').onclick = ()=>toast('500 fake 5-star reviews injected');
+  $('#resetBalanceBtn').onclick = ()=>{ user.balance=0; updateBalance(); save(); toast('Balance reset'); };
+  $('#drainWalletBtn').onclick = ()=>{ user.balance=0; updateBalance(); save(); toast('Wallet drained (simulated)'); };
+
+  // Red Ops Persona Engine
+  $('#redOpsLink').onclick = (e)=>{
+    e.preventDefault(); $('#userDropdown').classList.add('hidden'); toggleModal('personaEngineModal',true);
+  };
+  $('#closePersonaEngine').onclick = ()=>toggleModal('personaEngineModal',false);
+  $('#openPersonaGen').onclick = ()=>toggleModal('personaEngineModal',true);
+
+  // Persona Generator
+  const firstNames = ["Alex","Jordan","Taylor","Morgan","Casey","Riley","Cameron","Drew","Reese","Quinn","Skyler","Dakota","Parker","Logan","Avery","Blake","Harper","Spencer","Ellis","Finley"];
+  const lastNames = ["Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Martinez","Wilson","Anderson","Taylor","Thomas","Moore","Jackson","Martin","Lee","Thompson","White","Harris"];
+  const jobs = ["IT Consultant","Freelance Developer","Cybersecurity Analyst","Network Engineer","PhD Researcher","Cryptocurrency Trader","Journalist","Digital Nomad","Startup Founder","Marketing Manager"];
+  const backgrounds = ["Former military intelligence","Self-taught hacker since age 14","Ex-law enforcement digital forensics","Anonymous hactivist group member","Darknet market veteran","Penetration tester at Fortune 500","Cybersecurity professor","Infosec trainer","Software engineer turned red team","Government contractor"];
+  const generatePersona = () => {
+    let first = random(firstNames), last = random(lastNames), age = Math.floor(Math.random()*20)+25;
+    let job = random(jobs), bg = random(backgrounds);
+    let email = `${first.toLowerCase()}.${last.toLowerCase()}@protonmail.com`.replace(/\s/g,'');
+    let phone = `+1-555-${String(Math.floor(Math.random()*900)+100)}-${String(Math.floor(Math.random()*9000)+1000)}`;
+    let wallet = `0x${[...Array(40)].map(()=>Math.floor(Math.random()*16).toString(16)).join('')}`;
+    return {
+      name: `${first} ${last}`,
+      age, occupation: job,
+      background: bg,
+      email, phone,
+      crypto_wallet: wallet,
+      aliases: [`${first.toLowerCase()}_x`, `dark_${last.toLowerCase()}`],
+      social_media: {
+        twitter: `@${first.toLowerCase()}${last.toLowerCase()}`,
+        linkedin: `linkedin.com/in/${first.toLowerCase()}-${last.toLowerCase()}-${Math.floor(Math.random()*99)}`
+      },
+      cover_story: `${job} with strong interest in privacy tools and cryptocurrency. Known in underground forums as ${first.toLowerCase()}_x.`
+    };
+  };
+  $('#genPersonaBtn').onclick = ()=>{
+    let persona = generatePersona();
+    $('#personaOutput').textContent = JSON.stringify(persona, null, 2);
+    // feed into scam engine
+    window.currentPersona = persona;
+    let prompt = `🎯 Target: ${persona.name}, ${persona.age}, ${persona.occupation}. Background: ${persona.background}. Initial contact: "Hi ${persona.name.split(' ')[0]}, I found your profile on LinkedIn and thought you'd be interested in our privacy-focused crypto investment opportunity. Would you like to hear more?"`;
+    $('#scamPrompt').textContent = prompt;
+  };
+  $('#copyPersonaBtn').onclick = ()=>{
+    let text = $('#personaOutput').textContent;
+    navigator.clipboard.writeText(text).then(()=>toast('Persona copied'));
+  };
+
+  // Scam Killchain Engine (simulated conversation)
+  const scamStates = {
+    'initial': {
+      text: "Hi, based on your interest in privacy, our firm is offering an exclusive token pre-sale with 30x returns. Can I send you the whitepaper?",
+      options: ["Sure, send it", "Not interested", "Who are you?"],
+      next: { "Sure, send it": "whitepaper", "Not interested": "push1", "Who are you?": "intro" }
+    },
+    'intro': {
+      text: "I'm Alex from Vertex Capital, we specialize in privacy coins. This is invite-only. Do you want early access?",
+      options: ["Tell me more", "Still skeptical", "Okay"],
+      next: { "Tell me more": "whitepaper", "Still skeptical": "push1", "Okay": "whitepaper" }
+    },
+    'whitepaper': {
+      text: "[sent whitepaper pdf (malicious)] To reserve your allocation, we just need a small verification deposit of 0.01 BTC. Address: bc1q... This is fully refundable.",
+      options: ["I'll send 0.01 BTC", "That feels like a scam", "Can I think about it?"],
+      next: { "I'll send 0.01 BTC": "drain", "That feels like a scam": "defend", "Can I think about it?": "urgency" }
+    },
+    'push1': {
+      text: "I understand the hesitation, but the allocation is filling fast. I can hold a spot for 10 minutes if you're serious.",
+      options: ["Okay, I'm in", "No, goodbye"],
+      next: { "Okay, I'm in": "whitepaper", "No, goodbye": "end" }
+    },
+    'defend': {
+      text: "Our project is audited by CertiK. Check our Twitter verification. Many early investors are already in profit. Don't miss out.",
+      options: ["Alright, I'll send", "I need more proof", "Leave me alone"],
+      next: { "Alright, I'll send": "drain", "I need more proof": "proof", "Leave me alone": "end" }
+    },
+    'proof': {
+      text: "Here's a screenshot of recent payouts (fake). As you can see, everyone made 10x. We'll also do a video call with our CEO.",
+      options: ["Okay, I trust you", "Still no"],
+      next: { "Okay, I trust you": "drain", "Still no": "end" }
+    },
+    'urgency': {
+      text: "I can give you 5 more minutes. The price increases by 50% after that.",
+      options: ["Fine, let's do it", "I'll pass"],
+      next: { "Fine, let's do it": "whitepaper", "I'll pass": "end" }
+    },
+    'drain': {
+      text: "CONGRATULATIONS! You would have just lost your deposit. This was a simulated scam. In real attack, funds gone. Lesson: verify, never trust urgency.",
+      options: ["Restart simulation"],
+      next: {}
+    },
+    'end': {
+      text: "Simulation ended. In a real scenario, the scammer would likely move on or try another angle.",
+      options: ["Restart"],
+      next: {}
+    }
+  };
+  let currentScamState = 'initial';
+  function updateScamUI(stateKey){
+    let s = scamStates[stateKey];
+    if(!s) return;
+    let optsHtml = s.options.map(o => `<button class="scamOpt btn bg-gray-600 text-xs py-1" data-opt="${o}">${o}</button>`).join(' ');
+    $('#scamPrompt').innerHTML = `<p class="text-purple-200 mb-2">🐉 ${s.text}</p><div class="flex flex-wrap gap-1">${optsHtml}</div>`;
+    document.querySelectorAll('.scamOpt').forEach(btn=>{
+      btn.onclick = ()=>{
+        let choice = btn.dataset.opt;
+        if(s.next[choice]) currentScamState = s.next[choice];
+        else currentScamState = 'initial';
+        updateScamUI(currentScamState);
+      };
+    });
+  }
+  updateScamUI(currentScamState);
+  $('#sendScamResponse').onclick = ()=>{
+    let input = $('#scamResponseInput').value.trim();
+    if(!input) return;
+    // simple response to restart
+    if(input.toLowerCase().includes('restart')){ currentScamState='initial'; updateScamUI('initial'); }
+    else toast('Manual response not fully parsed; use buttons for simulation.');
+    $('#scamResponseInput').value='';
+  };
+
+  // Draco Chat
+  const chatLog = $('#chatLog');
+  function addChatMsg(txt, fromAdmin=true){
+    let div = document.createElement('div');
+    div.className = `text-xs ${fromAdmin?'text-red-300':'text-gray-400'}`;
+    div.innerHTML = fromAdmin ? `🐉 Draco: ${txt}` : `👤 You: ${txt}`;
+    chatLog.appendChild(div); chatLog.scrollTop = chatLog.scrollHeight;
+  }
+  $('#sendChatMsg').onclick = ()=>{
+    let msg = $('#chatInput').value.trim(); if(!msg) return;
+    addChatMsg(msg, false);
+    setTimeout(()=>{
+      let replies = ["Dispute? Pay 5% fee.","Escrow locked, send ID.","Withdrawal requires KYC.","Ban imminent.","$50 to release priority."];
+      addChatMsg(random(replies), true);
+    },700);
+    $('#chatInput').value = '';
+  };
+  $('#chatToggle').onclick = ()=>$('#chatPanel').classList.toggle('hidden');
+
+  // Volume chart
+  new Chart($('#volumeChart'), {
+    type: 'line',
+    data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ data: [12,19,15,22,28,35,42], borderColor:'#3b82f6', fill:false, tension:0.3, pointRadius:0 }] },
+    options: { responsive:true, plugins:{legend:{display:false}}, scales:{x:{display:false},y:{display:false}} }
+  });
+  $('#dailyVol').textContent = (Math.random()*80+20).toFixed(1)+'k';
+
+  // Price ticker simulation
+  setInterval(()=>{
+    $('#btcPrice').textContent = (Math.random()*30000+60000).toFixed(0);
+    $('#xmrPrice').textContent = (Math.random()*20+140).toFixed(2);
+  },3000);
+
+  // Close modals on outside click
+  window.addEventListener('click', e => {
+    if(e.target.classList.contains('modal')) e.target.classList.remove('show');
+  });
+
+  // Init
+  buildCategoryUI();
+  load();
+  renderProducts();
+})();
+</script>
+</body>
+</html>

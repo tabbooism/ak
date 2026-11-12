@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RuneHall Games - Keno • Dice • Crash • Limbo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background-color: #071d2a;
+            color: #fff;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .games-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+        }
+
+        /* Game Card Base Styles */
+        .game-card {
+            background: #0f2a3b;
+            border: 1px solid #1e3a4a;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-2px);
+            border-color: #ffd70033;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #1e3a4a;
+        }
+
+        .game-header h2 {
+            color: #ffd700;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .game-header h2 i {
+            margin-right: 10px;
+            color: #ffaa00;
+        }
+
+        .balance-box {
+            background: #1a3343;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid #2d4b5e;
+        }
+
+        .balance-box span {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 18px;
+            margin-left: 8px;
+        }
+
+        /* Game Display Area */
+        .game-display {
+            background: #1a3343;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #2d4b5e;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Keno Grid */
+        .keno-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .keno-cell {
+            aspect-ratio: 1;
+            background: #0f2a3b;
+            border: 2px solid #2d4b5e;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .keno-cell.selected {
+            background: #ffd700;
+            border-color: #ffaa00;
+            color: #000;
+            box-shadow: 0 0 15px #ffd700;
+        }
+
+        .keno-cell.hit {
+            background: #22c55e;
+            border-color: #10b981;
+            color: #000;
+        }
+
+        .keno-picked {
+            color: #94a3b8;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        /* Dice Display */
+        .dice-display {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .dice {
+            width: 100px;
+            height: 100px;
+            background: #0f2a3b;
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            box-shadow: 0 0 20px #ffd70033;
+        }
+
+        .dice-roller {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dice-prediction {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .prediction-btn {
+            background: #1e3a4a;
+            border: 1px solid #2d4b5e;
+            color: #fff;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .prediction-btn.active {
+            background: #ffd700;
+            border-color: #ffaa00;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Crash Game */
+        .crash-canvas {
+            width: 100%;
+            height: 200px;
+            background: #0f2a3b;
+            border-radius: 12px;
+            border: 1px solid #2d4b5e;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .crash-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #ffd700;
+            transform-origin: left;
+            transition: transform 0.05s linear;
+        }
+
+        .crash-multiplier {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700;
+            margin: 15px 0;
+        }
+
+        .crash-status {
+            font-size: 20px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+
+        /* Limbo Game */
+        .limbo-target {
+            font-size: 64px;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 10px 0;
+        }
+
+        .limbo-result {
+            font-size: 48px;
+            margin: 20px 0;
+        }
+
+        .limbo-multiplier {
+            color: #22c55e;
+        }
+
+        /* Controls */
+        .game-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .bet-input {
+            background: #1a3343;
+            border: 1px solid #2d4b5e;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            width: 150px;
+            text-align: center;
+        }
+
+        .bet-input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .play-btn:hover {
+            opacity: 0.9;
+        }
+
+        .play-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cashout-btn {
+            background: linear-gradient(135deg, #22c55e, #10b981);
+            color: #000;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .result-text {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .win-text {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .lose-text {
+            color: #ef4444;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .games-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="games-container">
+        <!-- KENO GAME -->
+        <div class="game-card">
+            <div class="game-header">
+                <h2><i class="fas fa-dice"></i> KENO</h2>
+                <div class="balance-box">
+                    <i class="fas fa-coins"></i> Balance: <span id="keno-balance">1000.00</span>
+                </div>
+            </div>
+            <div class="game-display">
+                <div class="keno-grid" id="keno-grid">
+                    <!-- Generated by JS -->
+                </div>
+                <div class="keno-picked" id="keno-picked">Pick 1-5 numbers</div>
+            </div>
+            <div class="game-controls">
+                <input type="number" id="keno-bet" class="bet-input" value="10.00" min="1" step="1">
+                <button class="play-btn" id="keno-play"><i class="fas fa-play"></i> Draw</button>
+            </div>
+            <div class="result-text" id="keno-result"></div>
+        </div>
+
+        <!-- DICE GAME -->
+        <div class="game-card">
+            <div class="game-header">
+                <h2><i class="fas fa-dice-d20"></i> DICE</h2>
+                <div class="balance-box">
+                    <i class="fas fa-coins"></i> Balance: <span id="dice-balance">1000.00</span>
+                </div>
+            </div>
+            <div class="game-display">
+                <div class="dice-display">
+                    <div class="dice" id="dice-result">?</div>
+                    <div class="dice-roller">
+                        <div class="dice-prediction" id="dice-prediction">
+                            <button class="prediction-btn" data-pred="under">Under 50</button>
+                            <button class="prediction-btn" data-pred="over">Over 50</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="game-controls">
+                <input type="number" id="dice-bet" class="bet-input" value="10.00" min="1" step="1">
+                <button class="play-btn" id="dice-play"><i class="fas fa-dice"></i> Roll</button>
+            </div>
+            <div class="result-text" id="dice-result-text"></div>
+        </div>
+
+        <!-- CRASH GAME -->
+        <div class="game-card">
+            <div class="game-header">
+                <h2><i class="fas fa-chart-line"></i> CRASH</h2>
+                <div class="balance-box">
+                    <i class="fas fa-coins"></i> Balance: <span id="crash-balance">1000.00</span>
+                </div>
+            </div>
+            <div class="game-display">
+                <div class="crash-canvas" id="crash-canvas">
+                    <div class="crash-line" id="crash-line"></div>
+                </div>
+                <div class="crash-multiplier" id="crash-multiplier">1.00x</div>
+                <div class="crash-status" id="crash-status">Waiting to start</div>
+            </div>
+            <div class="game-controls">
+                <input type="number" id="crash-bet" class="bet-input" value="10.00" min="1" step="1">
+                <button class="play-btn" id="crash-play"><i class="fas fa-play"></i> Bet</button>
+                <button class="cashout-btn" id="crash-cashout" disabled>Cash Out</button>
+            </div>
+            <div class="result-text" id="crash-result"></div>
+        </div>
+
+        <!-- LIMBO GAME -->
+        <div class="game-card">
+            <div class="game-header">
+                <h2><i class="fas fa-rocket"></i> LIMBO</h2>
+                <div class="balance-box">
+                    <i class="fas fa-coins"></i> Balance: <span id="limbo-balance">1000.00</span>
+                </div>
+            </div>
+            <div class="game-display">
+                <div class="limbo-target" id="limbo-target">2.00x</div>
+                <div class="limbo-result" id="limbo-result">?</div>
+            </div>
+            <div class="game-controls">
+                <input type="number" id="limbo-bet" class="bet-input" value="10.00" min="1" step="1">
+                <input type="number" id="limbo-multiplier" class="bet-input" value="2.00" min="1.01" step="0.01" style="width: 100px;">
+                <button class="play-btn" id="limbo-play"><i class="fas fa-play"></i> Fly</button>
+            </div>
+            <div class="result-text" id="limbo-result-text"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game States
+        let balances = {
+            keno: 1000,
+            dice: 1000,
+            crash: 1000,
+            limbo: 1000
+        };
+
+        // Keno Game
+        const kenoGrid = document.getElementById('keno-grid');
+        const kenoPicked = document.getElementById('keno-picked');
+        const kenoPlay = document.getElementById('keno-play');
+        const kenoBet = document.getElementById('keno-bet');
+        const kenoResult = document.getElementById('keno-result');
+        const kenoBalanceSpan = document.getElementById('keno-balance');
+
+        let selectedNumbers = [];
+        
+        // Initialize Keno grid (1-40)
+        for (let i = 1; i <= 40; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'keno-cell';
+            cell.textContent = i;
+            cell.dataset.num = i;
+            cell.addEventListener('click', () => {
+                if (selectedNumbers.includes(i)) {
+                    selectedNumbers = selectedNumbers.filter(n => n !== i);
+                    cell.classList.remove('selected');
+                } else if (selectedNumbers.length < 5) {
+                    selectedNumbers.push(i);
+                    cell.classList.add('selected');
+                }
+                updateKenoPicked();
+            });
+            kenoGrid.appendChild(cell);
+        }
+
+        function updateKenoPicked() {
+            kenoPicked.textContent = selectedNumbers.length ? 
+                `Picked: ${selectedNumbers.sort((a,b) => a-b).join(', ')}` : 
+                'Pick 1-5 numbers';
+        }
+
+        kenoPlay.addEventListener('click', () => {
+            if (selectedNumbers.length === 0) {
+                kenoResult.innerHTML = '<span class="lose-text">Pick some numbers first!</span>';
+                return;
+            }
+
+            let bet = parseFloat(kenoBet.value);
+            if (isNaN(bet) || bet <= 0 || bet > balances.keno) {
+                kenoResult.innerHTML = '<span class="lose-text">Invalid bet amount</span>';
+                return;
+            }
+
+            balances.keno -= bet;
+            updateBalance('keno');
+
+            // Draw 10 random numbers
+            let drawn = [];
+            while (drawn.length < 10) {
+                let num = Math.floor(Math.random() * 40) + 1;
+                if (!drawn.includes(num)) drawn.push(num);
+            }
+
+            // Update grid visuals
+            document.querySelectorAll('.keno-cell').forEach(cell => {
+                cell.classList.remove('hit');
+            });
+
+            // Count matches
+            let matches = selectedNumbers.filter(n => drawn.includes(n));
+            matches.forEach(num => {
+                document.querySelector(`.keno-cell[data-num="${num}"]`).classList.add('hit');
+            });
+
+            // Calculate winnings (Keno paytable)
+            let multiplier = 0;
+            if (matches.length === 3) multiplier = 2;
+            else if (matches.length === 4) multiplier = 10;
+            else if (matches.length === 5) multiplier = 50;
+
+            if (multiplier > 0) {
+                let win = bet * multiplier;
+                balances.keno += win;
+                kenoResult.innerHTML = `<span class="win-text">WIN! ${matches.length} matches - +${win.toFixed(2)} (${multiplier}x)</span>`;
+            } else {
+                kenoResult.innerHTML = `<span class="lose-text">LOSE! ${matches.length} matches</span>`;
+            }
+
+            updateBalance('keno');
+        });
+
+        // Dice Game
+        const dicePlay = document.getElementById('dice-play');
+        const diceBet = document.getElementById('dice-bet');
+        const diceResult = document.getElementById('dice-result');
+        const diceResultText = document.getElementById('dice-result-text');
+        const diceBalanceSpan = document.getElementById('dice-balance');
+        const predBtns = document.querySelectorAll('.prediction-btn');
+        let currentPrediction = 'over';
+
+        predBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                predBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentPrediction = btn.dataset.pred;
+            });
+        });
+        predBtns[1].classList.add('active'); // Default over
+
+        dicePlay.addEventListener('click', () => {
+            let bet = parseFloat(diceBet.value);
+            if (isNaN(bet) || bet <= 0 || bet > balances.dice) {
+                diceResultText.innerHTML = '<span class="lose-text">Invalid bet amount</span>';
+                return;
+            }
+
+            balances.dice -= bet;
+            updateBalance('dice');
+
+            let roll = Math.floor(Math.random() * 100) + 1; // 1-100
+            diceResult.textContent = roll;
+
+            let win = false;
+            if (currentPrediction === 'over' && roll > 50) win = true;
+            if (currentPrediction === 'under' && roll < 50) win = true;
+
+            if (win) {
+                let payout = bet * 1.98; // ~2x with house edge
+                balances.dice += payout;
+                diceResultText.innerHTML = `<span class="win-text">WIN! Rolled ${roll} - +${payout.toFixed(2)}</span>`;
+            } else {
+                diceResultText.innerHTML = `<span class="lose-text">LOSE! Rolled ${roll}</span>`;
+            }
+
+            updateBalance('dice');
+        });
+
+        // Crash Game
+        const crashPlay = document.getElementById('crash-play');
+        const crashCashout = document.getElementById('crash-cashout');
+        const crashBet = document.getElementById('crash-bet');
+        const crashMultiplier = document.getElementById('crash-multiplier');
+        const crashStatus = document.getElementById('crash-status');
+        const crashResult = document.getElementById('crash-result');
+        const crashBalanceSpan = document.getElementById('crash-balance');
+        const crashLine = document.getElementById('crash-line');
+
+        let crashGameActive = false;
+        let crashInterval;
+        let currentMultiplier = 1;
+        let hasBet = false;
+
+        crashPlay.addEventListener('click', () => {
+            if (crashGameActive) return;
+            
+            let bet = parseFloat(crashBet.value);
+            if (isNaN(bet) || bet <= 0 || bet > balances.crash) {
+                crashResult.innerHTML = '<span class="lose-text">Invalid bet amount</span>';
+                return;
+            }
+
+            balances.crash -= bet;
+            updateBalance('crash');
+            hasBet = true;
+            crashGameActive = true;
+            crashPlay.disabled = true;
+            crashCashout.disabled = false;
+            currentMultiplier = 1;
+            
+            let crashPoint = (Math.random() * 5 + 1).toFixed(2); // Random 1-6x
+            crashStatus.textContent = 'Game in progress...';
+            
+            let time = 0;
+            crashInterval = setInterval(() => {
+                time += 0.05;
+                currentMultiplier = (1 + time).toFixed(2);
+                crashMultiplier.textContent = `${currentMultiplier}x`;
+                
+                // Crash line animation
+                let progress = (currentMultiplier - 1) / 5;
+                crashLine.style.transform = `scaleX(${Math.min(progress, 1)})`;
+                
+                if (currentMultiplier >= crashPoint) {
+                    clearInterval(crashInterval);
+                    crashMultiplier.textContent = `💥 CRASH @ ${crashPoint}x`;
+                    crashStatus.textContent = 'Crashed!';
+                    crashResult.innerHTML = `<span class="lose-text">Lost ${bet.toFixed(2)}</span>`;
+                    crashGameActive = false;
+                    crashPlay.disabled = false;
+                    crashCashout.disabled = true;
+                    hasBet = false;
+                    crashLine.style.transform = 'scaleX(0)';
+                }
+            }, 50);
+        });
+
+        crashCashout.addEventListener('click', () => {
+            if (!crashGameActive || !hasBet) return;
+            
+            clearInterval(crashInterval);
+            let bet = parseFloat(crashBet.value);
+            let win = bet * currentMultiplier;
+            balances.crash += win;
+            
+            crashResult.innerHTML = `<span class="win-text">CASHED OUT! +${win.toFixed(2)} @ ${currentMultiplier}x</span>`;
+            crashStatus.textContent = 'Cashed out!';
+            crashGameActive = false;
+            crashPlay.disabled = false;
+            crashCashout.disabled = true;
+            hasBet = false;
+            updateBalance('crash');
+            crashLine.style.transform = 'scaleX(0)';
+        });
+
+        // Limbo Game
+        const limboPlay = document.getElementById('limbo-play');
+        const limboBet = document.getElementById('limbo-bet');
+        const limboMultiplier = document.getElementById('limbo-multiplier');
+        const limboTarget = document.getElementById('limbo-target');
+        const limboResult = document.getElementById('limbo-result');
+        const limboResultText = document.getElementById('limbo-result-text');
+        const limboBalanceSpan = document.getElementById('limbo-balance');
+
+        limboPlay.addEventListener('click', () => {
+            let bet = parseFloat(limboBet.value);
+            let targetMult = parseFloat(limboMultiplier.value);
+            
+            if (isNaN(bet) || bet <= 0 || bet > balances.limbo || targetMult < 1.01) {
+                limboResultText.innerHTML = '<span class="lose-text">Invalid bet or multiplier</span>';
+                return;
+            }
+
+            balances.limbo -= bet;
+            updateBalance('limbo');
+
+            // Generate random multiplier (provably fair style)
+            let result = (1 + Math.random() * 10).toFixed(2); // 1.00x - 11.00x
+            limboResult.textContent = `${result}x`;
+            
+            if (parseFloat(result) >= targetMult) {
+                let win = bet * targetMult;
+                balances.limbo += win;
+                limboResultText.innerHTML = `<span class="win-text">WIN! Hit ${result}x - +${win.toFixed(2)}</span>`;
+            } else {
+                limboResultText.innerHTML = `<span class="lose-text">LOSE! Hit ${result}x</span>`;
+            }
+            
+            updateBalance('limbo');
+        });
+
+        // Helper Functions
+        function updateBalance(game) {
+            document.getElementById(`${game}-balance`).textContent = balances[game].toFixed(2);
+        }
+
+        // Initialize active state for prediction buttons
+        predBtns[0].addEventListener('click', () => {
+            predBtns.forEach(b => b.classList.remove('active'));
+            predBtns[0].classList.add('active');
+            currentPrediction = 'under';
+        });
+        
+        predBtns[1].addEventListener('click', () => {
+            predBtns.forEach(b => b.classList.remove('active'));
+            predBtns[1].classList.add('active');
+            currentPrediction = 'over';
+        });
+    </script>
+</body>
+</html>

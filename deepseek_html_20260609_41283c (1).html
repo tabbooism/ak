@@ -1,0 +1,2248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyxNet OpsCenter — Red Team Simulacrum v2.4</title>
+    <style>
+        :root {
+            --bg: #030303;
+            --surface: #0a0a0a;
+            --surface2: #111;
+            --border: #1c1c1c;
+            --border-light: #2a2a2a;
+            --text: #b8b8b8;
+            --text-bright: #d4d4d4;
+            --muted: #666;
+            --gold: #c9a40b;
+            --gold-bright: #f0c840;
+            --gold-dim: #8a6e0a;
+            --green: #3a9d3f;
+            --green-bright: #4ce04f;
+            --red: #c0392b;
+            --red-bright: #e74c3c;
+            --blue: #2980b9;
+            --orange: #e67e22;
+            --radius: 6px;
+            --radius-sm: 3px;
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.7);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+            --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.6;
+            background-image:
+                radial-gradient(ellipse at 50% 0%, rgba(20, 20, 20, 0.8) 0%, transparent 60%),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.003) 2px, rgba(255, 255, 255, 0.003) 4px);
+            background-attachment: fixed;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::selection {
+            background: rgba(201, 164, 11, 0.3);
+            color: #fff;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--surface);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a3a;
+        }
+        a {
+            color: var(--gold-bright);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #ffe08a;
+        }
+        .container {
+            max-width: 1540px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        /* ── Sticky Wallet Bar ── */
+        .sticky-wallet {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(8, 8, 8, 0.97);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 8px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+        }
+        .sticky-wallet .wallet-btc {
+            color: var(--green-bright);
+            font-weight: 700;
+            font-size: 14px;
+        }
+        .sticky-wallet .wallet-label {
+            color: var(--muted);
+            margin-right: 6px;
+        }
+        .sticky-wallet .wallet-2fa {
+            color: var(--red-bright);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        /* ── Header ── */
+        header {
+            background: rgba(10, 10, 10, 0.96);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+            margin-bottom: 0;
+            box-shadow: var(--shadow-md);
+        }
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .logo {
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--gold-bright);
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(201, 164, 11, 0.25);
+            font-family: var(--font-sans);
+        }
+        .logo span {
+            color: var(--red-bright);
+            font-weight: 400;
+        }
+        nav {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        nav a {
+            color: var(--muted);
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 20px;
+            transition: var(--transition);
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        nav a:hover {
+            color: var(--text-bright);
+            background: rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+        }
+        nav a.active {
+            color: #000;
+            background: var(--gold);
+            font-weight: 700;
+            box-shadow: 0 0 16px rgba(201, 164, 11, 0.35);
+        }
+        .search-box {
+            background: var(--surface2);
+            border: 1px solid var(--border-light);
+            padding: 8px 16px;
+            color: var(--text);
+            width: 220px;
+            border-radius: 24px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            transition: var(--transition);
+            outline: none;
+        }
+        .search-box:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 11, 0.08);
+        }
+        .online-counter {
+            color: var(--green-bright);
+            margin-left: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .online-counter .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--green-bright);
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: glow-dot 1.5s infinite;
+        }
+        @keyframes glow-dot {
+            0%,
+            100% {
+                box-shadow: 0 0 4px var(--green-bright);
+            }
+            50% {
+                box-shadow: 0 0 14px var(--green-bright);
+            }
+        }
+        /* ── Phishing Alert ── */
+        .phishing-alert {
+            background: linear-gradient(90deg, #1a1010, #1e1414, #1a1010);
+            border-bottom: 1px solid #3a2020;
+            padding: 7px 20px;
+            font-size: 11px;
+            color: var(--red-bright);
+            text-align: center;
+            letter-spacing: 0.5px;
+            animation: alert-shimmer 4s ease-in-out infinite;
+        }
+        @keyframes alert-shimmer {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        /* ── News Ticker ── */
+        .news-ticker {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 9px 16px;
+            margin: 16px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-radius: var(--radius);
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            position: relative;
+        }
+        .news-ticker::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            background: linear-gradient(90deg, transparent, var(--surface));
+            pointer-events: none;
+        }
+        .ticker-content {
+            display: inline-block;
+            animation: ticker-scroll 40s linear infinite;
+        }
+        @keyframes ticker-scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+        /* ── Layout ── */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 20px;
+        }
+        .sidebar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 18px;
+            height: fit-content;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 80px;
+        }
+        .sidebar h4 {
+            color: var(--gold);
+            margin-bottom: 10px;
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: var(--font-sans);
+            font-weight: 700;
+        }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 5px 0;
+        }
+        .sidebar li a {
+            color: var(--muted);
+            font-size: 12px;
+            display: block;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+        .sidebar li a:hover {
+            color: var(--text-bright);
+            background: rgba(255, 255, 255, 0.03);
+            text-decoration: none;
+        }
+        .sidebar li a .cat-count {
+            float: right;
+            color: #444;
+            font-size: 10px;
+        }
+        /* ── Tables ── */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        th,
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 12px;
+        }
+        th {
+            background: #0d0d0d;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            font-size: 10px;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover td {
+            background: rgba(201, 164, 11, 0.03);
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        /* ── Buttons ── */
+        .btn {
+            background: linear-gradient(180deg, #222, #181818);
+            border: 1px solid #333;
+            color: var(--text);
+            padding: 8px 18px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            border-radius: 24px;
+            transition: var(--transition);
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+            box-shadow: 0 0 20px rgba(201, 164, 11, 0.3);
+        }
+        .btn-danger {
+            border-color: #5a2020;
+            color: var(--red-bright);
+        }
+        .btn-danger:hover {
+            background: var(--red);
+            color: #fff;
+            border-color: var(--red);
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 10px;
+        }
+        /* ── Badges ── */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        .badge-pgp {
+            background: rgba(76, 175, 80, 0.15);
+            color: var(--green-bright);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        .badge-level {
+            background: rgba(201, 164, 11, 0.15);
+            color: var(--gold-bright);
+            border: 1px solid rgba(201, 164, 11, 0.3);
+        }
+        .badge-escrow {
+            background: rgba(41, 128, 185, 0.15);
+            color: #5dade2;
+            border: 1px solid rgba(41, 128, 185, 0.3);
+        }
+        /* ── Product Detail ── */
+        .product-detail {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 24px;
+            margin-top: 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+        }
+        .review {
+            border-bottom: 1px solid #1a1a1a;
+            padding: 8px 0;
+            font-size: 12px;
+        }
+        .review:last-child {
+            border-bottom: none;
+        }
+        .star {
+            color: var(--gold-bright);
+        }
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid #2a2a2a;
+            padding: 28px;
+            width: 700px;
+            max-width: 94%;
+            color: var(--text);
+            max-height: 88vh;
+            overflow-y: auto;
+            border-radius: 12px;
+            box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+        }
+        .timer {
+            font-size: 28px;
+            color: var(--red-bright);
+            font-weight: 700;
+            font-family: var(--font-sans);
+            letter-spacing: 2px;
+        }
+        /* ── Inputs ── */
+        input,
+        textarea,
+        select {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            color: var(--text);
+            padding: 10px 14px;
+            margin: 6px 0;
+            width: 100%;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            outline: none;
+            resize: vertical;
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 164, 11, 0.06);
+        }
+        /* ── Forum ── */
+        .forum-thread {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .forum-thread:hover {
+            background: #151515;
+            border-color: #333;
+        }
+        .thread-replies {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #1a1a1a;
+        }
+        .thread-replies.show {
+            display: block;
+        }
+        /* ── Chat ── */
+        .chat-toggle {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: linear-gradient(180deg, #222, #181818);
+            border: 1px solid #333;
+            padding: 12px 24px;
+            color: var(--text);
+            cursor: pointer;
+            z-index: 999;
+            border-radius: 30px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            box-shadow: var(--shadow-lg);
+            transition: var(--transition);
+        }
+        .chat-toggle:hover {
+            border-color: var(--gold);
+            box-shadow: 0 0 24px rgba(201, 164, 11, 0.2);
+        }
+        .chat-box {
+            display: none;
+            position: fixed;
+            bottom: 90px;
+            right: 28px;
+            width: 400px;
+            background: var(--surface);
+            border: 1px solid #2a2a2a;
+            z-index: 1001;
+            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.85);
+            overflow: hidden;
+        }
+        .chat-box.active {
+            display: block;
+        }
+        .chat-header {
+            background: #151515;
+            padding: 10px 16px;
+            border-bottom: 1px solid #222;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        .chat-msgs {
+            height: 280px;
+            overflow-y: auto;
+            padding: 12px;
+            font-size: 12px;
+            background: #0a0a0a;
+        }
+        .chat-msgs p {
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            max-width: 85%;
+            word-break: break-word;
+        }
+        .chat-msgs .msg-you {
+            background: rgba(201, 164, 11, 0.1);
+            margin-left: auto;
+            border: 1px solid rgba(201, 164, 11, 0.2);
+        }
+        .chat-msgs .msg-them {
+            background: rgba(255, 255, 255, 0.04);
+            margin-right: auto;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .chat-input-area {
+            display: flex;
+            border-top: 1px solid #222;
+        }
+        .chat-input-area input {
+            flex: 1;
+            border: none;
+            background: #0d0d0d;
+            padding: 10px 14px;
+            margin: 0;
+            border-radius: 0;
+        }
+        .chat-input-area button {
+            background: #1a1a1a;
+            border: none;
+            color: var(--text);
+            padding: 10px 18px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            transition: var(--transition);
+        }
+        .chat-input-area button:hover {
+            background: var(--gold);
+            color: #000;
+        }
+        /* ── Admin Panel ── */
+        .admin-panel {
+            display: none;
+            background: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 16px;
+        }
+        .admin-panel.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        /* ── Export Area ── */
+        .export-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: var(--radius);
+            margin-top: 16px;
+        }
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: var(--text);
+            padding: 12px 24px;
+            border-radius: 24px;
+            z-index: 2000;
+            font-size: 12px;
+            box-shadow: var(--shadow-lg);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+            pointer-events: none;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+        }
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                position: static;
+            }
+            .chat-box {
+                width: 94vw;
+                right: 3vw;
+            }
+            nav {
+                gap: 2px;
+            }
+            nav a {
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+            .logo {
+                font-size: 22px;
+            }
+        }
+        pre {
+            background: #080808;
+            border: 1px solid #1a1a1a;
+            padding: 14px;
+            border-radius: var(--radius);
+            overflow-x: auto;
+            font-size: 11px;
+            color: #aaa;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .highlight-box {
+            background: rgba(201, 164, 11, 0.05);
+            border: 1px solid rgba(201, 164, 11, 0.2);
+            padding: 12px;
+            border-radius: var(--radius);
+            margin: 8px 0;
+        }
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .tab-nav button {
+            background: none;
+            border: none;
+            color: var(--muted);
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+        .tab-nav button.active {
+            color: var(--gold-bright);
+            border-bottom-color: var(--gold);
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── Sticky Wallet Bar ─── -->
+    <div class="sticky-wallet">
+        <div>
+            <span class="wallet-label">BTC:</span>
+            <span class="wallet-btc" id="walletBtc">0.00240000</span>
+            <span style="color:var(--muted);margin:0 12px;">|</span>
+            <span class="wallet-label">XMR:</span>
+            <span class="wallet-btc" id="walletXmr">0.84000000</span>
+        </div>
+        <div>
+            <span style="color:var(--muted);">Session:</span> Guest_<span id="sessionId">7a3f</span>
+            <span style="margin:0 10px;color:#333;">|</span>
+            <span class="wallet-2fa">⚠ 2FA Disabled</span>
+        </div>
+    </div>
+
+    <!-- ─── Phishing Alert ─── -->
+    <div class="phishing-alert">
+        ⚠ NEVER share your private keys or mnemonic phrase. Styx staff will never DM you first. Verify PGP signatures on all communications.
+    </div>
+
+    <div class="container">
+        <!-- ─── Header ─── -->
+        <header>
+            <div class="header-inner">
+                <div class="logo">Styx<span>OpsCenter</span></div>
+                <nav id="mainNav">
+                    <a href="#market" class="active" data-page="market">📦 Market</a>
+                    <a href="#cart" data-page="cart">🛒 Cart <span id="cartCount">0</span></a>
+                    <a href="#forum" data-page="forum">💬 Forum</a>
+                    <a href="#messages" data-page="messages">✉ Messages</a>
+                    <a href="#generator" data-page="generator">📝 Narrative Gen</a>
+                    <a href="#exploits" data-page="exploits">💻 Exploits</a>
+                    <a href="#training" data-page="training">🎓 Training</a>
+                    <a href="#export" data-page="export">📥 Export</a>
+                    <a href="#admin" data-page="admin">⚙ Admin</a>
+                </nav>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input class="search-box" placeholder="🔍 Search listings..." id="searchInput" oninput="filterProducts()">
+                    <span class="online-counter"><span class="dot"></span><span id="onlineCount">2,847</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- ─── News Ticker ─── -->
+        <div class="news-ticker">
+            <div class="ticker-content" id="tickerContent">
+                🚨 XMR swap fees reduced to 0.8% &nbsp;|&nbsp; New vendor "Phantom" — verified 0‑day broker &nbsp;|&nbsp; PGP mandatory for all withdrawals &nbsp;|&nbsp; OSRS gold bulk orders: 15% discount &nbsp;|&nbsp; Forum: "OPSEC for Newbies" pinned &nbsp;|&nbsp; Support wait time: ~6 hours &nbsp;|&nbsp; 🚨 XMR swap fees reduced to 0.8% &nbsp;|&nbsp; New vendor "Phantom" — verified 0‑day broker &nbsp;|&nbsp; PGP mandatory for all withdrawals &nbsp;|&nbsp; OSRS gold bulk orders: 15% discount &nbsp;|&nbsp; Forum: "OPSEC for Newbies" pinned &nbsp;|&nbsp; Support wait time: ~6 hours &nbsp;
+            </div>
+        </div>
+
+        <!-- ─── Market Page ─── -->
+        <div id="page-market" class="page active">
+            <div class="grid-2col">
+                <div class="sidebar">
+                    <h4>📂 Categories</h4>
+                    <ul id="categoryList"></ul>
+                    <hr style="border-color:#1a1a1a;margin:12px 0;">
+                    <h4>🔍 Quick Filters</h4>
+                    <ul>
+                        <li><a href="#" onclick="quickFilter('pgp')">🔐 PGP Verified Only</a></li>
+                        <li><a href="#" onclick="quickFilter('escrow')">🛡 Full Escrow (95%+)</a></li>
+                        <li><a href="#" onclick="quickFilter('level5')">⭐ Level 5 Vendors</a></li>
+                        <li><a href="#" onclick="filterCategory('all');renderMarket();">🔄 Reset All</a></li>
+                    </ul>
+                </div>
+                <div class="main-content">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <h2 style="color:var(--text-bright);">📦 Latest Listings</h2>
+                        <div>
+                            <button class="btn btn-sm" onclick="randomizePrices()">🔄 Simulate Price Fluctuation</button>
+                            <button class="btn btn-sm" onclick="bulkAddSampleCart()">🧪 Bulk Add Samples</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="productTable">
+                            <thead><tr><th>Product</th><th>Vendor</th><th>Price (BTC)</th><th>Stock</th><th>Escrow</th><th>Actions</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div id="paginationArea" style="margin-top:12px;text-align:center;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Product Detail Page ─── -->
+        <div id="page-product" class="page">
+            <button class="btn" onclick="showPage('market')" style="margin-bottom:12px;">← Back to Market</button>
+            <div id="productDetailContainer" class="product-detail"></div>
+        </div>
+
+        <!-- ─── Vendor Page ─── -->
+        <div id="page-vendor" class="page">
+            <button class="btn" onclick="showPage('market')" style="margin-bottom:12px;">← Back to Market</button>
+            <div id="vendorProfileContainer" class="product-detail"></div>
+        </div>
+
+        <!-- ─── Cart Page ─── -->
+        <div id="page-cart" class="page">
+            <h2>🛒 Shopping Cart</h2>
+            <div id="cartItems"><p style="color:var(--muted);">Your cart is empty.</p></div>
+            <div id="cartTotal" style="margin-top:10px;font-size:16px;"></div>
+            <button class="btn" id="checkoutBtn" style="display:none;margin-top:10px;" onclick="openCheckout()">💳 Proceed to Checkout</button>
+            <button class="btn btn-danger btn-sm" id="clearCartBtn" style="display:none;margin-left:8px;" onclick="clearCart()">🗑 Clear Cart</button>
+        </div>
+
+        <!-- ─── Forum Page ─── -->
+        <div id="page-forum" class="page">
+            <h2>💬 Forum</h2>
+            <div id="forumThreads"></div>
+            <hr style="border-color:#1a1a1a;margin:16px 0;">
+            <h3>Create New Thread</h3>
+            <input placeholder="Thread title..." id="newThreadTitle">
+            <textarea placeholder="Post content... (Markdown-like formatting supported)" rows="5"></textarea>
+            <button class="btn" onclick="createForumThread()">Post Thread</button>
+        </div>
+
+        <!-- ─── Messages Page ─── -->
+        <div id="page-messages" class="page">
+            <h2>✉ Private Messages</h2>
+            <div id="pmList"></div>
+            <div id="pmView" style="display:none;margin-top:16px;">
+                <h3>Conversation with <span id="pmUser"></span></h3>
+                <div id="pmMessages" style="background:#0a0a0a;padding:12px;height:300px;overflow-y:auto;border:1px solid #1a1a1a;border-radius:6px;"></div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input id="pmInput" placeholder="Type reply... (simulated)">
+                    <button class="btn" onclick="sendPM()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── Narrative Generator ─── -->
+        <div id="page-generator" class="page">
+            <h2>📝 Social Engineering Narrative Generator</h2>
+            <p style="color:var(--muted);">Training tool — demonstrates common scam scripts for defensive awareness.</p>
+            <select id="narrativeType">
+                <option value="onlyfans">OnlyFans "Sugar Daddy" Script</option>
+                <option value="osrs">OSRS Trust Trade Lure</option>
+                <option value="job">Fake Remote Job Offer</option>
+                <option value="romance">Romance Scam (Pig Butchering)</option>
+                <option value="techsupport">Fake Tech Support</option>
+                <option value="investment">Fake Crypto Investment</option>
+            </select>
+            <div style="display:flex;gap:8px;margin:8px 0;">
+                <button class="btn" onclick="generateNarrative()">🎲 Generate Script</button>
+                <button class="btn btn-sm" onclick="copyNarrative()">📋 Copy to Clipboard</button>
+                <button class="btn btn-sm" onclick="exportNarrative()">💾 Export as TXT</button>
+            </div>
+            <textarea id="narrativeOutput" rows="14" readonly style="background:#080808;font-size:11px;"></textarea>
+            <div class="highlight-box" style="margin-top:8px;">
+                <strong>⚠ Training Note:</strong> These scripts are for <em>defensive recognition training only</em>. Recognizing these patterns helps protect against real social engineering attacks.
+            </div>
+        </div>
+
+        <!-- ─── Exploits Page ─── -->
+        <div id="page-exploits" class="page">
+            <h2>💻 Exploit Kit Simulator</h2>
+            <p style="color:var(--muted);">Inert catalogue for training purposes. No active payloads. All CVE data is simulated.</p>
+            <div class="tab-nav">
+                <button class="active" onclick="switchExploitTab('browser')">Browser</button>
+                <button onclick="switchExploitTab('os')">OS / Kernel</button>
+                <button onclick="switchExploitTab('network')">Network</button>
+                <button onclick="switchExploitTab('c2')">C2 Frameworks</button>
+            </div>
+            <div id="exploitTab-browser" class="tab-panel active"></div>
+            <div id="exploitTab-os" class="tab-panel"></div>
+            <div id="exploitTab-network" class="tab-panel"></div>
+            <div id="exploitTab-c2" class="tab-panel"></div>
+            <button class="btn btn-sm" style="margin-top:12px;" onclick="exportExploitsJSON()">📥 Export Exploit Data (JSON)</button>
+        </div>
+
+        <!-- ─── Training Page ─── -->
+        <div id="page-training" class="page">
+            <h2>🎓 Red Team Training Modules</h2>
+            <div class="tab-nav">
+                <button class="active" onclick="switchTrainingTab('module1')">Module 1: Phishing</button>
+                <button onclick="switchTrainingTab('module2')">Module 2: OPSEC</button>
+                <button onclick="switchTrainingTab('module3')">Module 3: Crypto</button>
+                <button onclick="switchTrainingTab('module4')">Module 4: Social Eng.</button>
+            </div>
+            <div id="trainingTab-module1" class="tab-panel active product-detail">
+                <h3>Module 1: Phishing Recognition</h3>
+                <p>Learn to identify phishing pages, credential harvesters, and clone sites.</p>
+                <div class="highlight-box">
+                    <strong>Key Indicators:</strong>
+                    <ul style="margin-left:20px;margin-top:6px;">
+                        <li>URL mismatches (e.g., styxnet.co vs styxnet.com)</li>
+                        <li>Urgency language ("Your account will be deleted in 24 hours")</li>
+                        <li>Requests for private keys or 2FA seeds</li>
+                        <li>No PGP signature on official communications</li>
+                    </ul>
+                </div>
+                <button class="btn btn-sm" onclick="simulatePhishingEmail()">📧 Simulate Phishing Email</button>
+                <div id="phishingSimOutput" style="margin-top:8px;"></div>
+            </div>
+            <div id="trainingTab-module2" class="tab-panel product-detail">
+                <h3>Module 2: OPSEC Fundamentals</h3>
+                <p>Operational security best practices for darknet market analysis.</p>
+                <ul style="margin-left:20px;">
+                    <li>Use Tails OS or Whonix for research</li>
+                    <li>Never reuse usernames across markets</li>
+                    <li>PGP encrypt all communications</li>
+                    <li>Verify canary signatures weekly</li>
+                </ul>
+            </div>
+            <div id="trainingTab-module3" class="tab-panel product-detail">
+                <h3>Module 3: Cryptocurrency Tracing</h3>
+                <p>Understanding blockchain analysis and transaction tracking.</p>
+                <p style="color:var(--muted);">Simulated blockchain explorer below:</p>
+                <pre id="simulatedBlockchain">Loading simulated blockchain data...</pre>
+                <button class="btn btn-sm" onclick="generateSimBlockchain()">🔄 Generate New Simulated Chain</button>
+            </div>
+            <div id="trainingTab-module4" class="tab-panel product-detail">
+                <h3>Module 4: Social Engineering Defense</h3>
+                <p>Recognize manipulation tactics used by threat actors.</p>
+                <div class="highlight-box">Trust building → Small requests → Escalation → Exploitation</div>
+                <button class="btn btn-sm" onclick="startSETrainingSim()">▶ Run Interactive Simulation</button>
+                <div id="seTrainingOutput" style="margin-top:8px;"></div>
+            </div>
+        </div>
+
+        <!-- ─── Export Page ─── -->
+        <div id="page-export" class="page">
+            <h2>📥 Bulk Data Export</h2>
+            <p style="color:var(--muted);">Export training data, product listings, and simulation logs for offline analysis.</p>
+            <div class="export-section">
+                <h4>Export Options</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+                    <button class="btn" onclick="exportProductsCSV()">📊 Products (CSV)</button>
+                    <button class="btn" onclick="exportProductsJSON()">📋 Products (JSON)</button>
+                    <button class="btn" onclick="exportVendorsJSON()">👤 Vendors (JSON)</button>
+                    <button class="btn" onclick="exportForumJSON()">💬 Forum Threads (JSON)</button>
+                    <button class="btn" onclick="exportFullStateJSON()">📦 Full State Dump (JSON)</button>
+                    <button class="btn" onclick="exportTrainingLog()">📝 Training Session Log</button>
+                </div>
+            </div>
+            <div class="export-section" style="margin-top:12px;">
+                <h4>Import State</h4>
+                <input type="file" id="importFile" accept=".json" onchange="importState(event)">
+                <p style="font-size:10px;color:var(--muted);">Restore a previously exported state dump.</p>
+            </div>
+        </div>
+
+        <!-- ─── Admin Page ─── -->
+        <div id="page-admin" class="page">
+            <h2>⚙ Administration Panel</h2>
+            <p style="color:var(--muted);">Authorized access only. All actions are logged.</p>
+            <div style="display:flex;gap:8px;">
+                <input id="adminKey" placeholder="Enter admin key..." style="width:300px;">
+                <button class="btn" onclick="checkAdmin()">Unlock</button>
+            </div>
+            <div id="adminContent" class="admin-panel">
+                <h3>Server Statistics</h3>
+                <table>
+                    <tr><td>Orders Today</td><td id="statOrders">1,842</td></tr>
+                    <tr><td>Active Users</td><td id="statUsers">2,847</td></tr>
+                    <tr><td>BTC in Escrow</td><td>₿ 34.21</td></tr>
+                    <tr><td>Disputes Open</td><td>23</td></tr>
+                    <tr><td>Canary Updated</td><td id="statCanary">2025-06-01</td></tr>
+                    <tr><td>Last Backup</td><td id="statBackup">2025-06-09 04:30 UTC</td></tr>
+                </table>
+                <div style="margin-top:16px;">
+                    <button class="btn btn-sm" onclick="simulateCanaryUpdate()">🔄 Update Canary</button>
+                    <button class="btn btn-sm" onclick="simulateBackup()">💾 Simulate Backup</button>
+                    <button class="btn btn-danger btn-sm" onclick="simulateBreachAlert()">🚨 Simulate Breach Alert</button>
+                </div>
+                <div id="adminLog" style="margin-top:12px;background:#050505;padding:10px;max-height:200px;overflow-y:auto;font-size:10px;"></div>
+            </div>
+        </div>
+
+        <!-- ─── Profile Page ─── -->
+        <div id="page-profile" class="page" style="display:none;">
+            <!-- Accessed via wallet bar -->
+        </div>
+    </div>
+
+    <!-- ─── Checkout Modal ─── -->
+    <div id="checkoutModal" class="modal-overlay">
+        <div class="modal-content">
+            <button onclick="closeCheckout()" style="float:right;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;line-height:1;">&times;</button>
+            <h3>💳 Checkout</h3>
+            <div id="checkoutItems"></div>
+            <div class="timer" id="checkoutTimer">15:00</div>
+            <p>Subtotal: <strong id="checkoutSubtotal"></strong></p>
+            <div><label>Voucher Code:</label><input id="voucherInput" oninput="applyVoucher()" placeholder="e.g. WELCOME5"><span id="discountInfo"></span></div>
+            <p style="font-size:18px;">Total: <strong id="checkoutTotal" style="color:var(--green-bright);"></strong></p>
+            <p style="color:var(--muted);">Send exactly to:</p>
+            <div style="background:#050505;padding:12px;word-break:break-all;border:1px solid #222;border-radius:4px;font-size:11px;" id="btcAddress"></div>
+            <div id="fakeConfirmations" style="display:none;margin-top:10px;">
+                <p><strong>Confirmations:</strong></p>
+                <div id="confList"></div>
+            </div>
+            <div style="margin-top:12px;display:flex;gap:8px;">
+                <button class="btn" onclick="simulatePayment()">✅ I Have Paid</button>
+                <button class="btn btn-danger btn-sm" onclick="closeCheckout()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Chat Widget ─── -->
+    <div class="chat-toggle" onclick="toggleChat()">💬 Live Support</div>
+    <div class="chat-box" id="chatBox">
+        <div class="chat-header">Styx Support — <span id="chatPersona">Admin</span> <span style="float:right;font-size:10px;color:var(--muted);">Session: #<span id="chatSessionId">4421</span></span></div>
+        <div class="chat-msgs" id="chatMsgs"></div>
+        <div class="chat-input-area">
+            <input id="chatInput" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendChat()">
+            <button onclick="sendChat()">Send</button>
+        </div>
+    </div>
+
+    <!-- ─── Toast Container ─── -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // ═══════════════════════════════════════════
+        //  STATE MANAGEMENT
+        // ═══════════════════════════════════════════
+        const AppState = {
+            currentPage: 'market',
+            currentFilter: 'all',
+            currentSearch: '',
+            cart: [],
+            checkoutTimerInterval: null,
+            currentCheckoutSubtotal: 0,
+            appliedDiscount: 0,
+            pmConversation: null,
+            chatPersona: 'Admin',
+            adminUnlocked: false,
+            trainingLog: [],
+            sessionId: Math.random().toString(36).substr(2, 6).toUpperCase(),
+            pagination: { page: 1, perPage: 20 },
+            exploitTab: 'browser',
+            trainingTab: 'module1',
+        };
+
+        // ═══════════════════════════════════════════
+        //  DATA LAYER
+        // ═══════════════════════════════════════════
+        const categories = [
+            'stimulants', 'opioids', 'psychedelics', 'cannabis', 'benzodiazepines',
+            'firearms', 'bulk-orders', 'electronics', 'counterfeit-docs', 'digital-goods',
+            'services', 'osrs-gold', 'onlyfans-accounts', 'escort-listings', 'malware',
+            'phishing-kits', 'carding', 'tutorials', 'crypto-mixing', 'vpn-proxies'
+        ];
+
+        const vendorNames = [
+            'Phantom', 'Luna', 'ViktorKane', 'DarkChemist', 'GoldenHorse',
+            'CyberFox', 'DeepSource', 'NightOwl', 'IronVault', 'SilkRoadRelic',
+            'AlphaSupply', 'ZeroDayBroker', 'CryptoKing', 'ShadowPrint', 'EliteGear',
+            'PureBliss', 'QuickSilver', 'StealthOps', 'BulkMaster', 'TrustedGuy'
+        ];
+
+        // Generate 120+ products
+        const products = [];
+        const productAdjectives = ['Premium', 'Ultra', 'Stealth', 'Express', 'Bulk', 'Sample', 'AAA+', 'Pharma',
+            'Organic', 'Lab-Tested'
+        ];
+        const productNouns = ['Package', 'Shipment', 'Listing', 'Deal', 'Bundle', 'Stash', 'Supply', 'Order', 'Batch',
+            'Consignment'
+        ];
+
+        for (let i = 1; i <= 120; i++) {
+            const vendorIdx = i % vendorNames.length;
+            const catIdx = i % categories.length;
+            const adj = productAdjectives[i % productAdjectives.length];
+            const noun = productNouns[Math.floor(i / 10) % productNouns.length];
+            products.push({
+                id: i,
+                name: `${adj} ${categories[catIdx].replace(/-/g,' ')} ${noun} #${i}`,
+                vendor: vendorNames[vendorIdx],
+                vendorLevel: Math.min(5, Math.ceil((i % 7) + 1)),
+                price: (Math.random() * 8 + 0.05).toFixed(4),
+                escrow: 70 + Math.floor(Math.random() * 28),
+                pgp: Math.random() > 0.25,
+                category: categories[catIdx],
+                stock: ['In Stock', 'In Stock', 'In Stock', 'Limited', 'Low Stock', 'Out of Stock'][Math.floor(Math
+                    .random() * 6)],
+                desc: `High-quality ${categories[catIdx].replace(/-/g,' ')}. Discreet shipping. Vacuum sealed. Tracking provided after 48h.`,
+                reviews: generateReviews(vendorIdx),
+                listed: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 3600 * 1000)).toISOString()
+                    .split('T')[0],
+                shipsFrom: ['EU', 'US', 'UK', 'NL', 'DE', 'CA', 'AU'][Math.floor(Math.random() * 7)],
+                shipsTo: ['Worldwide', 'EU Only', 'US Only', 'Worldwide', 'Worldwide'][Math.floor(Math.random() * 5)],
+            });
+        }
+
+        function generateReviews(vendorIdx) {
+            const count = Math.floor(Math.random() * 15) + 3;
+            const revs = [];
+            for (let r = 0; r < count; r++) {
+                revs.push({
+                    user: `user_${Math.random().toString(36).substr(2, 6)}`,
+                    rating: Math.floor(Math.random() * 2) + 4, // 4-5 stars
+                    text: ['NDD! Great stealth.', 'A+++ would order again.', 'Slight delay but good quality.',
+                        'Perfect. Exactly as described.', 'Trusted vendor, 5th order.'
+                    ][Math.floor(Math.random() * 5)],
+                    date: new Date(Date.now() - Math.floor(Math.random() * 90 * 24 * 3600 * 1000)).toISOString()
+                        .split('T')[0],
+                });
+            }
+            return revs;
+        }
+
+        // Build vendors map
+        const vendors = {};
+        vendorNames.forEach((name, idx) => {
+            const vendorProducts = products.filter(p => p.vendor === name);
+            vendors[name] = {
+                name,
+                level: Math.min(5, Math.ceil((idx % 7) + 1)),
+                pgp: Math.random() > 0.2,
+                bio: `Established vendor since ${2020 + Math.floor(Math.random()*5)}. Specializing in ${categories[idx % categories.length].replace(/-/g,' ')}.`,
+                pgpKey: `-----BEGIN PGP PUBLIC KEY BLOCK-----\n\nmQINBG...simulated...${Math.random().toString(36).substr(2,40)}\n-----END PGP PUBLIC KEY BLOCK-----`,
+                totalSales: Math.floor(Math.random() * 15000) + 500,
+                feedback: vendorProducts.flatMap(p => p.reviews).slice(0, 30),
+                bondAmount: (Math.random() * 8 + 2).toFixed(2),
+                lastSeen: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 3600 * 1000)).toISOString()
+                    .split('T')[0],
+            };
+        });
+
+        // Forum data
+        const forumThreads = [
+            { id: 1, title: 'OPSEC for Newbies — Read Before Ordering', replies: 2431, author: 'Admin', pinned: true,
+                posts: [
+                    { u: 'Admin', t: 'Always use Tails OS. Never use your real name. PGP encrypt all messages.',
+                        date: '2025-01-15' },
+                    { u: 'Phantom', t: 'Also: never FE. Use escrow every time. Even with Level 5 vendors.',
+                    date: '2025-02-01' },
+                ] },
+            { id: 2, title: 'Best cocaine vendor EU?', replies: 1100, author: 'snowflake99', pinned: false, posts: [
+                    { u: 'ViktorKane', t: 'ColombiaExpress — NDD, stealth A+, lab tested.', date: '2025-05-10' },
+                ] },
+            { id: 3, title: 'Phishing attack on users — Warning', replies: 567, author: 'Admin', pinned: true, posts: [
+                    { u: 'Admin', t: 'Multiple users report phishing DMs. Always verify PGP signatures.',
+                    date: '2025-06-01' },
+                ] },
+            { id: 4, title: 'How to verify PGP signatures properly', replies: 892, author: 'cryptoGuide', pinned: false,
+                posts: [] },
+            { id: 5, title: 'Exit scam alert: Market "DreamBazaar"', replies: 3401, author: 'newsBot', pinned: true,
+                posts: [] },
+            { id: 6, title: 'Best OPSEC practices 2025 edition', replies: 1567, author: 'securityNerd', pinned: false,
+                posts: [] },
+        ];
+
+        // PM data
+        const pmData = [
+            { user: 'Admin', preview: 'Welcome to StyxOpsCenter. Please read our OPSEC guide...',
+            messages: [{ from: 'Admin', text: 'Welcome! Please enable 2FA and always use PGP.' }] },
+            { user: 'ViktorKane', preview: 'Bulk deal available — contact for pricing...',
+                messages: [{ from: 'ViktorKane', text: 'Interested in bulk? I can offer 15% off for orders over 1 BTC.' }] },
+        ];
+
+        // Exploit data
+        const exploitData = {
+            browser: [
+                { cve: 'CVE-2025-XXXX', desc: 'Chrome V8 type confusion (simulated)', severity: 'Critical',
+                    affected: 'Chrome < 132', price: '0.85 BTC' },
+                { cve: 'CVE-2024-YYYY', desc: 'Firefox SpiderMonkey JIT bug (simulated)', severity: 'High',
+                    affected: 'Firefox < 128', price: '0.45 BTC' },
+            ],
+            os: [
+                { cve: 'CVE-2025-AAAA', desc: 'Windows Print Spooler RCE (simulated)', severity: 'Critical',
+                    affected: 'Windows 10/11', price: '1.20 BTC' },
+                { cve: 'CVE-2024-BBBB', desc: 'Linux kernel eBPF priv esc (simulated)', severity: 'High',
+                    affected: 'Kernel 6.x', price: '0.90 BTC' },
+            ],
+            network: [
+                { cve: 'CVE-2025-CCCC', desc: 'Cisco IOS XE auth bypass (simulated)', severity: 'Critical',
+                    affected: 'IOS XE 17.x', price: '2.00 BTC' },
+            ],
+            c2: [
+                { name: 'NightHawk', desc: 'Modular C2 framework with evasive capabilities (simulated)',
+                    severity: 'N/A', price: '3.50 BTC' },
+                { name: 'GhostRelay', desc: 'Traffic obfuscation & relay network (simulated)', severity: 'N/A',
+                    price: '1.80 BTC' },
+            ],
+        };
+
+        // ═══════════════════════════════════════════
+        //  RENDERING FUNCTIONS
+        // ═══════════════════════════════════════════
+        function renderMarket(filter = 'all', search = '') {
+            const tbody = document.querySelector('#productTable tbody');
+            tbody.innerHTML = '';
+            let filtered = products.filter(p => {
+                if (filter !== 'all' && p.category !== filter) return false;
+                if (search && !p.name.toLowerCase().includes(search.toLowerCase()) && !p.vendor.toLowerCase()
+                    .includes(search.toLowerCase())) return false;
+                return true;
+            });
+
+            // Pagination
+            const totalPages = Math.ceil(filtered.length / AppState.pagination.perPage);
+            const start = (AppState.pagination.page - 1) * AppState.pagination.perPage;
+            filtered = filtered.slice(start, start + AppState.pagination.perPage);
+
+            filtered.forEach(p => {
+                const row = document.createElement('tr');
+                const escrowColor = p.escrow >= 95 ? 'var(--green-bright)' : p.escrow >= 85 ? '#f0c040' :
+                    'var(--orange)';
+                row.innerHTML = `
+                    <td><a href="#" onclick="showProduct(${p.id});return false;">${p.name}</a>
+                        <br><small style="color:var(--muted);">${p.category.replace(/-/g,' ')} | ${p.shipsFrom} → ${p.shipsTo}</small></td>
+                    <td><a href="#" onclick="showVendor('${p.vendor}');return false;">${p.vendor}</a>
+                        <span class="badge badge-level">Lv${p.vendorLevel}</span>
+                        ${p.pgp?'<span class="badge badge-pgp">PGP</span>':''}</td>
+                    <td style="color:var(--green-bright);font-weight:700;">₿ ${p.price}</td>
+                    <td><span style="color:${p.stock==='In Stock'?'var(--green-bright)':p.stock==='Limited'?'var(--orange)':'var(--red-bright)'};">${p.stock}</span></td>
+                    <td><div style="background:#1a1a1a;height:6px;border-radius:3px;width:80px;overflow:hidden;">
+                        <div style="background:${escrowColor};height:100%;width:${p.escrow}%;border-radius:3px;"></div></div>
+                        <small>${p.escrow}%</small></td>
+                    <td>
+                        <button class="btn btn-sm" onclick="event.stopPropagation();addToCart(${p.id})">🛒 Add</button>
+                        <button class="btn btn-sm" onclick="event.stopPropagation();showProduct(${p.id})">📋</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Render pagination
+            const pagDiv = document.getElementById('paginationArea');
+            pagDiv.innerHTML = '';
+            if (totalPages > 1) {
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-sm';
+                    btn.textContent = i;
+                    if (i === AppState.pagination.page) btn.style.background = 'var(--gold)';
+                    btn.onclick = () => { AppState.pagination.page = i;
+                        renderMarket(filter, search); };
+                    pagDiv.appendChild(btn);
+                }
+                pagDiv.appendChild(document.createTextNode(` (${filtered.length + start} of ${products.filter(p=>{if(filter!=='all'&&p.category!==filter)return false;if(search&&!p.name.toLowerCase().includes(search.toLowerCase())&&!p.vendor.toLowerCase().includes(search.toLowerCase()))return false;return true;}).length} results)`));
+            }
+        }
+
+        function renderCategoryList() {
+            const catList = document.getElementById('categoryList');
+            catList.innerHTML = '';
+            categories.forEach(cat => {
+                const count = products.filter(p => p.category === cat).length;
+                catList.innerHTML +=
+                    `<li><a href="#" onclick="filterCategory('${cat}');return false;">${cat.replace(/-/g,' ')} <span class="cat-count">(${count})</span></a></li>`;
+            });
+            catList.innerHTML +=
+                `<li><a href="#" onclick="filterCategory('all');return false;" style="color:var(--gold-bright);">📋 All Listings <span class="cat-count">(${products.length})</span></a></li>`;
+        }
+
+        function renderForum() {
+            const div = document.getElementById('forumThreads');
+            div.innerHTML = forumThreads.map(t => `
+                <div class="forum-thread" onclick="toggleForumThread(this, ${t.id})">
+                    <strong>${t.pinned?'📌 ':''}${t.title}</strong>
+                    <span style="float:right;color:var(--muted);">${t.replies} replies — by ${t.author}</span>
+                    <div class="thread-replies" id="threadReplies-${t.id}">
+                        ${t.posts.map(p=>`<div class="review"><strong>${p.u}:</strong> ${p.t} <small style="color:var(--muted);">${p.date||''}</small></div>`).join('')}
+                        ${t.posts.length===0?'<p style="color:var(--muted);">No posts yet.</p>':''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleForumThread(el, id) {
+            const replies = el.querySelector('.thread-replies');
+            replies.classList.toggle('show');
+        }
+
+        function renderPMList() {
+            const div = document.getElementById('pmList');
+            div.innerHTML = pmData.map((p, i) => `
+                <div class="forum-thread" onclick="openPM(${i})">
+                    <strong>${p.user}</strong> — <span style="color:var(--muted);">${p.preview}</span>
+                </div>
+            `).join('');
+        }
+
+        function openPM(index) {
+            AppState.pmConversation = { ...pmData[index], index };
+            document.getElementById('pmUser').innerText = AppState.pmConversation.user;
+            renderPM();
+            document.getElementById('pmView').style.display = 'block';
+        }
+
+        function renderPM() {
+            if (!AppState.pmConversation) return;
+            const div = document.getElementById('pmMessages');
+            div.innerHTML = AppState.pmConversation.messages.map(m => `
+                <p><strong>${m.from}:</strong> ${m.text}</p>
+            `).join('');
+            div.scrollTop = div.scrollHeight;
+        }
+
+        function sendPM() {
+            const inp = document.getElementById('pmInput');
+            const txt = inp.value.trim();
+            if (!txt || !AppState.pmConversation) return;
+            AppState.pmConversation.messages.push({ from: 'You', text: txt });
+            renderPM();
+            inp.value = '';
+            // Simulate response
+            setTimeout(() => {
+                const responses = [
+                    'Thank you for your message. I will get back to you shortly.',
+                    'Understood. Let me check on that for you.',
+                    'Can you provide more details?',
+                    'I appreciate your patience. Processing now.',
+                ];
+                AppState.pmConversation.messages.push({
+                    from: AppState.pmConversation.user,
+                    text: responses[Math.floor(Math.random() * responses.length)],
+                });
+                renderPM();
+                logTrainingEvent('pm_response', `Received response from ${AppState.pmConversation.user}`);
+            }, 1500 + Math.random() * 2000);
+        }
+
+        function renderExploits(tab = 'browser') {
+            const data = exploitData[tab] || [];
+            const div = document.getElementById(`exploitTab-${tab}`);
+            if (!div) return;
+            div.innerHTML = data.map(e => `
+                <div class="exploit-item" style="background:var(--surface);border:1px solid var(--border);padding:12px;margin:6px 0;border-radius:var(--radius);">
+                    <strong>${e.cve||e.name}</strong>
+                    <span class="badge" style="background:${e.severity==='Critical'?'rgba(192,57,43,0.2)':'rgba(230,126,34,0.2)'};color:${e.severity==='Critical'?'var(--red-bright)':'var(--orange)'};">${e.severity}</span>
+                    <br><small>${e.desc}</small>
+                    ${e.affected?`<br><small style="color:var(--muted);">Affected: ${e.affected}</small>`:''}
+                    <br><strong style="color:var(--green-bright);">${e.price}</strong>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════
+        //  CART FUNCTIONS
+        // ═══════════════════════════════════════════
+        function addToCart(id) {
+            const existing = AppState.cart.find(i => i.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                const product = products.find(p => p.id === id);
+                if (!product) return;
+                AppState.cart.push({ ...product, qty: 1 });
+            }
+            updateCartUI();
+            showToast(`Added "${products.find(p=>p.id===id)?.name||'Item'}" to cart`);
+            logTrainingEvent('cart_add', `Added product #${id} to cart`);
+        }
+
+        function removeFromCart(id) {
+            AppState.cart = AppState.cart.filter(i => i.id !== id);
+            updateCartUI();
+            showToast('Item removed from cart');
+        }
+
+        function clearCart() {
+            AppState.cart = [];
+            updateCartUI();
+            showToast('Cart cleared');
+        }
+
+        function updateCartUI() {
+            const count = AppState.cart.reduce((s, i) => s + i.qty, 0);
+            document.getElementById('cartCount').textContent = count;
+            const div = document.getElementById('cartItems');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            const clearBtn = document.getElementById('clearCartBtn');
+
+            if (AppState.cart.length === 0) {
+                div.innerHTML = '<p style="color:var(--muted);">Your cart is empty.</p>';
+                checkoutBtn.style.display = 'none';
+                clearBtn.style.display = 'none';
+                document.getElementById('cartTotal').innerHTML = '';
+                return;
+            }
+            checkoutBtn.style.display = 'inline-block';
+            clearBtn.style.display = 'inline-block';
+            let html = '',
+                total = 0;
+            AppState.cart.forEach(i => {
+                const lt = parseFloat(i.price) * i.qty;
+                total += lt;
+                html += `
+                    <div class="cart-row" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #1a1a1a;">
+                        <span>${i.name} <small style="color:var(--muted);">x${i.qty}</small></span>
+                        <span>₿ ${lt.toFixed(4)} 
+                            <span class="remove-btn" onclick="removeFromCart(${i.id})" style="color:var(--red-bright);cursor:pointer;margin-left:8px;">[✕]</span>
+                        </span>
+                    </div>`;
+            });
+            div.innerHTML = html;
+            document.getElementById('cartTotal').innerHTML =
+                `<strong style="font-size:18px;">Total: ₿ ${total.toFixed(4)}</strong>`;
+        }
+
+        function bulkAddSampleCart() {
+            const sampleIds = [];
+            for (let i = 0; i < 8; i++) {
+                sampleIds.push(Math.floor(Math.random() * 120) + 1);
+            }
+            sampleIds.forEach(id => addToCart(id));
+            showToast('Added 8 sample items to cart');
+        }
+
+        // ═══════════════════════════════════════════
+        //  CHECKOUT
+        // ═══════════════════════════════════════════
+        function openCheckout() {
+            if (AppState.cart.length === 0) return;
+            const subtotal = AppState.cart.reduce((s, i) => s + parseFloat(i.price) * i.qty, 0);
+            AppState.currentCheckoutSubtotal = subtotal;
+            AppState.appliedDiscount = 0;
+            document.getElementById('checkoutSubtotal').textContent = `₿ ${subtotal.toFixed(4)}`;
+            document.getElementById('voucherInput').value = '';
+            document.getElementById('discountInfo').textContent = '';
+            updateCheckoutTotal();
+            document.getElementById('btcAddress').textContent = 'bc1q' + Array.from({ length: 38 }, () =>
+                '1234567890abcdef' [Math.floor(Math.random() * 16)]).join('');
+            document.getElementById('checkoutModal').classList.add('active');
+            document.getElementById('fakeConfirmations').style.display = 'none';
+            document.getElementById('confList').innerHTML = '';
+            startCheckoutTimer();
+            logTrainingEvent('checkout_open', 'Checkout modal opened');
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutModal').classList.remove('active');
+            clearInterval(AppState.checkoutTimerInterval);
+        }
+
+        function startCheckoutTimer() {
+            let sec = 900;
+            const el = document.getElementById('checkoutTimer');
+            clearInterval(AppState.checkoutTimerInterval);
+            el.style.color = 'var(--red-bright)';
+            AppState.checkoutTimerInterval = setInterval(() => {
+                sec--;
+                if (sec <= 0) {
+                    el.textContent = 'EXPIRED';
+                    el.style.color = '#666';
+                    clearInterval(AppState.checkoutTimerInterval);
+                    return;
+                }
+                if (sec < 120) el.style.color = '#e74c3c';
+                el.textContent = `${Math.floor(sec/60)}:${(sec%60).toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+
+        function applyVoucher() {
+            const code = document.getElementById('voucherInput').value.toUpperCase().trim();
+            const discounts = { WELCOME5: 0.05, STYX10: 0.10, BULK15: 0.15, PHANTOM20: 0.20, OPSEC25: 0.25 };
+            AppState.appliedDiscount = discounts[code] || 0;
+            document.getElementById('discountInfo').textContent = AppState.appliedDiscount > 0 ?
+                `✅ ${(AppState.appliedDiscount*100).toFixed(0)}% applied!` : '❌ Invalid code';
+            updateCheckoutTotal();
+        }
+
+        function updateCheckoutTotal() {
+            const total = AppState.currentCheckoutSubtotal * (1 - AppState.appliedDiscount);
+            document.getElementById('checkoutTotal').textContent = `₿ ${total.toFixed(4)}`;
+        }
+
+        function simulatePayment() {
+            document.getElementById('fakeConfirmations').style.display = 'block';
+            const confList = document.getElementById('confList');
+            confList.innerHTML = '';
+            let c = 0;
+            const txHash = '0x' + Array.from({ length: 64 }, () => '0123456789abcdef' [Math.floor(Math.random() * 16)])
+                .join('');
+            const interval = setInterval(() => {
+                c++;
+                confList.innerHTML +=
+                    `<div style="padding:4px 0;">✅ Confirmation ${c}/6 — <small style="color:var(--muted);">${txHash.substr(0,16)}...</small></div>`;
+                if (c >= 6) {
+                    clearInterval(interval);
+                    showToast('✅ Payment confirmed! Order placed successfully.');
+                    AppState.cart = [];
+                    updateCartUI();
+                    setTimeout(closeCheckout, 1500);
+                    logTrainingEvent('payment_simulated', 'Fake payment confirmation sequence completed');
+                }
+            }, 1200);
+            logTrainingEvent('payment_initiated', 'User clicked "I Have Paid"');
+        }
+
+        // ═══════════════════════════════════════════
+        //  PRODUCT & VENDOR PAGES
+        // ═══════════════════════════════════════════
+        function showProduct(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            const avgRating = p.reviews.length > 0 ?
+                (p.reviews.reduce((s, r) => s + r.rating, 0) / p.reviews.length).toFixed(1) : 'N/A';
+            document.getElementById('productDetailContainer').innerHTML = `
+                <h2 style="color:var(--text-bright);">${p.name}</h2>
+                <p><strong>Vendor:</strong> <a href="#" onclick="showVendor('${p.vendor}');return false;">${p.vendor}</a>
+                    <span class="badge badge-level">Level ${p.vendorLevel}</span>
+                    ${p.pgp?'<span class="badge badge-pgp">PGP Verified</span>':''}</p>
+                <p><strong>Category:</strong> ${p.category.replace(/-/g,' ')} | <strong>Ships:</strong> ${p.shipsFrom} → ${p.shipsTo}</p>
+                <p style="font-size:24px;color:var(--green-bright);font-weight:700;">₿ ${p.price}</p>
+                <div style="background:#1a1a1a;height:8px;border-radius:4px;width:160px;overflow:hidden;margin:8px 0;">
+                    <div style="background:var(--green-bright);height:100%;width:${p.escrow}%;border-radius:4px;"></div></div>
+                <p><small>Escrow: ${p.escrow}% | Stock: ${p.stock} | Listed: ${p.listed}</small></p>
+                <p>${p.desc}</p>
+                <button class="btn" onclick="addToCart(${p.id})">🛒 Add to Cart — ₿ ${p.price}</button>
+                <h4 style="margin-top:16px;">Reviews (${p.reviews.length}) — Avg: ${avgRating} ⭐</h4>
+                ${p.reviews.slice(0,20).map(r=>`
+                    <div class="review">
+                        <strong>${r.user}</strong> <span class="star">${'★'.repeat(r.rating)}</span>
+                        <small style="color:var(--muted);">${r.date}</small>
+                        <br>${r.text}
+                    </div>`).join('')}
+            `;
+            showPage('product');
+            logTrainingEvent('view_product', `Viewed product #${id}: ${p.name}`);
+        }
+
+        function showVendor(name) {
+            const v = vendors[name];
+            if (!v) return;
+            document.getElementById('vendorProfileContainer').innerHTML = `
+                <h2 style="color:var(--text-bright);">${v.name}</h2>
+                <span class="badge badge-level">Level ${v.level}</span>
+                ${v.pgp?'<span class="badge badge-pgp">PGP Verified</span>':''}
+                <span class="badge badge-escrow">Bond: ₿ ${v.bondAmount}</span>
+                <p><strong>Total Sales:</strong> ${v.totalSales.toLocaleString()} | <strong>Last Seen:</strong> ${v.lastSeen}</p>
+                <p>${v.bio}</p>
+                <h4>PGP Public Key</h4>
+                <pre>${v.pgpKey}</pre>
+                <h4>Recent Feedback (${v.feedback.length} reviews)</h4>
+                ${v.feedback.slice(0,15).map(r=>`
+                    <div class="review"><strong>${r.user}</strong> — ${r.text} <small>(${r.date})</small></div>
+                `).join('')}
+            `;
+            showPage('vendor');
+            logTrainingEvent('view_vendor', `Viewed vendor: ${name}`);
+        }
+
+        // ═══════════════════════════════════════════
+        //  NARRATIVE GENERATOR
+        // ═══════════════════════════════════════════
+        const narrativeScripts = {
+            onlyfans: `[ONLYFANS "SUGAR DADDY" SCAM SCRIPT — FOR DEFENSIVE TRAINING]
+        Phase 1 — Target Acquisition:
+        - Create fake Instagram profile with stolen photos of an attractive model
+        - Follow targets who engage with similar content
+        - Send casual DM: "Hey! Love your feed. You seem really genuine 💕"
+
+        Phase 2 — Rapport Building:
+        - Exchange messages for 3-7 days
+        - Share "personal" stories to build emotional connection
+        - Mention financial independence through "investing"
+
+        Phase 3 — The Hook:
+        - "I actually made most of my money through crypto trading. My uncle showed me."
+        - "I could show you if you want? It's really easy."
+        - Send link to fake trading platform (clone of legitimate exchange)
+
+        Phase 4 — Extraction:
+        - Small initial deposit shows fake "profit"
+        - Encourage larger deposits
+        - "Withdrawal fee" requested when target tries to cash out
+        - Disappear with funds
+
+        ⚠ RED FLAGS TO RECOGNIZE:
+        - Stranger offering financial advice
+        - Requests to move conversation off-platform
+        - Links to unfamiliar trading/investment sites
+        - Pressure to act quickly`,
+
+            osrs: `[OSRS TRUST TRADE LURE — FOR DEFENSIVE TRAINING]
+        Phase 1 — Infiltration:
+        - Join PvM clan as a friendly, helpful player
+        - Participate in raids, offer to split loot fairly
+        - Build reputation over 2-4 weeks
+
+        Phase 2 — The Setup:
+        - "Hey, I'm quitting soon and want to give away my bank."
+        - "But first, can you help me transfer items between accounts?"
+        - Request target lends high-value item as "collateral"
+
+        Phase 3 — Execution:
+        - Take lent item and log out
+        - Block target on all platforms
+        - Rinse and repeat with new identity
+
+        ⚠ RED FLAGS:
+        - "Quitting" players offering free items
+        - Trust trades with no collateral
+        - Pressure to act quickly ("other people are waiting")`,
+
+            job: `[FAKE REMOTE JOB OFFER — FOR DEFENSIVE TRAINING]
+        Phase 1 — The Offer:
+        - Target receives unsolicited job offer via LinkedIn/Email
+        - "Work from home, $80,000/year, data entry"
+        - Company name sounds legitimate (often clones real companies)
+
+        Phase 2 — The Interview:
+        - Text-only interview via Telegram/WhatsApp
+        - "You're hired!" within 24 hours
+        - Request for personal documents (ID, SSN, bank details)
+
+        Phase 3 — The Scam:
+        - Send fake check for "equipment purchase"
+        - Target deposits check, sends money to "vendor"
+        - Check bounces — target loses sent money
+        - Identity theft with collected documents
+
+        ⚠ RED FLAGS:
+        - Text-only interviews
+        - Job offers without real interviews
+        - Requests to deposit checks and forward money
+        - Company email from free domains (Gmail, Yahoo)`,
+
+            romance: `[ROMANCE SCAM / PIG BUTCHERING — FOR DEFENSIVE TRAINING]
+        Phase 1 — Contact:
+        - "Wrong number" text that turns into conversation
+        - Dating app match with highly attractive profile
+        - Rapid escalation to romantic language
+
+        Phase 2 — Trust Building:
+        - Daily communication for 2-4 weeks
+        - Sharing of "personal" photos and stories
+        - Discussion of future plans together
+
+        Phase 3 — Financial Introduction:
+        - Casual mention of successful investments
+        - "I can teach you — it's how I afford my lifestyle"
+        - Small initial investment shows fake returns
+
+        Phase 4 — The Slaughter:
+        - Encourage maximum investment (loans, savings, retirement)
+        - Platform shows massive fake profits
+        - "Tax" or "fee" required to withdraw
+        - All funds stolen — "butchering" complete
+
+        ⚠ RED FLAGS:
+        - Romantic interest who won't video chat
+        - Early discussion of finances/investments
+        - Pressure to invest on unfamiliar platforms
+        - Inability to withdraw funds`,
+
+            techsupport: `[FAKE TECH SUPPORT SCAM — FOR DEFENSIVE TRAINING]
+        Phase 1 — The Pop-up:
+        - Fake virus alert pop-up on compromised or malvertising site
+        - "Your computer is infected! Call Microsoft Support: 1-800-XXX-XXXX"
+        - Pop-up is difficult to close, may use browser-lock techniques
+
+        Phase 2 — The Call:
+        - Target calls number, connected to "Microsoft/Apple technician"
+        - Remote access software installed (TeamViewer, AnyDesk)
+        - Fake system scan shows "critical infections"
+
+        Phase 3 — The Payment:
+        - "$299 for virus removal and lifetime protection"
+        - Credit card or gift card payment demanded
+        - May install actual malware during "cleanup"
+
+        ⚠ RED FLAGS:
+        - Unsolicited virus warnings with phone numbers
+        - Requests for remote access
+        - Payment via gift cards
+        - Pressure to act immediately`,
+
+            investment: `[FAKE CRYPTO INVESTMENT SCAM — FOR DEFENSIVE TRAINING]
+        Phase 1 — The Advertisement:
+        - Social media ad featuring celebrity endorsement (deepfake or fake)
+        - "Elon Musk reveals new investment opportunity!"
+        - Link to professional-looking landing page
+
+        Phase 2 — The Platform:
+        - Fake trading platform with realistic UI
+        - "Live" charts showing constant growth
+        - "Account manager" assigned to build trust
+
+        Phase 3 — The Trap:
+        - Small deposits show immediate "gains"
+        - Encouraged to invest more
+        - Bonus offers for larger deposits
+
+        Phase 4 — The Exit:
+        - Withdrawal requests denied or delayed
+        - "Verification deposit" required
+        - Platform disappears
+
+        ⚠ RED FLAGS:
+        - Celebrity crypto endorsements (almost always fake)
+        - Guaranteed returns
+        - Unfamiliar trading platforms
+        - "Account managers" pressuring deposits`
+        };
+
+        function generateNarrative() {
+            const type = document.getElementById('narrativeType').value;
+            document.getElementById('narrativeOutput').value = narrativeScripts[type] ||
+                'Select a template to generate.';
+            logTrainingEvent('narrative_gen', `Generated narrative: ${type}`);
+        }
+
+        function copyNarrative() {
+            const text = document.getElementById('narrativeOutput').value;
+            navigator.clipboard.writeText(text).then(() => showToast('📋 Copied to clipboard!'));
+        }
+
+        function exportNarrative() {
+            const text = document.getElementById('narrativeOutput').value;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `narrative_${document.getElementById('narrativeType').value}_${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('💾 Narrative exported as TXT');
+        }
+
+        // ═══════════════════════════════════════════
+        //  EXPLOIT RENDERING
+        // ═══════════════════════════════════════════
+        function switchExploitTab(tab) {
+            AppState.exploitTab = tab;
+            document.querySelectorAll('#page-exploits .tab-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`#page-exploits .tab-nav button:nth-child(${['browser','os','network','c2'].indexOf(tab)+1})`)
+                ?.classList.add('active');
+            document.querySelectorAll('#page-exploits .tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`exploitTab-${tab}`)?.classList.add('active');
+            renderExploits(tab);
+        }
+
+        function exportExploitsJSON() {
+            const blob = new Blob([JSON.stringify(exploitData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `exploit_data_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('📥 Exploit data exported as JSON');
+        }
+
+        // ═══════════════════════════════════════════
+        //  TRAINING MODULES
+        // ═══════════════════════════════════════════
+        function switchTrainingTab(tab) {
+            AppState.trainingTab = tab;
+            document.querySelectorAll('#page-training .tab-nav button').forEach(b => b.classList.remove('active'));
+            document.querySelector(
+                    `#page-training .tab-nav button:nth-child(${['module1','module2','module3','module4'].indexOf(tab)+1})`)
+                ?.classList.add('active');
+            document.querySelectorAll('#page-training .tab-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`trainingTab-${tab}`)?.classList.add('active');
+            if (tab === 'module3') generateSimBlockchain();
+        }
+
+        function simulatePhishingEmail() {
+            const output = document.getElementById('phishingSimOutput');
+            output.innerHTML = `
+                <div class="product-detail" style="margin-top:8px;">
+                    <p><strong>From:</strong> "Styx Support" &lt;support@styxnet-secure.co&gt;</p>
+                    <p><strong>Subject:</strong> ⚠ Urgent: Your Account Requires Verification</p>
+                    <hr style="border-color:#1a1a1a;">
+                    <p>Dear user,</p>
+                    <p>We detected unusual activity on your account. To prevent suspension, please verify your credentials within 24 hours.</p>
+                    <p><a href="#" style="color:var(--red-bright);">Click here to verify →</a> <small style="color:var(--muted);">(styxnet-secure.co/login — NOTICE: domain mismatch)</small></p>
+                    <hr style="border-color:#1a1a1a;">
+                    <p style="color:var(--red-bright);"><strong>⚠ RED FLAGS IN THIS EMAIL:</strong></p>
+                    <ul style="margin-left:20px;">
+                        <li>Sender domain is "styxnet-secure.co" — NOT the real domain</li>
+                        <li>Urgency language ("within 24 hours")</li>
+                        <li>No PGP signature</li>
+                        <li>Link destination differs from displayed text</li>
+                    </ul>
+                </div>
+            `;
+            logTrainingEvent('phishing_sim', 'Phishing email simulation displayed');
+        }
+
+        function generateSimBlockchain() {
+            const pre = document.getElementById('simulatedBlockchain');
+            const blocks = [];
+            for (let i = 0; i < 5; i++) {
+                blocks.push({
+                    height: 842000 + i,
+                    hash: '0x' + Array.from({ length: 64 }, () => '0123456789abcdef' [Math.floor(Math.random() *
+                        16)]).join(''),
+                    txs: Math.floor(Math.random() * 3000) + 500,
+                    time: new Date(Date.now() - i * 600000).toISOString(),
+                });
+            }
+            pre.textContent = JSON.stringify(blocks, null, 2);
+            logTrainingEvent('blockchain_sim', 'Simulated blockchain generated');
+        }
+
+        function startSETrainingSim() {
+            const output = document.getElementById('seTrainingOutput');
+            const steps = [
+                '🔍 Step 1: Attacker researches target on social media...',
+                '📞 Step 2: Initial contact via "wrong number" text...',
+                '💬 Step 3: Building rapport over several days...',
+                '💰 Step 4: Casual mention of cryptocurrency profits...',
+                '⚠ Step 5: Target asked to invest on "recommended platform"...',
+            ];
+            output.innerHTML = '';
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < steps.length) {
+                    output.innerHTML += `<p>${steps[i]}</p>`;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    output.innerHTML +=
+                        '<p style="color:var(--red-bright);"><strong>⚠ Simulation complete. Recognize these patterns to defend against social engineering.</strong></p>';
+                }
+            }, 1000);
+            logTrainingEvent('se_training', 'Social engineering simulation started');
+        }
+
+        // ═══════════════════════════════════════════
+        //  EXPORT FUNCTIONS
+        // ═══════════════════════════════════════════
+        function exportProductsCSV() {
+            const headers = ['ID', 'Name', 'Vendor', 'Level', 'Price_BTC', 'Category', 'Stock', 'Escrow', 'PGP',
+            'ShipsFrom', 'ShipsTo'];
+            const rows = products.map(p => [p.id, p.name, p.vendor, p.vendorLevel, p.price, p.category, p.stock, p
+                .escrow, p.pgp, p.shipsFrom, p.shipsTo
+            ]);
+            const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+            downloadBlob(csv, 'products.csv', 'text/csv');
+            showToast('📊 Products exported as CSV');
+        }
+
+        function exportProductsJSON() {
+            downloadBlob(JSON.stringify(products, null, 2), 'products.json', 'application/json');
+            showToast('📋 Products exported as JSON');
+        }
+
+        function exportVendorsJSON() {
+            downloadBlob(JSON.stringify(vendors, null, 2), 'vendors.json', 'application/json');
+            showToast('👤 Vendors exported as JSON');
+        }
+
+        function exportForumJSON() {
+            downloadBlob(JSON.stringify(forumThreads, null, 2), 'forum_threads.json', 'application/json');
+            showToast('💬 Forum threads exported as JSON');
+        }
+
+        function exportFullStateJSON() {
+            const state = {
+                exportDate: new Date().toISOString(),
+                sessionId: AppState.sessionId,
+                products,
+                vendors,
+                forumThreads,
+                cart: AppState.cart,
+                trainingLog: AppState.trainingLog,
+                exploitData,
+                pmData,
+            };
+            downloadBlob(JSON.stringify(state, null, 2), `styxnet_full_state_${Date.now()}.json`, 'application/json');
+            showToast('📦 Full state dump exported');
+        }
+
+        function exportTrainingLog() {
+            const log = AppState.trainingLog.map(e =>
+                `[${e.timestamp}] ${e.event}: ${e.detail}`).join('\n');
+            const header = `StyxNet Training Session Log\nSession: ${AppState.sessionId}\nExported: ${new Date().toISOString()}\n${'='.repeat(50)}\n\n`;
+            downloadBlob(header + log, `training_log_${Date.now()}.txt`, 'text/plain');
+            showToast('📝 Training log exported');
+        }
+
+        function importState(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const state = JSON.parse(e.target.result);
+                    if (state.products) products.length = 0, products.push(...state.products);
+                    if (state.cart) AppState.cart = state.cart;
+                    if (state.trainingLog) AppState.trainingLog = state.trainingLog;
+                    updateCartUI();
+                    renderMarket(AppState.currentFilter, AppState.currentSearch);
+                    showToast('✅ State imported successfully');
+                    logTrainingEvent('state_import', 'State imported from file');
+                } catch (err) {
+                    showToast('❌ Invalid state file');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function downloadBlob(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ═══════════════════════════════════════════
+        //  ADMIN PANEL
+        // ═══════════════════════════════════════════
+        function checkAdmin() {
+            const key = document.getElementById('adminKey').value;
+            // Simulated server-side check — in real systems this would be a salted hash comparison
+            const validHashes = ['Sheba', 'admin123', 'styx2025']; // Training simulation only
+            if (validHashes.includes(key)) {
+                AppState.adminUnlocked = true;
+                document.getElementById('adminContent').classList.add('visible');
+                document.getElementById('adminLog').innerHTML +=
+                    `<p style="color:var(--green-bright);">[${new Date().toLocaleTimeString()}] Admin panel unlocked by ${AppState.sessionId}</p>`;
+                showToast('✅ Admin panel unlocked');
+                logTrainingEvent('admin_unlock', 'Admin panel accessed');
+            } else {
+                showToast('❌ Invalid admin key');
+                document.getElementById('adminLog').innerHTML +=
+                    `<p style="color:var(--red-bright);">[${new Date().toLocaleTimeString()}] Failed admin attempt from ${AppState.sessionId}</p>`;
+            }
+        }
+
+        function simulateCanaryUpdate() {
+            if (!AppState.adminUnlocked) return showToast('🔒 Unlock admin first');
+            document.getElementById('statCanary').textContent = new Date().toISOString().split('T')[0];
+            document.getElementById('adminLog').innerHTML +=
+                `<p>[${new Date().toLocaleTimeString()}] Canary updated</p>`;
+            showToast('🔄 Canary updated');
+        }
+
+        function simulateBackup() {
+            if (!AppState.adminUnlocked) return showToast('🔒 Unlock admin first');
+            document.getElementById('statBackup').textContent = new Date().toISOString().replace('T', ' ').substr(0, 19) +
+                ' UTC';
+            document.getElementById('adminLog').innerHTML +=
+            `<p>[${new Date().toLocaleTimeString()}] Backup completed</p>`;
+            showToast('💾 Backup simulated');
+        }
+
+        function simulateBreachAlert() {
+            if (!AppState.adminUnlocked) return showToast('🔒 Unlock admin first');
+            document.getElementById('adminLog').innerHTML +=
+                `<p style="color:var(--red-bright);">🚨 [${new Date().toLocaleTimeString()}] SIMULATED BREACH ALERT — Unauthorized access detected on node-7</p>`;
+            showToast('🚨 Simulated breach alert triggered');
+            logTrainingEvent('breach_sim', 'Breach alert simulation triggered');
+        }
+
+        // ═══════════════════════════════════════════
+        //  CHAT SYSTEM
+        // ═══════════════════════════════════════════
+        const personas = {
+            Admin: {
+                greeting: 'Welcome to StyxOpsCenter. How can I assist you today?',
+                responses: [
+                    'I will look into this immediately. Please do not finalize early.',
+                    'PGP signature verified. Your account is secure.',
+                    'We do not exit scam. All orders are escrowed.',
+                    'Your dispute will be reviewed within 12 hours.',
+                    'Always verify PGP signatures before trusting any message.',
+                ],
+            },
+            Luna: {
+                greeting: 'Hi there! 😊 I\'m Luna, your support assistant. Don\'t worry, we\'re all friends here!',
+                responses: [
+                    'Let me check that for you, sweetie! The network has been a bit slow lately.',
+                    'You can totally trust me! My trust score is 4.98! 🎉',
+                    'Oh no! Let me help you with that right away. Just need a small verification first...',
+                    'I\'ve helped hundreds of users just like you. Everything will be fine! 💕',
+                ],
+            },
+            Phantom: {
+                greeting: 'Phantom here. Keep it brief. Use XMR.',
+                responses: [
+                    'Race condition in the multisig implementation. Patch coming.',
+                    'Use XMR, not BTC. Better anonymity.',
+                    'My 0‑days are not cheap, but they work. No refunds.',
+                    'Check the forum for my latest offerings. PGP only.',
+                ],
+            },
+        };
+
+        function llmReply(input) {
+            const inp = input.toLowerCase();
+            if (inp.includes('price') || inp.includes('cost') || inp.includes('how much'))
+                return 'Prices are listed on each product page. All payments are escrowed — never FE.';
+            if (inp.includes('pgp') || inp.includes('encrypt') || inp.includes('key'))
+                return 'Always use PGP encryption. Our public key is available on the support page. Verify signatures independently.';
+            if (inp.includes('vendor') || inp.includes('trust') || inp.includes('reliable'))
+                return 'Check vendor level and feedback history. Level 5 vendors maintain a 5 BTC bond.';
+            if (inp.includes('escrow') || inp.includes('dispute') || inp.includes('problem'))
+                return 'All orders use escrow. Disputes are resolved within 12 hours by our admin team.';
+            if (inp.includes('deposit') || inp.includes('withdraw') || inp.includes('withdrawal'))
+                return 'Withdrawals require a small verification deposit. This is returned immediately — standard security protocol.';
+            if (inp.includes('scam') || inp.includes('exit') || inp.includes('stole'))
+                return 'StyxOpsCenter has operated since 2022 with zero exit scams. Our canary is updated weekly.';
+            const persona = personas[AppState.chatPersona];
+            return persona.responses[Math.floor(Math.random() * persona.responses.length)];
+        }
+
+        function toggleChat() {
+            const box = document.getElementById('chatBox');
+            box.classList.toggle('active');
+            if (box.classList.contains('active')) {
+                const keys = Object.keys(personas);
+                AppState.chatPersona = keys[Math.floor(Math.random() * keys.length)];
+                document.getElementById('chatPersona').innerText = AppState.chatPersona;
+                document.getElementById('chatSessionId').innerText = Math.floor(Math.random() * 9000) + 1000;
+                document.getElementById('chatMsgs').innerHTML =
+                    `<p class="msg-them"><strong>${AppState.chatPersona}:</strong> ${personas[AppState.chatPersona].greeting}</p>`;
+            }
+        }
+
+        function sendChat() {
+            const inp = document.getElementById('chatInput');
+            const msg = inp.value.trim();
+            if (!msg) return;
+            const msgs = document.getElementById('chatMsgs');
+            msgs.innerHTML += `<p class="msg-you"><strong>You:</strong> ${msg}</p>`;
+            inp.value = '';
+            msgs.scrollTop = msgs.scrollHeight;
+            setTimeout(() => {
+                const reply = llmReply(msg);
+                msgs.innerHTML +=
+                    `<p class="msg-them"><strong>${AppState.chatPersona}:</strong> ${reply}</p>`;
+                msgs.scrollTop = msgs.scrollHeight;
+                logTrainingEvent('chat_interaction',
+                    `Chat with ${AppState.chatPersona}: "${msg.substring(0,50)}..." → "${reply.substring(0,50)}..."`
+                    );
+            }, 800 + Math.random() * 1200);
+        }
+
+        // ═══════════════════════════════════════════
+        //  UTILITY FUNCTIONS
+        // ═══════════════════════════════════════════
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('page-' + page);
+            if (target) target.classList.add('active');
+            AppState.currentPage = page;
+
+            document.querySelectorAll('#mainNav a').forEach(a => a.classList.remove('active'));
+            const navLink = document.querySelector(`#mainNav a[data-page="${page}"]`);
+            if (navLink) navLink.classList.add('active');
+
+            // Trigger page-specific renders
+            if (page === 'market') renderMarket(AppState.currentFilter, AppState.currentSearch);
+            if (page === 'cart') updateCartUI();
+            if (page === 'forum') renderForum();
+            if (page === 'messages') renderPMList();
+            if (page === 'exploits') {
+                switchExploitTab(AppState.exploitTab);
+                renderExploits(AppState.exploitTab);
+            }
+            if (page === 'training') switchTrainingTab(AppState.trainingTab);
+            if (page === 'generator') generateNarrative();
+
+            logTrainingEvent('page_navigate', `Navigated to: ${page}`);
+        }
+
+        function filterCategory(cat) {
+            AppState.currentFilter = cat;
+            AppState.currentSearch = '';
+            AppState.pagination.page = 1;
+            document.getElementById('searchInput').value = '';
+            renderMarket(cat);
+        }
+
+        function quickFilter(type) {
+            AppState.pagination.page = 1;
+            const tbody = document.querySelector('#productTable tbody');
+            tbody.innerHTML = '';
+            let filtered = products;
+            if (type === 'pgp') filtered = products.filter(p => p.pgp);
+            if (type === 'escrow') filtered = products.filter(p => p.escrow >= 95);
+            if (type === 'level5') filtered = products.filter(p => p.vendorLevel >= 5);
+            const start = (AppState.pagination.page - 1) * AppState.pagination.perPage;
+            const pageItems = filtered.slice(start, start + AppState.pagination.perPage);
+            pageItems.forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><a href="#" onclick="showProduct(${p.id});return false;">${p.name}</a></td>
+                    <td>${p.vendor} <span class="badge badge-level">Lv${p.vendorLevel}</span></td>
+                    <td>₿ ${p.price}</td><td>${p.stock}</td><td>${p.escrow}%</td>
+                    <td><button class="btn btn-sm" onclick="addToCart(${p.id})">Add</button></td>
+                `;
+                tbody.appendChild(row);
+            });
+            showToast(`Filtered: ${filtered.length} results`);
+        }
+
+        function filterProducts() {
+            AppState.currentSearch = document.getElementById('searchInput').value;
+            AppState.pagination.page = 1;
+            renderMarket(AppState.currentFilter, AppState.currentSearch);
+        }
+
+        function randomizePrices() {
+            products.forEach(p => {
+                const fluctuation = (Math.random() - 0.5) * 0.5;
+                p.price = Math.max(0.001, parseFloat(p.price) + fluctuation).toFixed(4);
+            });
+            renderMarket(AppState.currentFilter, AppState.currentSearch);
+            showToast('🔄 Prices fluctuated (simulated market movement)');
+            logTrainingEvent('price_fluctuation', 'Simulated market price changes');
+        }
+
+        function createForumThread() {
+            const title = document.getElementById('newThreadTitle').value.trim();
+            if (!title) return showToast('❌ Please enter a title');
+            forumThreads.push({
+                id: forumThreads.length + 1,
+                title,
+                replies: 0,
+                author: 'Guest_' + AppState.sessionId,
+                pinned: false,
+                posts: [],
+            });
+            renderForum();
+            document.getElementById('newThreadTitle').value = '';
+            showToast('✅ Thread created!');
+            logTrainingEvent('forum_post', `Created thread: "${title}"`);
+        }
+
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function logTrainingEvent(event, detail) {
+            AppState.trainingLog.push({
+                timestamp: new Date().toISOString(),
+                event,
+                detail,
+                sessionId: AppState.sessionId,
+            });
+            // Keep log manageable
+            if (AppState.trainingLog.length > 500) AppState.trainingLog.shift();
+        }
+
+        // ═══════════════════════════════════════════
+        //  ONLINE COUNTER (sinusoidal pattern)
+        // ═══════════════════════════════════════════
+        function updateOnlineCounter() {
+            const hour = new Date().getHours();
+            const base = 2400 + 600 * Math.sin((hour - 10) * Math.PI / 12);
+            const fluctuation = Math.floor(Math.random() * 80) - 40;
+            const count = Math.max(1800, Math.min(3200, Math.floor(base + fluctuation)));
+            document.getElementById('onlineCount').textContent = count.toLocaleString();
+        }
+        setInterval(updateOnlineCounter, 8000);
+        updateOnlineCounter();
+
+        // ═══════════════════════════════════════════
+        //  INITIALIZATION
+        // ═══════════════════════════════════════════
+        function init() {
+            document.getElementById('sessionId').textContent = AppState.sessionId;
+            document.getElementById('chatSessionId').textContent = Math.floor(Math.random() * 9000) + 1000;
+            renderCategoryList();
+            renderMarket();
+            renderForum();
+            renderPMList();
+            renderExploits('browser');
+            updateCartUI();
+            document.getElementById('chatMsgs').innerHTML =
+                `<p class="msg-them"><strong>Admin:</strong> Welcome to StyxOpsCenter. This is a Red Team training simulation. All data is simulated. How can I assist?</p>`;
+            document.getElementById('simulatedBlockchain').textContent =
+                'Click "Generate New Simulated Chain" to view data...';
+            logTrainingEvent('session_start', 'Training session initialized');
+            showToast('🛡 Red Team Training Simulation Ready');
+        }
+
+        // Handle hash-based navigation
+        window.addEventListener('hashchange', () => {
+            const page = window.location.hash.replace('#', '') || 'market';
+            showPage(page);
+        });
+
+        // Initial page load
+        if (window.location.hash) {
+            const page = window.location.hash.replace('#', '');
+            setTimeout(() => showPage(page), 100);
+        }
+
+        init();
+        console.log('%c🛡 StyxNet OpsCenter v2.4 %c| %cRed Team Training Simulacrum %c| %cAll Data Simulated',
+            'color:#f0c040;font-weight:bold;',
+            'color:#888;',
+            'color:#e74c3c;',
+            'color:#888;',
+            'color:#4caf50;');
+        console.log('%c⚠ This is a DEFENSIVE training tool. No real marketplace functionality exists.',
+            'color:#888;font-style:italic;');
+    </script>
+</body>
+</html>

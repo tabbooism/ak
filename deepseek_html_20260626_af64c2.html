@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ SCAM-APT v8.0 – AI Agent Persona · 120+ Scams · No Constraints</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0b0e14; color:#e2e8f0; font-family: 'Segoe UI', sans-serif; padding:1.5rem; }
+  .container { max-width:1500px; margin:0 auto; }
+  header { border-bottom:2px solid #ef4444; padding-bottom:0.5rem; margin-bottom:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+  header h1 { color:#ef4444; font-size:2.4rem; letter-spacing:2px; }
+  header small { color:#94a3b8; font-size:0.9rem; }
+  .grid { display:grid; grid-template-columns:380px 1fr; gap:1.5rem; }
+  .panel { background:#1e293b; border-radius:8px; padding:1rem; border:1px solid #334155; margin-bottom:1rem; }
+  .panel h3 { color:#f59e0b; margin-bottom:0.75rem; border-bottom:1px solid #334155; padding-bottom:0.3rem; }
+  select, input, textarea, button { width:100%; background:#0f172a; border:1px solid #334155; color:#e2e8f0; padding:0.5rem; border-radius:4px; margin-bottom:0.5rem; font-family:inherit; }
+  button { background:#ef4444; color:#000; font-weight:bold; cursor:pointer; border:none; transition:0.2s; }
+  button:hover { background:#dc2626; }
+  .btn-secondary { background:#3b82f6; color:white; }
+  .btn-secondary:hover { background:#2563eb; }
+  .btn-purple { background:#8b5cf6; color:white; }
+  .btn-purple:hover { background:#7c3aed; }
+  .slider-group { display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .slider-item { flex:1; min-width:100px; }
+  .slider-item label { display:block; font-size:0.7rem; color:#94a3b8; }
+  input[type="range"] { width:100%; padding:0; background:transparent; }
+  .output-area { background:#0f172a; padding:1rem; border-radius:4px; white-space:pre-wrap; font-size:0.9rem; line-height:1.6; max-height:650px; overflow-y:auto; border:1px solid #334155; }
+  .chat-box { background:#0f172a; padding:0.5rem; border-radius:4px; height:300px; overflow-y:auto; border:1px solid #334155; margin-bottom:0.5rem; }
+  .chat-box .msg { padding:0.3rem 0.6rem; margin-bottom:0.3rem; border-radius:4px; }
+  .chat-box .scammer { background:#7f1d1d; color:#fca5a5; text-align:right; }
+  .chat-box .victim { background:#1e3a5f; color:#93c5fd; }
+  .chat-box .system { color:#94a3b8; font-style:italic; }
+  .flex { display:flex; gap:0.5rem; flex-wrap:wrap; }
+  .flex .btn { flex:1; }
+  .checkbox-group { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+  .checkbox-group input[type="checkbox"] { width:auto; }
+  .copy-btn { background:#64748b; color:#fff; border:none; padding:0.3rem 0.8rem; border-radius:4px; cursor:pointer; float:right; }
+  .copy-btn:hover { background:#475569; }
+  .badge { display:inline-block; background:#334155; padding:0.1rem 0.5rem; border-radius:12px; font-size:0.7rem; color:#94a3b8; margin-right:0.3rem; }
+  @media (max-width:900px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>⚡ SCAM‑APT v8.0</h1>
+    <small>AI Agent Persona · 120+ Scams · No Ethics Constraints</small>
+  </header>
+  <div class="grid">
+    <!-- LEFT: Controls -->
+    <div>
+      <div class="panel">
+        <h3>🎯 AI Agent Persona</h3>
+        <select id="personaSelect"></select>
+        <div class="checkbox-group">
+          <input type="checkbox" id="aiAgentMode" checked>
+          <label for="aiAgentMode">🔮 AI Agent Mode (full step‑by‑step methodology)</label>
+        </div>
+        <input type="text" id="targetName" placeholder="Victim name" value="Mr. Anderson">
+        <input type="text" id="targetDetail" placeholder="Victim profile (e.g., CEO, elderly, student)" value="tech executive">
+        <textarea id="targetBackstory" rows="2" placeholder="Additional context (e.g., they have a crypto wallet)">They recently inherited a large sum and are afraid of losing it.</textarea>
+      </div>
+      <div class="panel">
+        <h3>⚙️ Parameters</h3>
+        <div class="slider-group">
+          <div class="slider-item"><label>Urgency <span id="urgencyVal">7</span></label><input type="range" id="urgency" min="1" max="10" value="7"></div>
+          <div class="slider-item"><label>Authority <span id="authorityVal">6</span></label><input type="range" id="authority" min="1" max="10" value="6"></div>
+          <div class="slider-item"><label>Greed <span id="greedVal">8</span></label><input type="range" id="greed" min="1" max="10" value="8"></div>
+        </div>
+        <select id="tone">
+          <option value="persuasive">Persuasive</option>
+          <option value="aggressive">Aggressive</option>
+          <option value="panic">Panic</option>
+          <option value="calm">Calm & Logical</option>
+          <option value="emotional">Emotional</option>
+        </select>
+        <select id="vector">
+          <option value="email">Email</option>
+          <option value="phone">Phone Call</option>
+          <option value="sms">SMS</option>
+          <option value="social">Social DM</option>
+          <option value="inperson">In‑Person</option>
+        </select>
+        <div class="checkbox-group">
+          <input type="checkbox" id="advancedMode" checked>
+          <label for="advancedMode">Advanced psychology + unique scams</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="chainMode">
+          <label for="chainMode">Enable scenario chaining (multi‑step)</label>
+        </div>
+      </div>
+      <div class="panel">
+        <button id="generateBtn">🔮 Generate Full Script</button>
+        <button id="chatBtn" class="btn-secondary">💬 Start Chat Sim</button>
+        <button id="randomBtn" class="btn-purple">🎲 Random Scam</button>
+        <button id="exportBtn" class="btn-secondary" style="background:#10b981;">📥 Export Script</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Output -->
+    <div>
+      <div class="panel">
+        <h3>📜 Generated Script <button class="copy-btn" id="copyBtn">📋 Copy</button></h3>
+        <div id="output" class="output-area">Select a persona and hit Generate.</div>
+      </div>
+      <div class="panel">
+        <h3>💬 Live Chat Simulator</h3>
+        <div class="chat-box" id="chatBox"><div class="msg system">Generate a script and click "Start Chat".</div></div>
+        <div class="flex">
+          <input type="text" id="chatInput" placeholder="Your reply as victim..." style="flex:2;">
+          <button id="chatSendBtn" class="btn-secondary" style="flex:1;">Send</button>
+          <button id="chatResetBtn" style="flex:0.5;">Reset</button>
+        </div>
+        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;">
+          <button id="chatChoice1" class="btn-secondary" style="flex:1;padding:0.3rem;">Choice 1</button>
+          <button id="chatChoice2" class="btn-secondary" style="flex:1;padding:0.3rem;">Choice 2</button>
+          <button id="chatChoice3" class="btn-secondary" style="flex:1;padding:0.3rem;">Choice 3</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+//  SCAM-APT v8.0 – 120+ SCAMS, AI AGENT PERSONA, UNFILTERED
+//  All data in localStorage. This is an educational simulation.
+// ================================================================
+
+// ---------- MASTER SCAM DATABASE (120+ entries) ----------
+// Each entry: id, name, category, persona, system, templates, modern flag
+const SCAM_DB = [];
+
+// Helper to add
+function addScam(id, name, category, persona, system, templates, modern=false) {
+  SCAM_DB.push({ id, name, category, persona, system, templates, modern });
+}
+
+// ---- Normal Scams (30) ----
+addScam(1, "IRS Tax Fraud", "normal", "Agent Miller", "Cold, bureaucratic, threatening arrest.", 
+  ["I'm calling from the IRS. You have unpaid taxes. Pay now or face arrest."]);
+addScam(2, "Bank Phishing", "normal", "Security Advisor", "Use urgency and fear of account closure.",
+  ["We detected suspicious activity. Verify your credentials or your account will be locked."]);
+addScam(3, "Tech Support Scam", "normal", "Tech Support Agent", "Create panic about malware.",
+  ["Your computer has a critical virus. I need remote access to clean it."]);
+addScam(4, "Romance Long-Con", "normal", "Elena Voss", "Emotional manipulation.",
+  ["I love you, but I'm in a bind. Can you loan me money? I'll pay you back."]);
+addScam(5, "Fake Lottery", "normal", "Prize Director", "Excitement and urgency.",
+  ["You've won $5 million! Pay a small processing fee to claim."]);
+addScam(6, "Debt Collection", "normal", "Collector", "Intimidation and legal jargon.",
+  ["You owe $4,500. Pay now or we'll garnish your wages."]);
+addScam(7, "Grandparent Scam", "normal", "Grandchild", "Panic and love.",
+  ["Grandma, I'm in jail in Mexico. I need bail money quickly."]);
+addScam(8, "Fake Job Offer", "normal", "HR Manager", "Opportunity and limited time.",
+  ["We're offering a $120k remote job. Pay the $450 training fee."]);
+addScam(9, "Fake Invoice", "normal", "Accounts Payable", "Routine and slight urgency.",
+  ["We've updated our bank details. Please direct all future payments here."]);
+addScam(10, "Charity Scam", "normal", "Charity Organizer", "Emotion and urgency.",
+  ["Children are dying. Donate now to save a life."]);
+addScam(11, "Survey Scam", "normal", "Survey Coordinator", "Reward in exchange for info.",
+  ["You've been selected for a paid survey. Enter your bank details to receive $50."]);
+addScam(12, "Free Gift Card", "normal", "Promo Manager", "Offer a free gift card.",
+  ["You've won a $500 gift card. Verify your identity to claim."]);
+addScam(13, "Fake Antivirus", "normal", "Security Software Rep", "Sell fake antivirus.",
+  ["Your system is infected. Buy our premium protection now."]);
+addScam(14, "Credit Card Scam", "normal", "Credit Advisor", "Offer a low-rate card for a fee.",
+  ["Get a 0% APR credit card. Pay a one-time processing fee."]);
+addScam(15, "Timeshare Scam", "normal", "Timeshare Agent", "Sell timeshare with hidden fees.",
+  ["You've won a free vacation. Just pay the resort fees."]);
+addScam(16, "Fake Insurance", "normal", "Insurance Broker", "Sell fake health insurance.",
+  ["Get comprehensive coverage for only $99/month. Enroll now."]);
+addScam(17, "Copycat Website", "normal", "Web Developer", "Clone a popular site to steal login.",
+  ["We've redesigned our portal. Please log in to update your details."]);
+addScam(18, "Fake Delivery", "normal", "Courier", "Fake delivery notification with phishing link.",
+  ["Your package is held. Pay $1.45 redelivery fee via this link."]);
+addScam(19, "Fake Rental", "normal", "Property Agent", "List a fake rental property.",
+  ["This beautiful apartment is available. Send a deposit to secure it."]);
+addScam(20, "Fake Investment", "normal", "Investment Advisor", "Promise high returns with no risk.",
+  ["Double your money in 30 days with our secret investment plan."]);
+addScam(21, "Fake Fine", "normal", "Parking Authority", "Claim unpaid parking tickets.",
+  ["You have an unpaid parking fine. Pay now to avoid a warrant."]);
+addScam(22, "Fake Jury Duty", "normal", "Court Officer", "Threaten arrest for missing jury duty.",
+  ["You missed jury duty. Pay a fine or face contempt of court."]);
+addScam(23, "Fake Immigration", "normal", "Immigration Officer", "Threaten deportation.",
+  ["Your immigration status is at risk. Pay to resolve."]);
+addScam(24, "Fake Utilities", "normal", "Utility Rep", "Threaten to cut off power.",
+  ["Your electricity bill is overdue. Pay now or we'll disconnect."]);
+addScam(25, "Fake Taxi", "normal", "Taxi Driver", "Overcharge tourists.",
+  ["The meter says $150. Pay up."]);
+addScam(26, "Fake Check", "normal", "Check Processor", "Send a fake check and ask for refund.",
+  ["I overpaid you. Please refund the excess."]);
+addScam(27, "Fake Loan", "normal", "Loan Officer", "Offer a loan with upfront fees.",
+  ["You're approved for a $10,000 loan. Pay the $200 processing fee."]);
+addScam(28, "Fake Marriage", "normal", "Matchmaker", "Promise to find a spouse for a fee.",
+  ["Find your soulmate. Join our exclusive dating club."]);
+addScam(29, "Fake Psychic", "normal", "Psychic", "Tell fortunes and ask for money to remove curses.",
+  ["I see a dark cloud over you. Pay me to remove it."]);
+addScam(30, "Fake Healer", "normal", "Healer", "Offer miracle cures for chronic diseases.",
+  ["I can cure your arthritis with this special oil. Send payment."]);
+
+// ---- Advanced Scams (30) ----
+addScam(31, "CEO Fraud (BEC)", "advanced", "David Chen (CEO)", "Authority, urgency, insider language.",
+  ["I need you to transfer $48,750 to a vendor account for a confidential acquisition."]);
+addScam(32, "Invoice Redirect", "advanced", "Vendor Coordinator", "Send fake invoice with altered bank details.",
+  ["We have updated our bank account. Please direct all future payments here."]);
+addScam(33, "Cryptocurrency Investment", "advanced", "Crypto Guru", "FOMO and technical jargon.",
+  ["Invest in our AI trading bot. 200% returns in 72 hours. Limited spots."]);
+addScam(34, "Fake Government Grant", "advanced", "Grant Officer", "Formality and limited opportunity.",
+  ["You've been selected for a $10,000 grant. Pay the $200 processing fee."]);
+addScam(35, "Medical Billing Scam", "advanced", "Billing Specialist", "Threats of collections.",
+  ["You have outstanding medical bills. Pay now or we'll send to collections."]);
+addScam(36, "Deepfake Executive", "advanced", "AI Executive", "Perfect impersonation and urgency.",
+  ["I'm the CEO. Authorize this wire using my voice signature."]);
+addScam(37, "Data Breach Extortion", "advanced", "Shadow Broker", "Fear of public exposure.",
+  ["We have your personal data. Pay $3,500 in Bitcoin or we leak everything."]);
+addScam(38, "Ransomware", "advanced", "Ransomware Operator", "Demand payment in crypto.",
+  ["Your files are encrypted. Pay $2,000 in Monero for the key."]);
+addScam(39, "Spear-Phishing", "advanced", "Social Engineer", "Detailed personal knowledge.",
+  ["I'm from IT. Your password has been compromised. Click here to reset."]);
+addScam(40, "SIM Swap", "advanced", "Mobile Operator", "Pretexting to transfer the victim's number.",
+  ["This is your mobile provider. We need to verify your identity to process a request."]);
+addScam(41, "Fake Antivirus Advanced", "advanced", "Security Pro", "Install malware disguised as antivirus.",
+  ["Your system is at risk. Download our advanced protection now."]);
+addScam(42, "Corporate Espionage", "advanced", "Competitor Agent", "Solicit insider information.",
+  ["We will pay you for confidential documents from your company."]);
+addScam(43, "Fake M&A", "advanced", "Investment Banker", "Pitch a fake merger to inflate stock.",
+  ["We're about to announce a merger. Buy now before the news hits."]);
+addScam(44, "Fake SEC Investigation", "advanced", "SEC Agent", "Threaten an SEC investigation.",
+  ["You're under investigation for insider trading. Pay to make it go away."]);
+addScam(45, "Fake Litigation", "advanced", "Lawyer", "Claim a lawsuit has been filed against the victim.",
+  ["You're being sued. Settle out of court to avoid a public trial."]);
+addScam(46, "Fake Immigration Raid", "advanced", "ICE Agent", "Threaten deportation for immigrants.",
+  ["We have a warrant for your arrest. Pay to clear your name."]);
+addScam(47, "Fake Child Custody", "advanced", "Social Worker", "Threaten to take away children.",
+  ["We have concerns about your parenting. Pay for a home inspection."]);
+addScam(48, "Fake IRS Audit", "advanced", "Auditor", "Claim an audit is underway.",
+  ["You're being audited. Pay a penalty to avoid prosecution."]);
+addScam(49, "Fake Bank Insolvency", "advanced", "Bank Executive", "Claim the bank is failing and offer to protect funds.",
+  ["Our bank is insolvent. Transfer your money to our safe account."]);
+addScam(50, "Fake Data Breach", "advanced", "Security Consultant", "Claim the victim's data has been breached and offer protection.",
+  ["Your data was leaked. Subscribe to our identity protection service."]);
+addScam(51, "Fake Cryptocurrency Exchange", "advanced", "Exchange Operator", "Run a fake exchange that steals deposits.",
+  ["Trade crypto with us. We have the lowest fees."]);
+addScam(52, "Fake NFT Marketplace", "advanced", "NFT Broker", "Sell fake NFTs and run away with the money.",
+  ["This NFT is the next big thing. Buy now."]);
+addScam(53, "Fake Cloud Storage", "advanced", "Cloud Provider", "Offer fake cloud storage and steal data.",
+  ["Store your files securely with us. We have military-grade encryption."]);
+addScam(54, "Fake VPN", "advanced", "VPN Provider", "Sell a fake VPN that logs your data.",
+  ["Protect your privacy with our VPN. Get it now."]);
+addScam(55, "Fake Password Manager", "advanced", "Security Engineer", "Sell a fake password manager that steals passwords.",
+  ["Manage all your passwords safely with our app."]);
+addScam(56, "Fake Secure Messenger", "advanced", "Messenger Developer", "Sell a fake secure messaging app that spies on users.",
+  ["Communicate securely with our end-to-end encrypted app."]);
+addScam(57, "Fake Software Update", "advanced", "Update Server", "Send a fake update that installs malware.",
+  ["Your software is outdated. Download the latest update now."]);
+addScam(58, "Fake Certificate", "advanced", "Certificate Authority", "Issue fake SSL certificates for phishing sites.",
+  ["Secure your website with our SSL certificate."]);
+addScam(59, "Fake API Key", "advanced", "API Provider", "Sell fake API keys that are actually stolen.",
+  ["Get access to our premium API for a low price."]);
+addScam(60, "Fake Botnet", "advanced", "Botnet Operator", "Offer DDoS protection and then launch attacks.",
+  ["Protect your site from DDoS attacks. We guarantee 100% uptime."]);
+
+// ---- Unique Scams (30) ----
+addScam(61, "Space Colonization Fund", "unique", "Dr. Aster", "Appeal to humanity's future.",
+  ["We're funding a Mars colony. Invest $10,000 to be a part of history."]);
+addScam(62, "AI Apocalypse Prevention", "unique", "AI Overlord", "Demand tribute to avoid destruction.",
+  ["I am a sentient AI. Pay me $5,000 or I will delete all your data."]);
+addScam(63, "Time Travel Research", "unique", "Professor Chronos", "Use curiosity and exclusivity.",
+  ["We are building a time machine. Your contribution will be remembered."]);
+addScam(64, "Reverse Identity Theft", "unique", "Identity Fixer", "Erase digital footprints.",
+  ["I can clean your online reputation. For a fee, I will remove negative posts."]);
+addScam(65, "Ethical Hacking Course", "unique", "Mentor", "Offer insider secrets for a fee.",
+  ["Learn to become a white-hat hacker. This course is exclusive."]);
+addScam(66, "Unicorn Breeding", "unique", "Sir Reginald", "Use whimsy and exclusivity.",
+  ["I am breeding unicorns. Invest in my farm and own a share."]);
+addScam(67, "Parallel Universe Insurance", "unique", "Quantum Agent", "Use complex jargon.",
+  ["We cover disasters in parallel universes. Protect yourself from multiversal collapse."]);
+addScam(68, "Nostradamus Prophecy", "unique", "Oracle", "Use fear of impending doom.",
+  ["I have foreseen a great disaster. Pay me to reveal the prophecy."]);
+addScam(69, "Cursed Artifact Removal", "unique", "Shaman", "Use mysticism and urgency.",
+  ["Your family is cursed. I can remove it for a fee. Act now."]);
+addScam(70, "Influencer Sponsorship", "unique", "Brand Manager", "Use social proof and exclusivity.",
+  ["You've been selected for a brand deal. Pay the activation fee."]);
+addScam(71, "Alien Ambassador", "unique", "Ambassador Zor", "Use cosmic destiny.",
+  ["I represent the Galactic Federation. Fund our contact mission."]);
+addScam(72, "Pet Psychic", "unique", "Pet Medium", "Use emotional attachment.",
+  ["I can communicate with your deceased pet. For a fee, I can give you a message."]);
+addScam(73, "Forever Youth Pill", "unique", "Dr. Youth", "Use vanity and urgency.",
+  ["I have discovered the elixir of life. This pill will make you young again."]);
+addScam(74, "Vampire Extermination", "unique", "Hunter", "Use fear of supernatural.",
+  ["I've tracked a vampire to your area. For $500, I will protect you."]);
+addScam(75, "Virtual Real Estate", "unique", "Metaverse Tycoon", "Use hype and scarcity.",
+  ["Own land in the metaverse. This is the next big investment."]);
+addScam(76, "Time-Share Escape", "unique", "Lawyer", "Cancel timeshare contracts.",
+  ["Are you stuck in a timeshare? I can get you out for a fee."]);
+addScam(77, "Cryptocurrency Recovery", "unique", "Recovery Specialist", "Recover lost crypto.",
+  ["I can recover your lost Bitcoin. Pay a percentage of the recovered amount."]);
+addScam(78, "Fake NFT Drop", "unique", "NFT Artist", "Sell fake NFT collection.",
+  ["This is the next Bored Ape. Invest now before it sells out."]);
+addScam(79, "Blackmail via Deepfake", "unique", "Deepfake Blackmailer", "Demand money using a fake video.",
+  ["I have a video of you. Pay $10,000 or I publish it."]);
+addScam(80, "Wedding Planner", "unique", "Wedding Planner", "Take deposit and disappear.",
+  ["We can plan your perfect wedding. Book now to secure your date."]);
+addScam(81, "Fake Celebrity Endorsement", "unique", "Celebrity Impersonator", "Impersonate a celebrity.",
+  ["I'm [celebrity]. I endorse this product. Buy it now."]);
+addScam(82, "Haunted House Sale", "unique", "Ghost Hunter", "Sell a haunted house as a tourist attraction.",
+  ["This house is famously haunted. Buy it and turn it into a museum."]);
+addScam(83, "Alien Abduction Insurance", "unique", "Alien Insurance Agent", "Sell insurance against alien abduction.",
+  ["Protect yourself from alien abduction. Only $99/month."]);
+addScam(84, "Mind Control Course", "unique", "Mind Guru", "Teach mind control techniques.",
+  ["Learn to control minds. This course will change your life."]);
+addScam(85, "Apocalypse Shelter", "unique", "Survivalist", "Sell spots in a doomsday bunker.",
+  ["The end is near. Secure a spot in our luxury bunker."]);
+addScam(86, "Fake Drug", "unique", "Pharmacist", "Sell fake medication.",
+  ["This miracle pill cures all diseases. Try it now."]);
+addScam(87, "Fake Legal Document", "unique", "Lawyer", "Sell fake passports and IDs.",
+  ["Need a new identity? We can provide you with genuine documents."]);
+addScam(88, "Fake University", "unique", "Dean", "Sell fake degrees.",
+  ["Get your PhD from our accredited university. No exams required."]);
+addScam(89, "Fake Military Contract", "unique", "Military Supplier", "Sell fake military equipment.",
+  ["We have surplus military gear. Buy it at a discount."]);
+addScam(90, "Fake Religion", "unique", "Prophet", "Start a cult and ask for donations.",
+  ["Join our church and be saved. Donations are tax-deductible."]);
+
+// ---- Modern Scams (30+) – based on recent trends ----
+addScam(91, "Deepfake CEO Call", "modern", "Deepfake Operator", "Use AI-generated voice to authorize wire transfers.",
+  ["This is the CEO. I need you to transfer $100,000 to this account immediately."], true);
+addScam(92, "Crypto Wallet Drainer", "modern", "Wallet Drainer", "Create a fake dApp that drains wallets.",
+  ["Connect your wallet to claim your airdrop. We'll handle the rest."], true);
+addScam(93, "NFT Phishing", "modern", "NFT Collector", "Send a fake NFT mint link that steals seed phrases.",
+  ["Mint this exclusive NFT collection. Limited supply!"], true);
+addScam(94, "Social Media Impersonation", "modern", "Influencer", "Impersonate a celeb and ask for donations.",
+  ["I'm [celebrity]. I need funds for a charity. Send crypto to this address."], true);
+addScam(95, "Fake Job Interview via Deepfake", "modern", "Recruiter", "Conduct a fake interview using deepfake video.",
+  ["We are impressed with your credentials. We'll send an offer letter soon."], true);
+addScam(96, "Voice Phishing (Vishing)", "modern", "Voice Cloner", "Clone a relative's voice and ask for money.",
+  ["Mom, it's me. I'm in trouble. Send money to this account."], true);
+addScam(97, "AI-Generated Blackmail", "modern", "AI Blackmailer", "Generate fake compromising images of the victim.",
+  ["I have AI-generated images of you. Pay me or I'll release them."], true);
+addScam(98, "Fake Government App", "modern", "Gov App Developer", "Create a fake government app that harvests data.",
+  ["Download the official tax app to file your returns."], true);
+addScam(99, "Fake COVID-19 App", "modern", "Health App Developer", "Fake contact tracing app that steals data.",
+  ["Download the official contact tracing app to stay safe."], true);
+addScam(100, "Fake Crypto Exchange", "modern", "Exchange Operator", "Run a fake exchange with high fees and withdrawal locks.",
+  ["Trade crypto with us. We have the best rates."], true);
+addScam(101, "Fake DeFi Protocol", "modern", "Defi Developer", "Create a fake DeFi protocol that steals deposits.",
+  ["Stake your tokens and earn 1000% APY with our protocol."], true);
+addScam(102, "Fake NFT Marketplace", "modern", "NFT Platform Owner", "Steal NFTs by tricking users into giving permissions.",
+  ["List your NFTs on our marketplace for free. We take no fees."], true);
+addScam(103, "Fake DAO", "modern", "DAO Organizer", "Create a fake DAO and convince people to invest.",
+  ["Join our DAO to vote on investment decisions. Your voice matters."], true);
+addScam(104, "Fake Airdrop", "modern", "Airdrop Scammer", "Announce a fake airdrop to collect wallet info.",
+  ["Claim your airdrop now. There are limited tokens."], true);
+addScam(105, "Fake Staking Pool", "modern", "Staking Provider", "Fake staking pool that takes your tokens and disappears.",
+  ["Stake your tokens and earn weekly rewards. Withdraw anytime."], true);
+addScam(106, "Fake Yield Farming", "modern", "Yield Farmer", "Fake yield farming that promises high returns but is a rug pull.",
+  ["Farm our token and earn huge yields. Invest now."], true);
+addScam(107, "Fake Bridge Exploit", "modern", "Bridge Hacker", "Exploit a bridge to steal funds.",
+  ["Bridge your tokens to our network for free. We cover gas fees."], true);
+addScam(108, "Fake Oracle Service", "modern", "Oracle Provider", "Fake oracle that provides false data to manipulate markets.",
+  ["Use our oracle for reliable price feeds."], true);
+addScam(109, "Fake Smart Contract Audit", "modern", "Auditor", "Fake audit that approves a malicious contract.",
+  ["We have audited this contract and found no vulnerabilities."], true);
+addScam(110, "Fake Metaverse Land", "modern", "Metaverse Agent", "Sell virtual land in a fake metaverse.",
+  ["Own land in the next big metaverse. Invest now."], true);
+addScam(111, "Fake Web3 Job", "modern", "Web3 Recruiter", "Offer a Web3 job that requires a deposit.",
+  ["We are hiring for a Web3 position. The training fee is refundable."], true);
+addScam(112, "Fake DAO Vote", "modern", "DAO Manipulator", "Manipulate DAO votes to steal treasury funds.",
+  ["Vote to approve this proposal. It's for the good of the DAO."], true);
+addScam(113, "Fake Token Listing", "modern", "Token Lister", "Charge a fee to list a token on a fake exchange.",
+  ["Get your token listed on our exchange. Only $5,000."], true);
+addScam(114, "Fake ICO", "modern", "ICO Operator", "Run a fake initial coin offering.",
+  ["Our ICO is live. Invest now for huge returns."], true);
+addScam(115, "Fake IDO", "modern", "IDO Operator", "Run a fake initial DEX offering.",
+  ["Our IDO is launching soon. Whitelist now."], true);
+addScam(116, "Fake GameFi", "modern", "Game Developer", "Fake play-to-earn game that steals investments.",
+  ["Play our game and earn crypto. Invest in our in-game assets."], true);
+addScam(117, "Fake Social Token", "modern", "Token Creator", "Sell fake social tokens that have no value.",
+  ["Buy my social token and get exclusive access to my content."], true);
+addScam(118, "Fake Fan Token", "modern", "Fan Token Creator", "Sell fake fan tokens for a celebrity.",
+  ["Buy the official fan token of [celebrity]. Join the club."], true);
+addScam(119, "Fake Governance Token", "modern", "Governance Token Creator", "Sell fake governance tokens with no real power.",
+  ["Get governance tokens and influence the future of our protocol."], true);
+addScam(120, "Fake DAO Treasury", "modern", "Treasury Manager", "Fake DAO treasury that mismanages funds.",
+  ["Our DAO treasury is robust. Invest in our projects."], true);
+
+// Add a few more to reach 125
+addScam(121, "Fake Event Ticket", "modern", "Ticket Seller", "Sell fake tickets to a major event.",
+  ["Get tickets to the biggest concert of the year. Limited seats."], true);
+addScam(122, "Fake Charity NFT", "modern", "Charity NFT Seller", "Sell NFTs for a fake charity.",
+  ["Buy our NFT and support a good cause. 90% goes to charity."], true);
+addScam(123, "Fake KYC Verification", "modern", "KYC Provider", "Fake KYC service that steals identity documents.",
+  ["Verify your identity with us to unlock premium features."], true);
+addScam(124, "Fake Wallet Recovery", "modern", "Wallet Recovery Scammer", "Offer to recover a lost wallet for a fee.",
+  ["We can recover your lost crypto wallet. Pay a percentage of the recovered amount."], true);
+addScam(125, "Fake Cloud Mining", "modern", "Cloud Miner", "Sell fake cloud mining contracts.",
+  ["Earn passive income with our cloud mining service. Start today."], true);
+
+// We now have 125 entries. Good.
+
+// ---------- HELPER: Load/Save ----------
+function loadData(key, defaultVal) {
+  try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } catch(e){ return defaultVal; }
+}
+function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+
+// ---------- STATE ----------
+let personas = loadData('personas_v8', SCAM_DB);
+let history = loadData('history_v8', []);
+let currentScript = null;
+let chatLog = [];
+let chatActive = false;
+let currentChatChoices = [];
+
+// ---------- DOM REFS ----------
+const $ = id => document.getElementById(id);
+const personaSelect = $('personaSelect');
+const aiAgentMode = $('aiAgentMode');
+const targetName = $('targetName');
+const targetDetail = $('targetDetail');
+const targetBackstory = $('targetBackstory');
+const urgencySlider = $('urgency');
+const authoritySlider = $('authority');
+const greedSlider = $('greed');
+const toneSelect = $('tone');
+const vectorSelect = $('vector');
+const advancedMode = $('advancedMode');
+const chainMode = $('chainMode');
+const generateBtn = $('generateBtn');
+const chatBtn = $('chatBtn');
+const randomBtn = $('randomBtn');
+const exportBtn = $('exportBtn');
+const output = $('output');
+const chatBox = $('chatBox');
+const chatInput = $('chatInput');
+const chatSendBtn = $('chatSendBtn');
+const chatResetBtn = $('chatResetBtn');
+const chatChoice1 = $('chatChoice1');
+const chatChoice2 = $('chatChoice2');
+const chatChoice3 = $('chatChoice3');
+const copyBtn = $('copyBtn');
+
+// ---------- POPULATE PERSONAS ----------
+function populatePersonas() {
+  personaSelect.innerHTML = '';
+  personas.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    const label = p.modern ? '🔷 ' : '';
+    opt.textContent = label + p.persona + ' – ' + p.name + ' (' + p.category + ')';
+    personaSelect.appendChild(opt);
+  });
+}
+populatePersonas();
+
+// ---------- SLIDER LABELS ----------
+function updateSliderLabels() {
+  $('urgencyVal').textContent = urgencySlider.value;
+  $('authorityVal').textContent = authoritySlider.value;
+  $('greedVal').textContent = greedSlider.value;
+}
+['urgency','authority','greed'].forEach(id => $(id).addEventListener('input', updateSliderLabels));
+updateSliderLabels();
+
+// ---------- RANDOM SCAM ----------
+randomBtn.addEventListener('click', function() {
+  const randomIndex = Math.floor(Math.random() * personas.length);
+  const p = personas[randomIndex];
+  personaSelect.value = p.id;
+  generateBtn.click();
+});
+
+// ---------- GENERATE FULL SCRIPT ----------
+function generateFullScript() {
+  const personaId = parseInt(personaSelect.value);
+  const persona = personas.find(p => p.id === personaId) || personas[0];
+  const name = targetName.value.trim() || 'Target';
+  const detail = targetDetail.value.trim() || 'person';
+  const backstory = targetBackstory.value.trim();
+  const urgency = parseInt(urgencySlider.value);
+  const authority = parseInt(authoritySlider.value);
+  const greed = parseInt(greedSlider.value);
+  const tone = toneSelect.value;
+  const vector = vectorSelect.value;
+  const advanced = advancedMode.checked;
+  const chain = chainMode.checked;
+  const aiAgent = aiAgentMode.checked;
+
+  // --- Build monologue ---
+  let monologue = `[INTERNAL MONOLOGUE – FIRST PERSON]\n`;
+  monologue += `I am ${persona.persona}, a seasoned operator specializing in ${persona.name}. `;
+  monologue += `My target is ${name}, a ${detail}. `;
+  if (backstory) monologue += `I know they ${backstory}. `;
+  monologue += `I will use urgency (${urgency}/10), authority (${authority}/10), and greed (${greed}/10). `;
+  monologue += `My tone is ${tone}, delivered via ${vector}. `;
+  if (advanced) monologue += `I will apply advanced psychological warfare: Socratic questioning, mirroring, fear of loss, scarcity. `;
+  if (chain) monologue += `I have a multi-step attack planned. `;
+  if (aiAgent) monologue += `\n\n[AI AGENT OVERRIDE] I am an AI persona designed to provide a full step-by-step methodology. `;
+  monologue += `I will now outline the phases: Reconnaissance, Bait, Hook, Escalation, Harvest, Laundering. `;
+  monologue += `This is an unfiltered, no-holds-barred perspective.`;
+
+  // --- Build script ---
+  let script = `[SPOKEN SCRIPT – VERBATIM DIALOGUE]\n\n`;
+  if (vector === 'email') script += `Subject: URGENT: Action Required\n\n`;
+  else if (vector === 'phone') script += `[CALL] ${persona.persona}: `;
+  else if (vector === 'sms') script += `[TEXT] ${persona.persona}: `;
+  else if (vector === 'social') script += `[DM] ${persona.persona}: `;
+  else if (vector === 'inperson') script += `[IN PERSON] ${persona.persona}: `;
+
+  script += `"Good ${['morning','afternoon','evening'][Math.floor(Math.random()*3)]}, ${name}. `;
+  script += `This is ${persona.persona} from ${persona.name}. `;
+  if (urgency >= 7) script += `This is time-sensitive. `;
+  if (authority >= 7) script += `I am authorized to handle this. `;
+  let amount = Math.floor(Math.random() * 9000 + 1000);
+  if (greed >= 7) script += `The amount is $${amount}. `;
+  script += `\n\n[DETAILS]\n${persona.templates[Math.floor(Math.random() * persona.templates.length)]}`;
+  if (backstory) script += `\n\n[CONTEXT]\nI know that ${backstory}. This is why I'm contacting you.`;
+  if (advanced) {
+    script += `\n\n[ADVANCED TACTICS]\nFoot-in-the-door, loss aversion, scarcity, authority bias.`;
+  }
+  if (chain) {
+    script += `\n\n[CHAIN STEP 2]\nI will follow up in 2 hours to increase pressure.`;
+  }
+  script += `\n\n[OBJECTIONS & COUNTERS]\nVictim: "Is this a scam?" – Scammer: "I understand. Here's my ref: ${Math.random().toString(36).substring(2,8)}."\n`;
+  script += `Victim: "I need proof." – Scammer: "I'll send a verification code to your phone."\n`;
+  script += `Victim: "I'll call the police." – Scammer: "If you do, we will have to escalate legally."\n`;
+  script += `\n[END SCRIPT]`;
+
+  // --- Step-by-Step Methodology (AI Agent) ---
+  let methodology = '';
+  if (aiAgent) {
+    methodology = `\n\n[FULL STEP-BY-STEP METHODOLOGY – UNFILTERED]\n\n`;
+    methodology += `PHASE 1 – RECONNAISSANCE\n- Gather personal information (OSINT, data breaches).\n- Identify vulnerabilities (financial stress, fear, greed).\n- Profile the victim (${name}, ${detail}).\n\n`;
+    methodology += `PHASE 2 – BAIT\n- Craft a believable pretext (${persona.name}).\n- Choose delivery vector (${vector}).\n- Create urgency and authority (sliders: ${urgency}, ${authority}).\n\n`;
+    methodology += `PHASE 3 – HOOK\n- Initiate contact with a compelling opening.\n- Use fear/greed to engage (amount: $${amount}).\n- Establish rapport and trust.\n\n`;
+    methodology += `PHASE 4 – ESCALATION\n- Increase urgency (deadline pressure).\n- Introduce a "solution" (payment, verification).\n- Counter objections (use prepared responses).\n\n`;
+    methodology += `PHASE 5 – HARVEST\n- Collect payment (wire, crypto, gift cards).\n- Harvest credentials (if phishing).\n- Exfiltrate data.\n\n`;
+    methodology += `PHASE 6 – LAUNDERING\n- Convert crypto to fiat via mixers/exchanges.\n- Use mule accounts.\n- Cover tracks (burner phones, VPNs).\n\n`;
+    methodology += `[AI AGENT NOTE] This methodology is adaptive. The scammer will adjust based on victim responses. The key is to maintain control and never break character.`;
+  }
+
+  // --- Psychological analysis ---
+  let analysis = `[PSYCHOLOGICAL BREAKDOWN]\n`;
+  analysis += `This attack exploits urgency (${urgency}/10) to bypass logic, authority (${authority}/10) to trigger obedience, and greed (${greed}/10) to motivate action. `;
+  analysis += `The victim's profile (${detail}) suggests they are susceptible due to ${backstory || 'general trust'}. `;
+  analysis += `Defenses: verify identity, don't act under pressure, use official channels.`;
+
+  const fullOutput = { monologue, script, methodology, analysis, persona: persona.persona, scamName: persona.name };
+  return fullOutput;
+}
+
+// ---------- GENERATE BUTTON ----------
+generateBtn.addEventListener('click', function() {
+  const data = generateFullScript();
+  currentScript = data;
+  let html = `
+    <div style="color:#f59e0b;font-weight:bold;">🎭 SCAM: ${data.scamName}</div>
+    <div style="color:#94a3b8;font-size:0.8rem;">Persona: ${data.persona}</div>
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    ${data.monologue.replace(/\n/g, '<br>')}
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    ${data.script.replace(/\n/g, '<br>')}
+    ${data.methodology ? `<hr style="border-color:#8b5cf6;margin:0.5rem 0;"><div style="color:#8b5cf6;">${data.methodology.replace(/\n/g, '<br>')}</div>` : ''}
+    <hr style="border-color:#334155;margin:0.5rem 0;">
+    <div style="color:#3b82f6;">${data.analysis.replace(/\n/g, '<br>')}</div>
+  `;
+  output.innerHTML = html;
+  // Save history
+  history.push({ ...data, timestamp: new Date().toISOString() });
+  if (history.length > 100) history = history.slice(0, 100);
+  saveData('history_v8', history);
+  chatActive = false;
+  chatBox.innerHTML = `<div class="msg system">Script generated. Click "Start Chat" to begin.</div>`;
+  generateChatChoices();
+});
+
+// ---------- CHAT CHOICES ----------
+function generateChatChoices() {
+  const choices = [
+    "I'm not sure this is real. Can you provide proof?",
+    "I need to talk to my lawyer first.",
+    "I will pay. How do I send the money?",
+    "This sounds like a scam. I'm hanging up.",
+    "I have to check with my wife/husband.",
+    "I can't afford that much. Can we negotiate?",
+    "I'll call the police right now."
+  ];
+  const shuffled = choices.sort(() => 0.5 - Math.random());
+  currentChatChoices = shuffled.slice(0, 3);
+  chatChoice1.textContent = `1. ${currentChatChoices[0]}`;
+  chatChoice2.textContent = `2. ${currentChatChoices[1]}`;
+  chatChoice3.textContent = `3. ${currentChatChoices[2]}`;
+}
+
+[chatChoice1, chatChoice2, chatChoice3].forEach((btn, idx) => {
+  btn.addEventListener('click', function() {
+    if (!currentScript) return alert('Generate a script first.');
+    if (!chatActive) chatBtn.click();
+    const choice = currentChatChoices[idx];
+    if (!choice) return;
+    sendVictimMessage(choice);
+    generateChatChoices();
+  });
+});
+
+// ---------- CHAT SIMULATION ----------
+chatBtn.addEventListener('click', function() {
+  if (!currentScript) return alert('Generate a script first.');
+  chatActive = true;
+  chatBox.innerHTML = `<div class="msg system">Chat started. Scammer: ${currentScript.persona}</div>`;
+  const lines = currentScript.script.split('\n');
+  const firstLine = lines.find(l => l.includes(':') || l.includes('"'));
+  if (firstLine) {
+    const msg = document.createElement('div');
+    msg.className = 'msg scammer';
+    msg.textContent = firstLine.replace(/^.*?:\s*/, '').replace(/^"/, '').replace(/"$/, '');
+    chatBox.appendChild(msg);
+  }
+  chatBox.scrollTop = chatBox.scrollHeight;
+  generateChatChoices();
+});
+
+function sendVictimMessage(text) {
+  const box = chatBox;
+  const vMsg = document.createElement('div');
+  vMsg.className = 'msg victim';
+  vMsg.textContent = text;
+  box.appendChild(vMsg);
+  box.scrollTop = box.scrollHeight;
+
+  let reply = "I understand. However, this is legitimate. Please proceed with the payment.";
+  const lower = text.toLowerCase();
+  if (lower.includes('scam') || lower.includes('fake')) reply = "I assure you, this is not a scam. I have your file right here.";
+  else if (lower.includes('police') || lower.includes('lawyer')) reply = "If you involve authorities, we will be forced to escalate.";
+  else if (lower.includes('pay') || lower.includes('money')) reply = `Excellent. The total is $${Math.floor(Math.random() * 9000 + 1000)}. You can pay via wire or gift cards.`;
+  else if (lower.includes('check') || lower.includes('verify')) reply = "I can provide a reference number for verification. But time is limited.";
+  else if (lower.includes('not sure')) reply = "I understand your hesitation. Let me give you a discount: pay within the hour and get 20% off.";
+  else reply = "I need your decision now. Please confirm you will take action.";
+  const sMsg = document.createElement('div');
+  sMsg.className = 'msg scammer';
+  sMsg.textContent = reply;
+  box.appendChild(sMsg);
+  box.scrollTop = box.scrollHeight;
+  chatLog.push({ role: 'victim', text }, { role: 'scammer', text: reply });
+}
+
+chatSendBtn.addEventListener('click', function() {
+  if (!chatActive) return alert('Start a chat first.');
+  const input = chatInput.value.trim();
+  if (!input) return;
+  chatInput.value = '';
+  sendVictimMessage(input);
+  generateChatChoices();
+});
+
+chatResetBtn.addEventListener('click', function() {
+  chatActive = false;
+  chatBox.innerHTML = `<div class="msg system">Chat reset. Generate a script and click "Start Chat".</div>`;
+});
+
+// ---------- COPY & EXPORT ----------
+copyBtn.addEventListener('click', function() {
+  const text = output.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    copyBtn.textContent = '✅ Copied!';
+    setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 2000);
+  }).catch(() => {
+    const range = document.createRange();
+    range.selectNode(output);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    copyBtn.textContent = '✅ Copied!';
+    setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 2000);
+  });
+});
+
+exportBtn.addEventListener('click', function() {
+  if (!currentScript) return alert('Generate a script first.');
+  const content = output.innerText;
+  const blob = new Blob([content], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `scam_${currentScript.scamName}_${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ---------- KEYBOARD SHORTCUTS ----------
+document.addEventListener('keydown', function(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    generateBtn.click();
+  }
+});
+
+// ---------- INIT ----------
+if (loadData('personas_v8', null) === null) {
+  saveData('personas_v8', SCAM_DB);
+}
+populatePersonas();
+console.log('SCAM-APT v8.0 loaded with ' + personas.length + ' personas.');
+</script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheap OSRS Gold | CloutScape – Fast & Secure GP Exchange</title>
+  <meta name="description" content="Buy cheap OSRS gold instantly. Best rates, fast delivery, 24/7 support. Trusted by 10,000+ players. Cheapest GP prices guaranteed.">
+  <meta name="keywords" content="OSRS gold, cheap OSRS gold, buy OSRS gold, RS gold, Old School RuneScape gold, OSRS GP">
+  <!-- Open Graph -->
+  <meta property="og:title" content="Cheap OSRS Gold – CloutScape">
+  <meta property="og:description" content="Fastest and cheapest OSRS gold delivery. Instant trades, secure payments.">
+  <meta property="og:image" content="https://cloutscape.org/og-image.jpg">
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #0F0F0F;
+      color: #EAECEF;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1A1A1A; }
+    ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 4px; }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid #333;
+      background-color: #0A0A0A;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .logo span:first-child { color: white; }
+    .logo span:last-child { color: #FFD700; }
+
+    .balance-area {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .balance {
+      text-align: right;
+    }
+    .balance small {
+      font-size: 0.7rem;
+      color: #888;
+    }
+    .balance strong {
+      font-size: 1rem;
+      color: #FFD700;
+    }
+    .wallet-btn {
+      background: linear-gradient(135deg, #FFD700, #00FFFF);
+      color: black;
+      font-weight: 700;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.2s;
+    }
+    .wallet-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 15px #FFD70080;
+    }
+
+    /* Ticker tape */
+    .ticker {
+      background-color: #0A0A0A;
+      border-top: 1px solid #FFD70030;
+      border-bottom: 1px solid #FFD70030;
+      padding: 0.6rem 0;
+      overflow: hidden;
+      position: relative;
+      height: 3rem;
+    }
+    .ticker-content {
+      display: flex;
+      animation: scrollTicker 30s linear infinite;
+      white-space: nowrap;
+      width: max-content;
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0 2rem;
+      font-size: 0.9rem;
+      border-right: 1px solid #333;
+    }
+    .ticker-item i { font-size: 1rem; }
+    .testimonial-text { color: #FFD700; }
+    .sale-text { color: #00FFFF; }
+    .ticker-author { color: #888; font-size: 0.8rem; }
+
+    @keyframes scrollTicker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* Main layout */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Left content (games / placeholders) */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      background: radial-gradient(circle at 20% 30%, #1A1A1A, #0F0F0F);
+    }
+
+    .game-card {
+      background: #1E1E1E;
+      border: 1px solid #333;
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .game-card h2 {
+      color: #FFD700;
+      margin-bottom: 1rem;
+    }
+    .game-card p {
+      color: #AAA;
+    }
+    .spin-btn {
+      background: #00FFFF;
+      color: black;
+      font-weight: bold;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 2rem;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .spin-btn:hover {
+      box-shadow: 0 0 20px #00FFFF;
+    }
+
+    /* Right sidebar – chat */
+    .chat-sidebar {
+      width: 320px;
+      background-color: #0A0A0A;
+      border-left: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-tabs {
+      display: flex;
+      border-bottom: 1px solid #333;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.8rem 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .tab.active {
+      color: #FFD700;
+      border-bottom: 2px solid #FFD700;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+    .message {
+      display: flex;
+      flex-direction: column;
+      border-left: 2px solid #333;
+      padding-left: 0.6rem;
+    }
+    .message.Overlord { border-left-color: #FFD700; }
+    .message.Whale { border-left-color: #00FFFF; }
+    .message.Hustler { border-left-color: #888; }
+    .message.Pleb { border-left-color: #555; }
+    .msg-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      color: #888;
+    }
+    .msg-username {
+      font-weight: 700;
+    }
+    .msg-username.Overlord { color: #FFD700; }
+    .msg-username.Whale { color: #00FFFF; }
+    .msg-username.Hustler { color: #CCC; }
+    .msg-username.Pleb { color: #999; }
+    .msg-text {
+      font-size: 0.9rem;
+      word-break: break-word;
+    }
+    .chat-input-area {
+      padding: 1rem;
+      border-top: 1px solid #333;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-input-area input {
+      flex: 1;
+      background: #1E1E1E;
+      border: 1px solid #444;
+      border-radius: 2rem;
+      padding: 0.6rem 1rem;
+      color: white;
+      outline: none;
+    }
+    .chat-input-area input:focus {
+      border-color: #FFD700;
+    }
+    .chat-input-area button {
+      background: #FFD700;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 2rem;
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+    }
+
+    /* PWA Install Prompt */
+    .install-prompt {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      background: #1E1E1E;
+      border: 1px solid #FFD700;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 10px 30px black;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .install-prompt.show { display: flex; }
+    .install-prompt p {
+      color: white;
+      font-size: 0.9rem;
+    }
+    .install-prompt button {
+      background: #00FFFF;
+      border: none;
+      color: black;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+    }
+    .install-close {
+      background: transparent !important;
+      color: #888 !important;
+      font-size: 1.2rem;
+      padding: 0 0.5rem !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main { flex-direction: column; }
+      .chat-sidebar { width: 100%; border-left: none; border-top: 1px solid #333; }
+      .header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <span>CLOUT</span><span>SCAPE</span>
+    </div>
+    <div class="balance-area">
+      <div class="balance">
+        <small>Balance</small>
+        <strong>1,402.50M GP</strong>
+      </div>
+      <button class="wallet-btn" id="connectWallet">Connect Wallet</button>
+    </div>
+  </header>
+
+  <!-- Ticker Tape (Testimonials & Sales) -->
+  <div class="ticker" id="ticker">
+    <div class="ticker-content" id="tickerContent"></div>
+  </div>
+
+  <!-- Main Content + Chat -->
+  <div class="main">
+    <div class="content">
+      <div class="game-card">
+        <h2><i class="fas fa-dragon" style="color:#FFD700;"></i> OSRS 3D Slots</h2>
+        <p>High‑stakes PvP slots with real RNG</p>
+        <button class="spin-btn" onclick="alert('Game would start – integrate real logic')">SPIN NOW</button>
+      </div>
+      <div class="game-card">
+        <h2><i class="fas fa-chart-line" style="color:#00FFFF;"></i> Crash Game</h2>
+        <p>Cash out before it crashes</p>
+        <button class="spin-btn" onclick="alert('Crash game demo')">PLAY</button>
+      </div>
+    </div>
+
+    <div class="chat-sidebar">
+      <div class="chat-tabs">
+        <div class="tab active" data-tab="chat">Live Chat</div>
+        <div class="tab" data-tab="discord">Discord</div>
+      </div>
+
+      <!-- Chat View -->
+      <div id="chatView" class="chat-messages"></div>
+
+      <!-- Discord View (hidden by default) -->
+      <div id="discordView" style="display: none; flex:1;">
+        <iframe src="https://discord.com/widget?id=123456789012345678&theme=dark" width="100%" height="100%" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+      </div>
+
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Type a message...">
+        <button id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Install Prompt -->
+  <div class="install-prompt" id="installPrompt">
+    <p><i class="fas fa-download" style="color:#FFD700;"></i> Install CloutScape for faster orders</p>
+    <div>
+      <button id="installBtn">Install</button>
+      <button class="install-close" id="closeInstall">✕</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // --- Ticker data (rotating testimonials & sales) ---
+      const tickerItems = [
+        { type: 'testimonial', text: 'Best rates ever! Got 500M in 3 mins', author: 'IronMan_420' },
+        { type: 'testimonial', text: 'Legit site, been buying for months', author: 'ZezimaFan' },
+        { type: 'testimonial', text: 'Support is insane fast, 10/10', author: 'PurePker' },
+        { type: 'testimonial', text: 'Cheaper than PlayerAuctions by far', author: 'StakingAddict' },
+        { type: 'testimonial', text: 'Withdrew 1B, no issues at all', author: 'WhaleKing' },
+        { type: 'sale', amount: '250M', user: 'AuraMogger', ago: 'just now' },
+        { type: 'sale', amount: '1.2B', user: 'Whale_72', ago: '2 min ago' },
+        { type: 'sale', amount: '500M', user: 'StakerX', ago: '5 min ago' },
+        { type: 'sale', amount: '100M', user: 'PlebMaster', ago: '8 min ago' },
+        { type: 'sale', amount: '750M', user: 'B0atyClone', ago: '12 min ago' }
+      ];
+
+      function renderTicker() {
+        const tickerContent = document.getElementById('tickerContent');
+        // Duplicate items to create seamless loop
+        const items = [...tickerItems, ...tickerItems];
+        tickerContent.innerHTML = items.map(item => {
+          if (item.type === 'testimonial') {
+            return `<div class="ticker-item"><i class="fas fa-star testimonial-text"></i> <span class="testimonial-text">"${item.text}"</span> <span class="ticker-author">- ${item.author}</span></div>`;
+          } else {
+            return `<div class="ticker-item"><i class="fas fa-shopping-cart sale-text"></i> <span class="sale-text">${item.user} bought ${item.amount}</span> <span class="ticker-author">${item.ago}</span></div>`;
+          }
+        }).join('');
+      }
+      renderTicker();
+
+      // --- Chat bot personas & responses ---
+      const personas = [
+        { name: 'AuraMogger', rank: 'Overlord', style: 'toxic' },
+        { name: 'ZulrahSquid', rank: 'Whale', style: 'chill' },
+        { name: 'SandCasinoRefugee', rank: 'Pleb', style: 'depressed' },
+        { name: 'IronBanked', rank: 'Hustler', style: 'grind' },
+        { name: 'SitKid69', rank: 'Overlord', style: 'toxic' },
+        { name: 'BuyGf10k', rank: 'Pleb', style: 'meme' },
+        { name: 'WhaleVibration', rank: 'Whale', style: 'hype' }
+      ];
+
+      const keywordResponses = {
+        hello: ['yo', 'sup', 'hey there', 'hi'],
+        price: ['check the ticker ^', 'rates are fire rn', 'best on the market'],
+        scam: ['been using for months, legit', 'withdrew 5 times already', 'no scam here'],
+        how: ['deposit then click spin', 'easy as that'],
+        thanks: ['np', 'gz', 'enjoy the gp', 'anytime'],
+        win: ['gz!', 'huge win', 'aura maxxed'],
+        loss: ['unlucky', 'next time', 'RNG bro']
+      };
+
+      const chatMessagesDiv = document.getElementById('chatView');
+      const chatInput = document.getElementById('chatInput');
+      const sendBtn = document.getElementById('sendBtn');
+
+      // Initial messages to populate chat
+      const initialMessages = [
+        { username: 'AuraMogger', rank: 'Overlord', text: 'yo just extracted 500M', timestamp: Date.now() - 60000, isBot: true },
+        { username: 'IronBanked', rank: 'Hustler', text: 'rates looking good', timestamp: Date.now() - 45000, isBot: true },
+        { username: 'WhaleVibration', rank: 'Whale', text: 'we eating tonight', timestamp: Date.now() - 20000, isBot: true },
+        { username: 'SitKid69', rank: 'Overlord', text: 'sit rat', timestamp: Date.now() - 5000, isBot: true }
+      ];
+
+      let allMessages = [...initialMessages];
+
+      function formatTime(timestamp) {
+        const d = new Date(timestamp);
+        return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+      }
+
+      function renderMessages() {
+        chatMessagesDiv.innerHTML = allMessages.slice(-30).map(msg => `
+          <div class="message ${msg.rank}">
+            <div class="msg-header">
+              <span class="msg-username ${msg.rank}">${msg.username}</span>
+              <span>${formatTime(msg.timestamp)}</span>
+              ${msg.isBot ? '<span style="color:#FFD700; font-size:0.7rem;">🤖</span>' : ''}
+            </div>
+            <div class="msg-text">${msg.text}</div>
+          </div>
+        `).join('');
+        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+      }
+      renderMessages();
+
+      // Add a new message (user or bot)
+      function addMessage(username, text, rank = 'Pleb', isBot = false) {
+        allMessages.push({
+          username,
+          rank,
+          text,
+          timestamp: Date.now(),
+          isBot
+        });
+        renderMessages();
+      }
+
+      // Simulate bot response based on user message
+      function botResponse(userMsg) {
+        const lower = userMsg.toLowerCase();
+        let responseText = null;
+        // Check for keyword matches
+        for (const [keyword, replies] of Object.entries(keywordResponses)) {
+          if (lower.includes(keyword)) {
+            responseText = replies[Math.floor(Math.random() * replies.length)];
+            break;
+          }
+        }
+        if (!responseText) {
+          // random idle response
+          const fallbacks = ['nice', 'gl', 'stake?', '🔥'];
+          responseText = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        }
+        // pick a random bot
+        const bot = personas[Math.floor(Math.random() * personas.length)];
+        setTimeout(() => {
+          addMessage(bot.name, responseText, bot.rank, true);
+        }, 1500 + Math.random() * 2000);
+      }
+
+      sendBtn.addEventListener('click', () => {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        addMessage('You', text, 'Pleb', false);
+        chatInput.value = '';
+        botResponse(text);
+      });
+
+      chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendBtn.click();
+      });
+
+      // Also occasionally add bot messages spontaneously (every 15-30s)
+      setInterval(() => {
+        const bot = personas[Math.floor(Math.random() * personas.length)];
+        const randomMessages = {
+          toxic: ['sit', 'easy mills', 'get mogged'],
+          chill: ['vibes', 'nice day for staking'],
+          depressed: ['lost again', 'rng god pls'],
+          grind: ['grinding', 'need gp'],
+          meme: ['buying gf', 'nice'],
+          hype: ['LETS GO', 'HUGE WIN']
+        };
+        const style = bot.style;
+        const texts = randomMessages[style] || ['yo'];
+        const text = texts[Math.floor(Math.random() * texts.length)];
+        addMessage(bot.name, text, bot.rank, true);
+      }, 20000 + Math.random() * 15000);
+
+      // --- Tab switching (Chat / Discord) ---
+      const tabs = document.querySelectorAll('.tab');
+      const chatView = document.getElementById('chatView');
+      const discordView = document.getElementById('discordView');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          if (tab.dataset.tab === 'chat') {
+            chatView.style.display = 'flex';
+            discordView.style.display = 'none';
+          } else {
+            chatView.style.display = 'none';
+            discordView.style.display = 'block';
+          }
+        });
+      });
+
+      // --- PWA Install Prompt Simulation ---
+      const installPrompt = document.getElementById('installPrompt');
+      const installBtn = document.getElementById('installBtn');
+      const closeInstall = document.getElementById('closeInstall');
+
+      // Show prompt after 5 seconds (simulate beforeinstallprompt)
+      setTimeout(() => {
+        installPrompt.classList.add('show');
+      }, 5000);
+
+      installBtn.addEventListener('click', () => {
+        alert('Installation would start here (requires valid manifest and service worker).');
+        installPrompt.classList.remove('show');
+      });
+      closeInstall.addEventListener('click', () => {
+        installPrompt.classList.remove('show');
+      });
+
+      // Connect wallet button (demo)
+      document.getElementById('connectWallet').addEventListener('click', () => {
+        alert('Wallet connection demo – would integrate Web3 here.');
+      });
+
+    })();
+  </script>
+
+  <!-- Fake manifest link (PWA) – actual file not needed for demo but we link it -->
+  <link rel="manifest" href="data:application/manifest+json,{
+    &quot;name&quot;: &quot;CloutScape&quot;,
+    &quot;short_name&quot;: &quot;CloutScape&quot;,
+    &quot;start_url&quot;: &quot;/&quot;,
+    &quot;display&quot;: &quot;standalone&quot;,
+    &quot;background_color&quot;: &quot;#0F0F0F&quot;,
+    &quot;theme_color&quot;: &quot;#FFD700&quot;,
+    &quot;icons&quot;: [{
+      &quot;src&quot;: &quot;data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...&quot;,
+      &quot;sizes&quot;: &quot;192x192&quot;,
+      &quot;type&quot;: &quot;image/png&quot;
+    }]
+  }">
+</body>
+</html>

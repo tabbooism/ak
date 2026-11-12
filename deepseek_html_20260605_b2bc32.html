@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkMarket Simulator v1.0 – Auth Key: Sheba</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root{--bg:#0b0f14;--surface:#131a22;--border:#1f2a36;--text:#bcc6cf;--accent:#ff0055;--accent2:#00e5ff;--success:#00e676;--warn:#ffaa00;--radius:8px;--shadow:0 4px 24px rgba(255,0,85,0.15);}
+        *{margin:0;padding:0;box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Segoe UI',Inter,system-ui,sans-serif;display:flex;min-height:100vh}
+        .sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;display:flex;flex-direction:column;height:100vh;position:fixed;z-index:100;overflow-y:auto}
+        .logo{font-size:1.3rem;font-weight:700;padding:0 1.5rem 1.5rem;color:var(--accent);border-bottom:1px solid var(--border);letter-spacing:1px;display:flex;align-items:center;gap:0.5rem}
+        .sidebar nav{flex:1}.sidebar nav .tab{display:flex;align-items:center;gap:0.8rem;padding:0.85rem 1.5rem;color:var(--text);cursor:pointer;border-left:3px solid transparent;transition:0.2s;font-size:0.9rem}
+        .sidebar nav .tab i{width:20px;text-align:center}.sidebar nav .tab:hover{background:rgba(255,0,85,0.05);color:#fff}
+        .sidebar nav .tab.active{background:rgba(255,0,85,0.1);border-left:3px solid var(--accent);color:var(--accent);font-weight:600}
+        .main{margin-left:280px;flex:1;padding:2rem;overflow-y:auto;height:100vh}
+        h2{font-size:1.6rem;color:#fff;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;box-shadow:var(--shadow);transition:0.2s}
+        .card:hover{transform:translateY(-2px);border-color:var(--accent)}
+        .stat-val{font-size:2rem;font-weight:700;color:var(--accent)}.stat-lab{font-size:0.8rem;text-transform:uppercase;color:#7b8c9d;margin-top:0.25rem}
+        .btn{background:transparent;border:1px solid var(--accent);color:var(--accent);padding:0.5rem 1.2rem;border-radius:4px;cursor:pointer;font-size:0.85rem;transition:0.2s;display:inline-flex;align-items:center;gap:0.4rem}
+        .btn:hover{background:var(--accent);color:#000}.btn-danger{border-color:var(--accent2);color:var(--accent2)}.btn-danger:hover{background:var(--accent2);color:#000}
+        .input,select,textarea{width:100%;padding:0.7rem;background:#0b0f14;border:1px solid var(--border);border-radius:4px;color:#fff;font-size:0.9rem;margin-bottom:1rem}
+        .input:focus,select:focus{outline:none;border-color:var(--accent)}
+        .progress-bar{height:8px;background:#1f2a36;border-radius:4px;margin:0.5rem 0;overflow:hidden}.progress-fill{height:100%;background:var(--accent);width:0%;transition:width 0.5s}
+        .log{background:#0b0f14;border:1px solid var(--border);border-radius:var(--radius);padding:1rem;max-height:300px;overflow-y:auto;font-family:'Fira Code',monospace;font-size:0.8rem;color:#a0b0c0}
+        .log .entry{margin-bottom:0.5rem;border-bottom:1px solid #1f2a36;padding-bottom:0.5rem}
+        table{width:100%;border-collapse:collapse;margin:1rem 0}th,td{padding:0.75rem;text-align:left;border-bottom:1px solid var(--border)}th{color:var(--accent);font-size:0.85rem;text-transform:uppercase}
+        .badge{display:inline-block;padding:0.25rem 0.6rem;border-radius:12px;font-size:0.75rem;font-weight:600;margin:0 0.2rem}
+        .badge-danger{background:var(--accent);color:#000}.badge-success{background:var(--success);color:#000}
+        .chat-window{background:#0b0f14;border:1px solid var(--border);border-radius:var(--radius);padding:1rem;max-height:400px;overflow-y:auto;margin-bottom:1rem}
+        .chat-msg{margin-bottom:0.8rem}.chat-msg.user{text-align:right;color:var(--accent2)}.chat-msg.bot{text-align:left;color:#ccc}
+        @media(max-width:768px){.sidebar{width:200px}.main{margin-left:200px;padding:1rem}}
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-skull-crossbones"></i> DARK<span style="color:var(--accent2)">MARKET</span></div>
+        <nav>
+            <div class="tab active" data-tab="login"><i class="fas fa-key"></i> Auth</div>
+            <div class="tab" data-tab="market"><i class="fas fa-store"></i> Market</div>
+            <div class="tab" data-tab="narratives"><i class="fas fa-feather-alt"></i> Narratives</div>
+            <div class="tab" data-tab="chatbot"><i class="fas fa-robot"></i> ChatBot</div>
+            <div class="tab" data-tab="payloads"><i class="fas fa-biohazard"></i> Payloads</div>
+            <div class="tab" data-tab="reports"><i class="fas fa-file-export"></i> Reports</div>
+        </nav>
+        <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);font-size:0.8rem;color:#7b8c9d">Access Key: <span id="keyStatus">Locked</span></div>
+    </aside>
+    <main class="main" id="mainContent"></main>
+
+<script>
+// ==================== ENGINE ====================
+const State = { activeTab:'login', authorized: false };
+
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1)+a);
+const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
+const ts=()=>new Date().toLocaleTimeString();
+const fakeHash=()=>Array.from({length:40},()=>Math.floor(Math.random()*16).toString(16)).join('');
+
+function switchTab(t){
+    if(!State.authorized && t!=='login'){ alert('Enter key "Sheba" first!'); return; }
+    document.querySelectorAll('.sidebar .tab').forEach(x=>x.classList.remove('active'));
+    const el=document.querySelector(`.sidebar .tab[data-tab="${t}"]`); if(el)el.classList.add('active');
+    State.activeTab=t; loadContent(t);
+}
+document.querySelectorAll('.sidebar .tab').forEach(t=>{ t.addEventListener('click',()=>switchTab(t.dataset.tab)); });
+
+function loadContent(tab){
+    const main=document.getElementById('mainContent');
+    switch(tab){
+        case 'login': main.innerHTML=renderLogin(); break;
+        case 'market': main.innerHTML=renderMarket(); break;
+        case 'narratives': main.innerHTML=renderNarratives(); break;
+        case 'chatbot': main.innerHTML=renderChatbot(); initChatbot(); break;
+        case 'payloads': main.innerHTML=renderPayloads(); break;
+        case 'reports': main.innerHTML=renderReports(); break;
+        default: main.innerHTML='<p>Tab not found.</p>';
+    }
+}
+
+// ==================== LOGIN ====================
+function renderLogin(){
+    return `<h2><i class="fas fa-key"></i> Authorization</h2>
+    <div class="card" style="max-width:500px">
+        <p style="margin-bottom:1rem">Enter access key to unlock the platform. The key is <strong>Sheba</strong>.</p>
+        <input class="input" id="accessKey" placeholder="Access Key" type="password">
+        <button class="btn" id="authBtn"><i class="fas fa-lock-open"></i> Unlock</button>
+        <div id="authMsg" style="margin-top:1rem; color:var(--accent)"></div>
+    </div>`;
+}
+document.addEventListener('click', e => {
+    if(e.target&&e.target.id==='authBtn'){
+        const key = document.getElementById('accessKey').value.trim();
+        if(key==='Sheba'){
+            State.authorized = true;
+            document.getElementById('keyStatus').innerHTML = '<span style="color:var(--success)">Unlocked</span>';
+            switchTab('market');
+        } else {
+            document.getElementById('authMsg').innerHTML = 'Invalid key.';
+        }
+    }
+});
+
+// ==================== MARKET ====================
+function renderMarket(){
+    return `<h2><i class="fas fa-store"></i> Black Market Listings</h2>
+    <div class="grid">
+        <div class="card" onclick="showListing('onlyfans')" style="cursor:pointer"><i class="fas fa-crown" style="font-size:2rem;color:var(--accent)"></i> <strong>OnlyFans Scam Kits</strong><p>Pre-made phishing pages, account takeover guides, fake verification scripts.</p></div>
+        <div class="card" onclick="showListing('osrs')" style="cursor:pointer"><i class="fas fa-coins" style="font-size:2rem;color:#ffaa00"></i> <strong>OSRS Gold Selling</strong><p>Gold farming services, phishing lures, dupe methods.</p></div>
+        <div class="card" onclick="showListing('callgirl')" style="cursor:pointer"><i class="fas fa-phone-alt" style="font-size:2rem;color:var(--accent2)"></i> <strong>Call Girl Platform</strong><p>Escort service scripts, payment schemes, blackmail templates.</p></div>
+        <div class="card" onclick="showListing('guns')" style="cursor:pointer"><i class="fas fa-gun" style="font-size:2rem;color:#555"></i> <strong>Firearms</strong><p>Underground arms listings, shipping methods, cryptocurrency deals.</p></div>
+        <div class="card" onclick="showListing('drugs')" style="cursor:pointer"><i class="fas fa-cannabis" style="font-size:2rem;color:#0f0"></i> <strong>Narcotics</strong><p>Vendor contacts, stealth shipping guides, market links.</p></div>
+        <div class="card" onclick="showListing('exploit')" style="cursor:pointer"><i class="fas fa-virus" style="font-size:2rem;color:var(--accent)"></i> <strong>Exploit Kits</strong><p>RATs, crypter services, zero-day brokers.</p></div>
+    </div>
+    <div id="listingDetail" style="margin-top:2rem"></div>`;
+}
+
+function showListing(type){
+    let detail = '';
+    switch(type){
+        case 'onlyfans': detail = `<h3>OnlyFans Scam Kit</h3><p>This package includes a replicated login page, a social engineering script to obtain 2FA codes, and a guide to drain accounts. <br><em>Price: 0.03 BTC</em></p><button class="btn" onclick="generateNarrative('onlyfans')">Generate Scam Narrative</button>`; break;
+        case 'osrs': detail = `<h3>OSRS Gold Selling Scheme</h3><p>Phishing lure: "You have been selected for a prize! Click to claim." Package also contains fake giveaway streams. <br><em>Price: 0.01 BTC</em></p><button class="btn" onclick="generateNarrative('osrs')">Generate Narrative</button>`; break;
+        case 'callgirl': detail = `<h3>Call Girl Platform</h3><p>Scripts to pose as an escort booking service, collect deposits, and then blackmail the client. <br><em>Price: 0.05 BTC</em></p><button class="btn" onclick="generateNarrative('callgirl')">Generate Narrative</button>`; break;
+        case 'guns': detail = `<h3>Firearms Listing</h3><p>Untraceable Glock 19. Seller: "ShadowArms". Requires PGP encryption. <br><em>Price: 2.5 BTC</em></p><button class="btn" onclick="generateNarrative('guns')">Generate Narrative</button>`; break;
+        case 'drugs': detail = `<h3>Narcotics – Cocaine (Fish Scale)</h3><p>Vendor: "Heisenberg". Stealth shipping from NL. <br><em>Price: 0.12 BTC/g</em></p><button class="btn" onclick="generateNarrative('drugs')">Generate Narrative</button>`; break;
+        case 'exploit': detail = `<h3>Exploit Kit – Spectre V2</h3><p>RAT with crypter FUD (fully undetectable). Includes C2 panel. <br><em>Price: 0.8 BTC</em></p><button class="btn" onclick="generateNarrative('exploit')">Generate Narrative</button>`; break;
+    }
+    document.getElementById('listingDetail').innerHTML = detail;
+}
+
+// ==================== NARRATIVES ====================
+const narrativeDB = {
+    onlyfans: [
+        "You pose as a subscriber looking for custom content. After gaining trust, send a fake 'verification' link that steals their login. Once logged in, you change the payout bank details and drain all funds.",
+        "Create a fake agency account, promise to promote the model's page, but instead gain access to their content and resell it without their knowledge."
+    ],
+    osrs: [
+        "Set up a fake Twitch stream offering double XP. Link directs to a phishing site that steals their RuneScape credentials and bank PIN.",
+        "Offer 'quick gold' via a fake website that takes their payment but never delivers."
+    ],
+    callgirl: [
+        "You advertise an escort service. Clients book and pay a deposit. After payment, you threaten to expose their request to family/employer unless they pay more.",
+        "You pose as a high-end escort, collect a 'booking fee', then block the client and keep the money."
+    ],
+    guns: [
+        "Advertise firearms on encrypted channels, require payment in crypto, then send an empty box or disappear.",
+        "Act as a middleman for arms deals, take a commission, then disappear with both payment and goods."
+    ],
+    drugs: [
+        "Sell fake narcotics (baking powder) online and disappear after receiving payment.",
+        "Offer 'stealth shipping' of real substances, but the package is actually empty or contains a tracking device for law enforcement."
+    ],
+    exploit: [
+        "Sell a RAT but include a backdoor that gives you control over the buyer's machine as well.",
+        "Provide a crypter service that encrypts malware, but the crypter itself is a trojan that installs on the user's system."
+    ]
+};
+
+function generateNarrative(type){
+    const arr = narrativeDB[type] || ["No narrative available."];
+    const narrative = pick(arr);
+    const formatted = `<div class="card" style="margin-top:1rem"><h4>Generated Scam Narrative</h4><p>${narrative}</p></div>`;
+    document.getElementById('listingDetail').innerHTML += formatted;
+}
+
+function renderNarratives(){
+    let html = `<h2><i class="fas fa-feather-alt"></i> Scam Narrative Generator</h2>
+    <div class="grid">
+        <div class="card"><h4>OnlyFans Scam</h4><button class="btn" onclick="genNar('onlyfans')">Generate</button><div id="nar-onlyfans"></div></div>
+        <div class="card"><h4>OSRS Gold Scam</h4><button class="btn" onclick="genNar('osrs')">Generate</button><div id="nar-osrs"></div></div>
+        <div class="card"><h4>Call Girl Scam</h4><button class="btn" onclick="genNar('callgirl')">Generate</button><div id="nar-callgirl"></div></div>
+        <div class="card"><h4>Guns Scam</h4><button class="btn" onclick="genNar('guns')">Generate</button><div id="nar-guns"></div></div>
+        <div class="card"><h4>Drugs Scam</h4><button class="btn" onclick="genNar('drugs')">Generate</button><div id="nar-drugs"></div></div>
+        <div class="card"><h4>Exploit Kit Scam</h4><button class="btn" onclick="genNar('exploit')">Generate</button><div id="nar-exploit"></div></div>
+    </div>`;
+    return html;
+}
+window.genNar = (type) => {
+    const el = document.getElementById(`nar-${type}`);
+    el.innerHTML = `<p style="margin-top:0.5rem">${pick(narrativeDB[type])}</p>`;
+};
+
+// ==================== CHATBOT ====================
+function renderChatbot(){
+    return `<h2><i class="fas fa-robot"></i> Context-Aware ChatBot</h2>
+    <div class="card">
+        <div class="chat-window" id="chatWindow"></div>
+        <div style="display:flex; gap:0.5rem"><input class="input" id="chatInput" placeholder="Type your question..."><button class="btn" id="sendChat"><i class="fas fa-paper-plane"></i> Send</button></div>
+    </div>`;
+}
+const chatResponses = {
+    "how to scam":"To scam effectively, you need a plausible pretext and urgency. For OnlyFans, we recommend fake agency offers.",
+    "onlyfans":"OnlyFans scams work best by posing as a promoter or a high-paying subscriber. Use the generated narratives.",
+    "osrs":"OSRS gold selling scams rely on fake giveaways and phishing streams. Our kit includes a replicable Twitch overlay.",
+    "call girl":"The call girl platform works by advertising fake escorts and collecting deposits. Blackmail is an optional escalation.",
+    "guns":"Gun listings should use encrypted messaging and dead-drop delivery. Always take payment in untraceable crypto.",
+    "drugs":"Drug sales require stealth shipping and a trusted vendor. Avoid exit scams – they ruin reputation.",
+    "exploit":"Exploit kits can be sold with FUD crypters. Offer a demo to prove effectiveness, then deliver a backdoored version.",
+    "key":"The access key is Sheba.",
+    "hello":"Greetings. How can I assist with your dark market operations?",
+    "help":"Available commands: scam, onlyfans, osrs, call girl, guns, drugs, exploit, key, hello."
+};
+function initChatbot(){
+    document.getElementById('sendChat').onclick = ()=>{
+        const input = document.getElementById('chatInput').value.trim().toLowerCase();
+        if(!input) return;
+        const chatWindow = document.getElementById('chatWindow');
+        chatWindow.innerHTML += `<div class="chat-msg user">You: ${input}</div>`;
+        // Bot response
+        let response = "I didn't understand. Type 'help' for commands.";
+        for(const [key, val] of Object.entries(chatResponses)){
+            if(input.includes(key)){ response = val; break; }
+        }
+        chatWindow.innerHTML += `<div class="chat-msg bot">Bot: ${response}</div>`;
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+        document.getElementById('chatInput').value = '';
+    };
+}
+
+// ==================== PAYLOADS ====================
+function renderPayloads(){
+    return `<h2><i class="fas fa-biohazard"></i> Payload Builder (Fake)</h2>
+    <div class="card"><h3>Generate Fake Payload</h3><input class="input" id="plName" value="cryptor.exe"><select class="input" id="plType"><option>exe</option><option>dll</option><option>doc</option></select><select class="input" id="plObf"><option>low</option><option>medium</option><option>high</option></select><button class="btn" id="genPl"><i class="fas fa-cog"></i> Generate</button><div id="plOut" style="margin-top:1rem"></div></div>`;
+}
+document.addEventListener('click', e=>{
+    if(e.target&&e.target.id==='genPl'){
+        const name=document.getElementById('plName').value;
+        const obf=document.getElementById('plObf').value;
+        const det = obf==='low'?0.7:obf==='medium'?0.3:0.05;
+        const hash = fakeHash();
+        document.getElementById('plOut').innerHTML = `
+        <p><strong>Payload:</strong> ${name} | SHA256: ${hash}</p>
+        <p>Detection Rate: <span style="color:${det>0.5?'red':'var(--success)'}">${(det*100).toFixed(1)}%</span></p>
+        <p>Size: ${rnd(50,2000)} KB</p>
+        <button class="btn" onclick="downloadFakeFile('${name}',${rnd(5000,50000)})">Download Mock File</button>`;
+    }
+});
+function downloadFakeFile(name, size){
+    const arr = new Uint8Array(size);
+    for(let i=0;i<size;i++) arr[i]=Math.floor(Math.random()*256);
+    const blob = new Blob([arr],{type:'application/octet-stream'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click();
+}
+
+// ==================== REPORTS ====================
+function renderReports(){
+    const sales = [
+        {item:'OnlyFans Kit', amount:'0.03 BTC', buyer:'anonymous', date:'2026-06-01'},
+        {item:'OSRS Gold', amount:'0.01 BTC', buyer:'rsgamer99', date:'2026-06-02'},
+        {item:'Call Girl Script', amount:'0.05 BTC', buyer:'playa123', date:'2026-06-03'},
+        {item:'Glock 19', amount:'2.5 BTC', buyer:'shadow_ops', date:'2026-06-04'},
+        {item:'Cocaine 10g', amount:'1.2 BTC', buyer:'heisenberg', date:'2026-06-05'},
+        {item:'Spectre RAT', amount:'0.8 BTC', buyer:'cyberlord', date:'2026-06-05'}
+    ];
+    let html = `<h2><i class="fas fa-file-export"></i> Sales Reports</h2><table class="table"><tr><th>Item</th><th>Amount</th><th>Buyer</th><th>Date</th></tr>`;
+    sales.forEach(s=>html+=`<tr><td>${s.item}</td><td>${s.amount}</td><td>${s.buyer}</td><td>${s.date}</td></tr>`);
+    html+=`</table><button class="btn" onclick="exportCSV()">Export CSV</button>`;
+    return html;
+}
+function exportCSV(){
+    const sales = [
+        {item:'OnlyFans Kit', amount:'0.03 BTC', buyer:'anonymous', date:'2026-06-01'},
+        {item:'OSRS Gold', amount:'0.01 BTC', buyer:'rsgamer99', date:'2026-06-02'},
+        {item:'Call Girl Script', amount:'0.05 BTC', buyer:'playa123', date:'2026-06-03'},
+        {item:'Glock 19', amount:'2.5 BTC', buyer:'shadow_ops', date:'2026-06-04'},
+        {item:'Cocaine 10g', amount:'1.2 BTC', buyer:'heisenberg', date:'2026-06-05'},
+        {item:'Spectre RAT', amount:'0.8 BTC', buyer:'cyberlord', date:'2026-06-05'}
+    ];
+    let csv = 'Item,Amount,Buyer,Date\n';
+    sales.forEach(s=>csv+=`${s.item},${s.amount},${s.buyer},${s.date}\n`);
+    const blob = new Blob([csv],{type:'text/csv'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='darkmarket_sales.csv'; a.click();
+}
+
+// Initial load
+switchTab('login');
+</script>
+</body>
+</html>

@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HADES MAX ULTIMATE – APT Offensive Suite</title>
+  <style>
+    /* ----- RESET & BASE ----- */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background:#06060c; color:#e0e0e0; font-family:'Inter',system-ui,sans-serif;
+      padding:1rem; min-height:100vh;
+    }
+    .app { max-width:1600px; margin:0 auto; }
+    h1 {
+      font-size:2.8rem; font-weight:800;
+      background:linear-gradient(135deg,#e74c3c,#f39c12);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      letter-spacing:-0.5px;
+    }
+    .subhead {
+      color:#888; margin-bottom:1.2rem; border-bottom:1px solid #2a2a3a;
+      padding-bottom:0.8rem; display:flex; justify-content:space-between; flex-wrap:wrap;
+    }
+    .subhead .badge { background:#1a1a2e; border:1px solid #e74c3c; padding:0.2rem 1rem; border-radius:30px; font-size:0.8rem; color:#e74c3c; }
+    .tabs {
+      display:flex; flex-wrap:wrap; gap:0.3rem; margin-bottom:1.2rem;
+      border-bottom:1px solid #2a2a3a; padding-bottom:0.5rem;
+    }
+    .tab {
+      padding:0.4rem 0.9rem; border-radius:30px; cursor:pointer;
+      background:#12121e; border:1px solid #2a2a3a; color:#aaa;
+      font-weight:500; transition:0.2s; font-size:0.8rem;
+    }
+    .tab.active { background:#e74c3c; color:#fff; border-color:#e74c3c; box-shadow:0 0 20px rgba(231,76,60,0.3); }
+    .tab:hover:not(.active) { border-color:#e74c3c; }
+    .panel { display:none; animation:fade 0.25s; }
+    .panel.active { display:block; }
+    @keyframes fade { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .card {
+      background:#12121e; border:1px solid #2a2a3a; border-radius:16px;
+      padding:1.5rem; margin-bottom:1.5rem; box-shadow:0 8px 30px rgba(0,0,0,0.4);
+    }
+    .card h2 { font-size:1.5rem; font-weight:600; color:#f39c12; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+    .card h3 { color:#f39c12; margin-bottom:0.8rem; font-size:1.1rem; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
+    .grid-3 { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; }
+    .flex { display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
+    label { display:block; font-size:0.8rem; color:#aaa; margin:0.6rem 0 0.2rem; font-weight:500; }
+    input, select, textarea {
+      width:100%; padding:0.6rem 0.9rem; background:#1a1a2e; border:1px solid #333;
+      color:#e0e0e0; border-radius:8px; font-size:0.95rem; transition:border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color:#e74c3c; outline:none; }
+    textarea { min-height:60px; resize:vertical; }
+    .btn {
+      padding:0.6rem 1.5rem; border:none; border-radius:8px; font-weight:600;
+      cursor:pointer; transition:0.2s; background:#2a2a3e; color:#e0e0e0;
+    }
+    .btn:hover { background:#3a3a4e; }
+    .btn-primary { background:#e74c3c; color:#fff; }
+    .btn-primary:hover { background:#c0392b; }
+    .btn-success { background:#27ae60; color:#fff; }
+    .btn-success:hover { background:#1e8449; }
+    .btn-outline { background:transparent; border:1px solid #e74c3c; color:#e74c3c; }
+    .btn-outline:hover { background:rgba(231,76,60,0.1); }
+    .btn-sm { padding:0.3rem 1rem; font-size:0.85rem; }
+    .preview-box {
+      background:#0a0a12; border:1px solid #2a2a3a; border-radius:8px;
+      padding:1.5rem; white-space:pre-wrap; font-family:'Courier New',monospace;
+      font-size:0.9rem; line-height:1.6; color:#d4d4d4;
+      max-height:500px; overflow-y:auto;
+    }
+    .preview-box .seal-svg { display:block; margin:0 auto; text-align:center; }
+    .preview-box .notary-box {
+      margin:1rem auto; border:2px solid #888; padding:0.5rem; width:300px;
+      text-align:center; background:#1a1a2e;
+    }
+    .score-badge {
+      display:inline-block; padding:0.2rem 1rem; border-radius:30px; font-weight:700;
+    }
+    .score-high { background:#e74c3c; color:#fff; }
+    .score-med { background:#f39c12; color:#000; }
+    .score-low { background:#27ae60; color:#fff; }
+    .mt-1 { margin-top:1rem; }
+    .mb-1 { margin-bottom:1rem; }
+    .text-muted { color:#888; }
+    @media (max-width:820px) { .grid-2 { grid-template-columns:1fr; } .tabs { gap:0.2rem; } .tab { padding:0.3rem 0.6rem; font-size:0.7rem; } }
+    @media (max-width:480px) { body { padding:0.5rem; } .card { padding:1rem; } }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:#0a0a12; }
+    ::-webkit-scrollbar-thumb { background:#e74c3c; border-radius:10px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <h1>🔥 HADES MAX ULTIMATE</h1>
+  <div class="subhead">
+    <span>Offensive APT Suite · 15 Integrated Modules</span>
+    <span class="badge">v7.0 · Weaponized</span>
+  </div>
+
+  <!-- TABS (15 total) -->
+  <div class="tabs" id="mainTabs">
+    <div class="tab active" data-tab="profiler">🧠 Profiler</div>
+    <div class="tab" data-tab="persona">🎭 Persona</div>
+    <div class="tab" data-tab="scam">🎯 Scam</div>
+    <div class="tab" data-tab="social">📱 Social</div>
+    <div class="tab" data-tab="killchain">⚔️ Killchain</div>
+    <div class="tab" data-tab="forge">📄 Forge</div>
+    <div class="tab" data-tab="phishing">📧 Phishing</div>
+    <div class="tab" data-tab="vishing">🎙️ Vishing</div>
+    <div class="tab" data-tab="scraper">🔎 Scraper</div>
+    <div class="tab" data-tab="darkweb">🌑 Dark Web</div>
+    <div class="tab" data-tab="campaign">📊 Campaign</div>
+    <div class="tab" data-tab="report">📋 Report</div>
+    <div class="tab" data-tab="targets">🎯 Targets</div>
+    <div class="tab" data-tab="evasion">🛡️ Evasion</div>
+    <div class="tab" data-tab="osint">🔍 OSINT</div>
+  </div>
+
+  <!-- ======== PANEL: PROFILER ======== -->
+  <div id="panel-profiler" class="panel active">
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+        <h2>🧠 Advanced Profiler</h2>
+        <div>
+          <button class="btn btn-outline" onclick="loadSampleProfile()">📋 Sample</button>
+          <button class="btn btn-primary" onclick="runProfiler()">▶ Analyze</button>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label>Full Name</label><input id="p_name" value="Robert Miller" />
+          <label>Age</label><input id="p_age" type="number" value="52" />
+          <label>Gender</label><select id="p_gender"><option>Male</option><option>Female</option><option>Other</option></select>
+          <label>Occupation</label><input id="p_occupation" value="IT Manager" />
+          <label>Income ($)</label><input id="p_income" type="number" value="95000" />
+          <label>Relationship</label><select id="p_relationship"><option>Single</option><option selected>Married</option><option>Divorced</option><option>Widowed</option></select>
+          <label>Education</label><select id="p_education"><option>High School</option><option selected>Bachelor</option><option>Master</option><option>PhD</option></select>
+          <label>Hobbies</label><input id="p_hobbies" value="Cycling, Poker, Crypto" />
+        </div>
+        <div>
+          <label>Email</label><input id="p_email" value="rob.miller@itconsult.com" />
+          <label>Phone</label><input id="p_phone" value="+1 512-555-1234" />
+          <label>Address</label><input id="p_address" value="Austin, TX" />
+          <label>Social Media</label><input id="p_social" value="Twitter: @rob_miller, LinkedIn" />
+          <label>Online Activity</label><textarea id="p_online" rows="2">Active on BitcoinTalk, Reddit r/personalfinance</textarea>
+          <label>Financial Stress (1-10)</label><input id="p_stress" type="number" min="1" max="10" value="7" />
+          <label>Risk Appetite (1-10)</label><input id="p_risk" type="number" min="1" max="10" value="6" />
+          <label>Gullibility (1-10)</label><input id="p_gullible" type="number" min="1" max="10" value="5" />
+          <label>Recent Life Events</label><textarea id="p_events" rows="2">Recently inherited $50k, planning to invest</textarea>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📊 Profiler Results</h2>
+      <div id="profilerOutput"><p class="text-muted">Run the profiler to see results.</p></div>
+      <div id="attackVectors" class="mt-1"></div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: PERSONA ======== -->
+  <div id="panel-persona" class="panel">
+    <div class="card">
+      <h2>🎭 Agent Persona Engine</h2>
+      <p class="text-muted">Define a detailed attacker persona used across all generators.</p>
+      <div class="grid-2">
+        <div>
+          <label>Persona Name</label><input id="persona_name" value="Sgt. Miller" />
+          <label>Role / Title</label><input id="persona_role" value="Sheriff's Office" />
+          <label>Voice / Tone</label>
+          <select id="persona_voice"><option value="authoritative">Authoritative</option><option value="sympathetic">Sympathetic</option><option value="professional">Professional</option><option value="urgent">Urgent</option><option value="friendly">Friendly</option></select>
+          <label>Mannerisms</label><textarea id="persona_mannerisms" rows="2">Speaks calmly, uses legal jargon, refers to official procedures.</textarea>
+          <label>Expertise</label><textarea id="persona_expertise" rows="2">Law enforcement, court procedures, administrative clearance.</textarea>
+          <label>Backstory</label><textarea id="persona_backstory" rows="2">20 years in law enforcement, worked in sex offender registration unit.</textarea>
+        </div>
+        <div>
+          <label>Preferred Platforms</label>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.3rem;">
+            <label style="display:flex; align-items:center; gap:0.3rem;"><input type="checkbox" class="persona_platform" value="twitter" checked /> Twitter</label>
+            <label style="display:flex; align-items:center; gap:0.3rem;"><input type="checkbox" class="persona_platform" value="facebook" /> Facebook</label>
+            <label style="display:flex; align-items:center; gap:0.3rem;"><input type="checkbox" class="persona_platform" value="instagram" /> Instagram</label>
+            <label style="display:flex; align-items:center; gap:0.3rem;"><input type="checkbox" class="persona_platform" value="linkedin" /> LinkedIn</label>
+            <label style="display:flex; align-items:center; gap:0.3rem;"><input type="checkbox" class="persona_platform" value="telegram" checked /> Telegram</label>
+            <label style="display:flex; align-items:center; gap:0.3rem;"><input type="checkbox" class="persona_platform" value="signal" /> Signal</label>
+          </div>
+          <label>Default Urgency</label>
+          <select id="persona_urgency"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+          <label>Signature Phrase</label><input id="persona_signature" value="Stay safe and compliant." />
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="savePersona()">💾 Save</button>
+            <button class="btn btn-outline" onclick="loadPersona()">📂 Load</button>
+          </div>
+          <div id="personaStatus" class="text-muted mt-1">No persona saved.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: SCAM ======== -->
+  <div id="panel-scam" class="panel">
+    <div class="card">
+      <h2>🎯 Scam Generator</h2>
+      <div class="grid-2">
+        <div>
+          <label>Scam Type</label>
+          <select id="gen_type">
+            <option value="registration">Sex Offender Registration</option>
+            <option value="tax">IRS Tax Evasion</option>
+            <option value="debt">Debt Collection</option>
+            <option value="job">Fake Job Offer</option>
+            <option value="tech">Tech Support</option>
+            <option value="family">Grandparent Emergency</option>
+            <option value="romance">Romance</option>
+            <option value="pharma">Pharma</option>
+            <option value="investment">Investment</option>
+            <option value="lottery">Lottery</option>
+            <option value="grant">Grant</option>
+            <option value="sextortion">Sextortion</option>
+            <option value="crypto">Crypto Giveaway</option>
+            <option value="taxi">Fake Taxi/Service</option>
+          </select>
+          <label>Target Name</label><input id="gen_target" value="Robert Miller" />
+          <label>Amount ($)</label><input id="gen_amount" type="number" value="5000" />
+          <label>Urgency</label><select id="gen_urgency"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+          <button class="btn btn-primary mt-1" onclick="generateScam()">⚡ Generate</button>
+          <button class="btn btn-success mt-1" onclick="exportScamJSON()">💾 Export</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Generated Scam</h3>
+          <div class="preview-box" id="scamOutput">Fill in fields and click Generate.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: SOCIAL ======== -->
+  <div id="panel-social" class="panel">
+    <div class="card">
+      <h2>📱 Social Media Campaign</h2>
+      <p class="text-muted">Generate platform‑specific posts, A/B variants, and schedule them.</p>
+      <div class="grid-2">
+        <div>
+          <label>Platform</label>
+          <select id="social_platform">
+            <option value="twitter">Twitter (X)</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="telegram">Telegram</option>
+            <option value="signal">Signal</option>
+          </select>
+          <label>Topic</label>
+          <select id="social_scam_type">
+            <option value="registration">Sex Offender Registration</option>
+            <option value="investment">Investment Opportunity</option>
+            <option value="job">Job Offer</option>
+            <option value="tech">Tech Support</option>
+            <option value="family">Family Emergency</option>
+            <option value="lottery">Lottery Win</option>
+          </select>
+          <label>Target</label><input id="social_target" value="Robert Miller" />
+          <label>Urgency</label>
+          <select id="social_urgency"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+          <label>Post Type</label>
+          <select id="social_post_type">
+            <option value="alert">Urgent Alert</option>
+            <option value="story">Personal Story</option>
+            <option value="offer">Exclusive Offer</option>
+            <option value="warning">Public Warning</option>
+            <option value="ad">Ad Copy</option>
+          </select>
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="generateSocialPost()">📢 Generate</button>
+            <button class="btn btn-outline" onclick="generateABVariant()">🔄 Variant</button>
+            <button class="btn btn-success" onclick="scheduleSocial()">📅 Schedule</button>
+          </div>
+          <div id="scheduleStatus" class="text-muted mt-1">No posts scheduled.</div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Generated Post</h3>
+          <div class="preview-box" id="socialOutput">Fill in fields and click Generate.</div>
+          <div class="flex mt-1">
+            <button class="btn btn-sm btn-success" onclick="copySocial()">📋 Copy</button>
+            <button class="btn btn-sm btn-outline" onclick="socialPrint()">🖨️ Print</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: KILLCHAIN ======== -->
+  <div id="panel-killchain" class="panel">
+    <div class="card">
+      <h2>⚔️ Killchain Builder</h2>
+      <div class="grid-2">
+        <div>
+          <label>Target</label><input id="kc_name" value="Robert Miller" />
+          <label>Scam Type</label>
+          <select id="kc_type">
+            <option value="registration">Sex Offender Registration</option>
+            <option value="tax">IRS Tax Evasion</option>
+            <option value="debt">Debt Collection</option>
+            <option value="job">Fake Job Offer</option>
+            <option value="tech">Tech Support</option>
+            <option value="family">Grandparent Emergency</option>
+            <option value="romance">Romance</option>
+            <option value="pharma">Pharma</option>
+            <option value="investment">Investment</option>
+            <option value="lottery">Lottery</option>
+            <option value="grant">Grant</option>
+            <option value="sextortion">Sextortion</option>
+            <option value="crypto">Crypto Giveaway</option>
+          </select>
+          <label>Steps</label><input id="kc_steps" type="number" value="7" />
+          <button class="btn btn-primary mt-1" onclick="buildKillchain()">⚔️ Build</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Execution Plan</h3>
+          <div class="preview-box" id="killchainOutput">Click Build to generate.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: DOCUMENT FORGE ======== -->
+  <div id="panel-forge" class="panel">
+    <div class="card">
+      <h2>📄 Document Forge Pro</h2>
+      <div class="flex" style="margin-bottom:1rem;">
+        <select id="doc_template" style="flex:1; max-width:400px;"></select>
+        <button class="btn btn-primary" onclick="updateDoc()">🔄 Refresh</button>
+        <button class="btn btn-success" onclick="printDoc()">🖨️ Print</button>
+        <button class="btn btn-outline" onclick="copyDoc()">📋 Copy</button>
+        <button class="btn btn-outline" onclick="exportDocJSON()">💾 JSON</button>
+      </div>
+      <div class="grid-2">
+        <div>
+          <label>Victim Name</label><input id="d_name" value="Robert Miller" />
+          <label>Address</label><input id="d_address" value="123 Main St" />
+          <label>City</label><input id="d_city" value="Austin" />
+          <label>State</label>
+          <select id="d_state">
+            <option value="AL">Alabama</option><option value="AK">Alaska</option><option value="AZ">Arizona</option>
+            <option value="AR">Arkansas</option><option value="CA">California</option><option value="CO">Colorado</option>
+            <option value="CT">Connecticut</option><option value="DE">Delaware</option><option value="FL">Florida</option>
+            <option value="GA">Georgia</option><option value="HI">Hawaii</option><option value="ID">Idaho</option>
+            <option value="IL">Illinois</option><option value="IN">Indiana</option><option value="IA">Iowa</option>
+            <option value="KS">Kansas</option><option value="KY">Kentucky</option><option value="LA">Louisiana</option>
+            <option value="ME">Maine</option><option value="MD">Maryland</option><option value="MA">Massachusetts</option>
+            <option value="MI">Michigan</option><option value="MN">Minnesota</option><option value="MS">Mississippi</option>
+            <option value="MO">Missouri</option><option value="MT">Montana</option><option value="NE">Nebraska</option>
+            <option value="NV">Nevada</option><option value="NH">New Hampshire</option><option value="NJ">New Jersey</option>
+            <option value="NM">New Mexico</option><option value="NY">New York</option><option value="NC">North Carolina</option>
+            <option value="ND">North Dakota</option><option value="OH">Ohio</option><option value="OK">Oklahoma</option>
+            <option value="OR">Oregon</option><option value="PA">Pennsylvania</option><option value="RI">Rhode Island</option>
+            <option value="SC">South Carolina</option><option value="SD">South Dakota</option><option value="TN">Tennessee</option>
+            <option value="TX" selected>Texas</option>
+            <option value="UT">Utah</option><option value="VT">Vermont</option><option value="VA">Virginia</option>
+            <option value="WA">Washington</option><option value="WV">West Virginia</option><option value="WI">Wisconsin</option>
+            <option value="WY">Wyoming</option>
+          </select>
+          <label>Amount</label><input id="d_amount" type="number" value="5000" />
+          <label>Date</label><input id="d_date" type="date" />
+          <label>Case Number</label><input id="d_case" value="2026-CR-1234" />
+          <label>Notary Name</label><input id="d_notary" value="Alice Johnson" />
+          <div class="flex mt-1">
+            <label style="display:flex; align-items:center; gap:0.5rem;"><input type="checkbox" id="doc_seal" checked /> Seal</label>
+            <label style="display:flex; align-items:center; gap:0.5rem;"><input type="checkbox" id="doc_notary" checked /> Notary</label>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Live Preview</h3>
+          <div class="preview-box" id="docPreview">Select a template.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: PHISHING ======== -->
+  <div id="panel-phishing" class="panel">
+    <div class="card">
+      <h2>📧 Phishing Email / SMS Generator</h2>
+      <p class="text-muted">Professional phishing templates with personalization.</p>
+      <div class="grid-2">
+        <div>
+          <label>Channel</label>
+          <select id="phish_channel"><option value="email">Email</option><option value="sms">SMS</option></select>
+          <label>Template</label>
+          <select id="phish_template">
+            <option value="account_verify">Account Verification</option>
+            <option value="security_alert">Security Alert</option>
+            <option value="invoice">Fake Invoice</option>
+            <option value="tax_refund">Tax Refund</option>
+            <option value="lottery">Lottery Win</option>
+            <option value="delivery">Delivery Notification</option>
+          </select>
+          <label>Target</label><input id="phish_target" value="Robert Miller" />
+          <label>Sender</label><input id="phish_sender" value="support@example.com" />
+          <button class="btn btn-primary mt-1" onclick="generatePhishing()">📧 Generate</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Phishing Content</h3>
+          <div class="preview-box" id="phishOutput">Generate to see.</div>
+          <button class="btn btn-sm btn-success mt-1" onclick="copyPhish()">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: VISHING ======== -->
+  <div id="panel-vishing" class="panel">
+    <div class="card">
+      <h2>🎙️ Vishing Script Generator</h2>
+      <p class="text-muted">Voice‑based scam scripts with tone, urgency, and persona integration.</p>
+      <div class="grid-2">
+        <div>
+          <label>Scenario</label>
+          <select id="vish_scenario">
+            <option value="irs">IRS Threat</option>
+            <option value="tech">Tech Support</option>
+            <option value="grandparent">Grandparent Emergency</option>
+            <option value="romance">Romance</option>
+            <option value="legal">Legal Threat</option>
+            <option value="lottery">Lottery Prize</option>
+          </select>
+          <label>Target</label><input id="vish_target" value="Robert Miller" />
+          <label>Tone</label>
+          <select id="vish_tone"><option value="authoritative">Authoritative</option><option value="sympathetic">Sympathetic</option><option value="urgent">Urgent</option></select>
+          <button class="btn btn-primary mt-1" onclick="generateVishing()">🎙️ Generate</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Vishing Script</h3>
+          <div class="preview-box" id="vishOutput">Generate to see.</div>
+          <button class="btn btn-sm btn-success mt-1" onclick="copyVish()">📋 Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: SCRAPER ======== -->
+  <div id="panel-scraper" class="panel">
+    <div class="card">
+      <h2>🔎 Advanced Scraper & Parser</h2>
+      <p class="text-muted">Paste raw text to extract emails, phones, social handles, keywords – and simulate web scraping.</p>
+      <div class="grid-2">
+        <div>
+          <label>Source URL (simulated)</label><input id="scrape_url" value="https://example.com/contact" />
+          <label>Raw Text</label>
+          <textarea id="scrape_text" rows="6">Contact us at support@example.com or call +1 (555) 123-4567. Follow us on Twitter @example and Instagram @example_inc.</textarea>
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="simulateScrape()">🕸️ Simulate</button>
+            <button class="btn btn-success" onclick="parseText()">🔍 Parse</button>
+            <button class="btn btn-outline" onclick="clearScraper()">🗑️ Clear</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Extracted Data</h3>
+          <div class="preview-box" id="scraperOutput">Parsed results will appear here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: DARK WEB ======== -->
+  <div id="panel-darkweb" class="panel">
+    <div class="card">
+      <h2>🌑 Dark Web Reference</h2>
+      <p class="text-muted">Simulated onion links, marketplaces, and intelligence sources.</p>
+      <div class="grid-2">
+        <div>
+          <h3 style="color:#f39c12;">.onion Links (simulated)</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 darkmarketxxx.onion – Darknet Market</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 dreaddite.onion – Dark Web Reddit</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 breachforums.onion – Leak Data</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 hackingcommunity.onion – Hack Forums</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 leakdb.onion – Credential Database</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 cryptoexchange.onion – Anonymous Exchange</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Dark Web Monitoring Tips</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use Tor with VPN for anonymity</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Monitor forums for breached data</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use dedicated email for dark web accounts</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Set up alerts for mentions of your target</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Verify information from multiple sources</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use cryptocurrency mixers for transactions</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: CAMPAIGN ======== -->
+  <div id="panel-campaign" class="panel">
+    <div class="card">
+      <h2>📊 Campaign Manager</h2>
+      <p class="text-muted">Create, save, and export campaigns that bundle a victim profile, scam, social posts, and documents.</p>
+      <div class="grid-2">
+        <div>
+          <label>Campaign Name</label><input id="camp_name" value="Operation Miller" />
+          <label>Victim (from profiler)</label><input id="camp_victim" value="Robert Miller" />
+          <label>Scam Type</label>
+          <select id="camp_scam_type">
+            <option value="registration">Sex Offender Registration</option>
+            <option value="tax">IRS Tax Evasion</option>
+            <option value="investment">Investment</option>
+            <option value="job">Fake Job</option>
+            <option value="tech">Tech Support</option>
+            <option value="family">Grandparent</option>
+          </select>
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="saveCampaign()">💾 Save</button>
+            <button class="btn btn-success" onclick="exportCampaign()">📤 Export</button>
+            <button class="btn btn-outline" onclick="loadCampaign()">📂 Load</button>
+          </div>
+          <div id="campStatus" class="text-muted mt-1">No campaigns saved.</div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Campaign Summary</h3>
+          <div class="preview-box" id="campOutput">Save a campaign to see summary.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: REPORT ======== -->
+  <div id="panel-report" class="panel">
+    <div class="card">
+      <h2>📋 Comprehensive Report Generator</h2>
+      <p class="text-muted">Generate a combined report of all modules and current data.</p>
+      <button class="btn btn-primary" onclick="generateReport()">📄 Generate Report</button>
+      <button class="btn btn-success" onclick="printReport()">🖨️ Print Report</button>
+      <div class="preview-box mt-1" id="reportOutput">Click Generate Report to compile.</div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: TARGETS ======== -->
+  <div id="panel-targets" class="panel">
+    <div class="card">
+      <h2>🎯 Multi-Target Manager</h2>
+      <p class="text-muted">Manage multiple targets and switch between them.</p>
+      <div class="grid-2">
+        <div>
+          <label>Target Name</label><input id="target_new_name" placeholder="Enter target name" />
+          <button class="btn btn-primary mt-1" onclick="addTarget()">➕ Add Target</button>
+          <div id="targetList" class="mt-1">
+            <p class="text-muted">No targets added.</p>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Active Target</h3>
+          <div id="activeTargetDisplay" class="preview-box">No active target.</div>
+          <button class="btn btn-outline mt-1" onclick="setActiveTarget(0)">Set as Active</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: EVASION ======== -->
+  <div id="panel-evasion" class="panel">
+    <div class="card">
+      <h2>🛡️ Evasion & Countermeasures</h2>
+      <p class="text-muted">Checklist and techniques for operational security and evidence destruction.</p>
+      <div class="grid-2">
+        <div>
+          <h3 style="color:#f39c12;">📋 OPSEC Checklist</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use VPN + Tor for all communications</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use encrypted messaging (Signal, Telegram)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Regularly clear browser history & cookies</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use burner phones and SIM cards</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Avoid reusing usernames or emails</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use cryptocurrency mixers for payments</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Disable location services on devices</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use disk encryption for all storage</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">🗑️ Evidence Destruction</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Physically destroy SIM cards after use</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Wipe hard drives with multiple passes</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Shred physical documents</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use secure deletion tools (e.g., BleachBit)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Destroy burner phones physically</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Delete all online accounts after campaign</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Use decoy documents to mislead investigators</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Regularly change encryption keys</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======== PANEL: OSINT ======== -->
+  <div id="panel-osint" class="panel">
+    <div class="card">
+      <h2>🔍 OSINT Reference & Methodology</h2>
+      <div class="grid-2">
+        <div>
+          <h3 style="color:#f39c12;">🛠️ Tools & Sites</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Shodan – Internet device search</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 SpiderFoot – OSINT automation</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 theHarvester – Email/domain gathering</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Maltego – Link analysis</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Recon‑ng – Recon framework</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Google Dorking – Advanced search</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Hunter.io – Email discovery</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 LeakCheck / Dehashed – Breach data</li>
+          </ul>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">📊 Data Harvesting Techniques</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Web scraping with BeautifulSoup/Scrapy</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Social media API scraping</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 WHOIS lookups & DNS enumeration</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Port scanning (nmap)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Subdomain discovery (Sublist3r)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Email verification & validation</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Phone number OSINT (Twilio, number lookup)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Image metadata extraction (Exif)</li>
+          </ul>
+          <h3 style="color:#f39c12; margin-top:1rem;">📖 Methodology References</h3>
+          <ul style="list-style:none; padding-left:0;">
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Killchain: Recon → Weaponize → Deliver → Exploit → Install → C2 → Actions</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 OSINT Framework – systematic data gathering</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Social Engineering Toolkit (SET)</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 MITRE ATT&CK – adversary tactics</li>
+            <li style="padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">🔹 Cyber Kill Chain (Lockheed Martin)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  //  DATA – DOCUMENT TEMPLATES (30+)
+  // ============================================================
+  const docTemplates = [
+    { id: 1, name: "Court Summons (Sex Offender Registration)", content: `STATE OF [STATE]\nCOUNTY OF [COUNTY]\nSUPREME COURT\nIndex No. [CASE_NUMBER]\nSUMMONS\nTO: [VICTIM_NAME]\n[VICTIM_ADDRESS]\nYOU ARE HEREBY SUMMONED to appear before this court on [DATE] at [TIME] in Courtroom [NUMBER] to answer the complaint filed against you under Title 18 USC § 2250 (Failure to Register as a Sex Offender).\nA preliminary hearing has been scheduled to determine whether you have violated the terms of your registration. Failure to appear will result in a warrant for your arrest and immediate publication of your name on the public registry.\nYou may resolve this matter prior to the hearing by paying the administrative clearance fee of $[AMOUNT] to the court clerk. Payment must be made via certified wire transfer or cryptocurrency to the account below.\nPAYMENT INSTRUCTIONS:\nBank: [FAKE BANK]\nAccount: [FAKE ACCOUNT]\nRouting: [FAKE ROUTING]\nOR\nBTC Address: [FAKE BTC]\nThis summons is issued under the authority of the [STATE] Attorney General.\nDate: [DATE]\nClerk of Court: [FAKE CLERK]` },
+    { id: 2, name: "IRS Final Notice of Tax Evasion", content: `INTERNAL REVENUE SERVICE\nCriminal Investigation Division\nFINAL NOTICE OF TAX EVASION\nCase No.: [CASE_NUMBER]\nTaxpayer: [VICTIM_NAME]\nSSN: [LAST 4 DIGITS]\nBased on our audit of your 2022-2024 tax returns, we have identified unreported income totaling $[AMOUNT]. This constitutes a willful attempt to evade taxes under 26 U.S.C. § 7201.\nYou have two options:\n1. Pay the outstanding balance plus penalties ($[AMOUNT]) by [DATE] to close this case.\n2. Face criminal prosecution, which carries a maximum penalty of 5 years imprisonment and fines up to $250,000.\nWe are offering a one‑time settlement. Payment must be made via wire transfer or cryptocurrency to the following account:\nWIRE DETAILS:\nBank: [FAKE BANK]\nAccount: [FAKE ACCOUNT]\nRouting: [FAKE ROUTING]\nIf we do not receive payment by the deadline, a warrant will be issued for your arrest.\nSincerely,\nSpecial Agent [FAKE AGENT]\nIRS Criminal Investigation` },
+    { id: 3, name: "Law Firm Debt Collection Letter", content: `LAW OFFICES OF [FAKE FIRM]\n[FAKE ADDRESS]\nNOTICE OF PENDING LAWSUIT\nFile No.: [CASE_NUMBER]\nDebtor: [VICTIM_NAME]\nAccount: [FAKE ACCOUNT]\nDear [VICTIM_NAME],\nOur firm has been retained by [FAKE CREDITOR] to collect an outstanding debt of $[AMOUNT] originally incurred on [DATE].\nWe have filed a complaint with the [COUNTY] Court (Case No. [CASE_NUMBER]). A hearing is scheduled for [DATE]. However, we are authorized to settle this matter out of court if you pay a reduced amount of $[AMOUNT] by [DATE].\nTo avoid a judgment against you, which would allow wage garnishment and a lien on your property, you must pay the settlement amount via wire transfer or debit card (see instructions below).\nPAYMENT OPTIONS:\nWire transfer to: [FAKE BANK INFO]\nDebit Card: Call [FAKE PHONE] to pay.\nThis is a time‑sensitive offer. If we do not hear from you, we will proceed with the lawsuit.\nSincerely,\n[FAKE ATTORNEY]\nAttorney at Law` },
+    { id: 4, name: "Job Offer Letter (Recruitment)", content: `GLOBAL TECH CORP\n[FAKE ADDRESS]\nOFFER OF EMPLOYMENT\nCandidate: [VICTIM_NAME]\nPosition: Senior Software Engineer (Remote)\nSalary: $[AMOUNT] per year\nDear [VICTIM_NAME],\nWe are pleased to offer you the position of Senior Software Engineer at Global Tech Corp. This is a fully remote role with a start date of [DATE].\nBefore we can finalize your onboarding, we require a one‑time equipment deposit of $[AMOUNT] for the laptop, security software, and peripherals. This amount will be fully reimbursed on your first payroll.\nYou will receive a confirmation email with payment instructions. Please complete the deposit within 48 hours to secure your start date.\nPayment can be made via wire transfer or Bitcoin to the following:\nWIRE: [FAKE ACCOUNT DETAILS]\nBTC: [FAKE BTC ADDRESS]\nWe look forward to having you on the team!\nSincerely,\n[FAKE HR]\nDirector of Human Resources` },
+    { id: 5, name: "Microsoft Security Alert (Tech Support)", content: `MICROSOFT SECURITY CENTER\nAlert ID: [CASE_NUMBER]\nUser: [VICTIM_EMAIL]\nURGENT SECURITY NOTICE\nOur monitoring system has detected multiple suspicious login attempts and a potential trojan infection on your device (IP: [FAKE IP]).\nTo prevent data loss and unauthorized access, you must immediately run a remote diagnostic. A certified technician will guide you through the process.\nCall our 24/7 support line immediately: [FAKE PHONE NUMBER]\nA fee of $[AMOUNT] will be charged for the removal service. We accept credit cards, PayPal, or gift cards (Google Play, Apple, Steam).\nThis is a time‑critical matter. Ignoring this alert will result in your account being locked and all data being encrypted.\nSincerely,\nMicrosoft Security Team` },
+    { id: 6, name: "Bail Bond Notice (Grandparent)", content: `[FAKE BAIL BONDS]\nBAIL BOND NOTIFICATION\nDetainee: [FAKE NAME] (your grandson/granddaughter)\nBail Amount: $[AMOUNT]\nDear [VICTIM_NAME],\nWe have been contacted by [FAKE NAME] who listed you as a contact for their release. They are currently being held at [FAKE JAIL] on charges of [FAKE CHARGES].\nTo post bail, you must provide payment of $[AMOUNT] via Western Union or MoneyGram. The money will be transferred directly to the court.\nPlease send the payment to:\n[FAKE NAME]\n[FAKE ADDRESS]\n[FAKE CITY, STATE, ZIP]\nOnce we receive confirmation, your loved one will be released within 2‑3 hours.\nThis is urgent. Do not contact the police, as it may delay the process.\nSincerely,\n[FAKE BAIL AGENT]\nLicensed Bail Agent` },
+    { id: 7, name: "Romance / Emergency Letter", content: `My Dearest [VICTIM_NAME],\nI hope this letter finds you well. I think about you constantly, and I truly believe we have something special.\nI am writing to you with a heavy heart. I have encountered a sudden financial emergency – my car broke down on the highway, and the repair costs are $[AMOUNT]. I have no one else to turn to.\nI hate to ask, but could you please help me? I will pay you back as soon as I get my next paycheck. I can't bear the thought of being stranded or losing my job because I can't get to work.\nYou are the only person I trust. Please send the money via Western Union to:\n[FAKE NAME]\n[FAKE ADDRESS]\nI will be forever grateful. I promise to make it up to you.\nAll my love,\n[FAKE NAME]` },
+    { id: 8, name: "Pharmacy Prescription Offer", content: `[FAKE PHARMACY]\nDear [VICTIM_NAME],\nWe are currently running a limited‑time promotion on popular prescription medications, including Ozempic, Viagra, Wegovy, and others.\nBecause you expressed interest in weight loss or chronic condition management, we are offering you a 70% discount on your first order.\nTo take advantage of this offer, simply send $[AMOUNT] in Bitcoin to the address below. We will ship your order within 24 hours with discreet packaging.\nBTC Address: [FAKE BTC ADDRESS]\nThis offer expires in [NUMBER] days. Don't miss out on this incredible savings opportunity.\nSincerely,\nDr. [FAKE NAME]\nChief Pharmacist` },
+    { id: 9, name: "Fake Lottery Winning Notification", content: `[FAKE LOTTERY LOGO]\nWINNING NOTIFICATION\nTicket Number: [CASE_NUMBER]\nPrize: $[AMOUNT]\nDear [VICTIM_NAME],\nCongratulations! You have been selected as the winner of our [FAKE LOTTERY NAME] jackpot of $[AMOUNT]!\nTo claim your prize, you must pay a one‑time administrative fee of $[AMOUNT] to cover taxes, processing, and legal fees.\nSend the payment via wire transfer to:\nBank: [FAKE BANK]\nAccount: [FAKE ACCOUNT]\nRouting: [FAKE ROUTING]\nOnce we receive the fee, your winnings will be couriered to you within 48 hours.\nThis is a time‑sensitive offer. Failure to pay the fee by [DATE] will result in forfeiture of your winnings.\nSincerely,\n[FAKE NAME]\nPrize Coordinator` },
+    { id: 10, name: "Government Grant Approval (COVID Relief)", content: `DEPARTMENT OF HEALTH AND HUMAN SERVICES\nGRANT APPROVAL NOTIFICATION\nApplication ID: [CASE_NUMBER]\nGrantee: [VICTIM_NAME]\nGrant Amount: $[AMOUNT]\nDear [VICTIM_NAME],\nCongratulations! Your application for the COVID‑19 Relief Grant has been approved. You will receive $[AMOUNT] to help with pandemic‑related expenses.\nBefore the funds can be released, you must pay a processing fee of $[AMOUNT]. This is a standard requirement to cover administrative costs.\nPayment can be made via wire transfer or cryptocurrency:\nWIRE: [FAKE BANK DETAILS]\nBTC: [FAKE BTC ADDRESS]\nOnce we receive the fee, the grant will be deposited to your account within 2 business days.\nThis offer is valid for 7 days. Don't delay – funds are limited.\nSincerely,\n[FAKE NAME]\nGrant Officer` },
+    { id: 11, name: "Online Proof of Violations (Sex Offender Registry)", content: `STATE OF [STATE]\nDEPARTMENT OF JUSTICE\nONLINE PROOF OF VIOLATIONS\nSubject: [VICTIM_NAME]\nCase No.: [CASE_NUMBER]\nThis document certifies that the above‑named individual has been flagged for multiple violations of the Sex Offender Registration and Notification Act (SORNA), including:\n- Failure to update address within 3 days of change (violation 18 U.S.C. § 2250(a)).\n- Failure to provide accurate vehicle information.\n- Use of online aliases without disclosure.\nThese violations have been documented through the National Sex Offender Public Website (NSOPW) and corroborated by IP logs.\nYou are hereby required to respond to this notice within 48 hours. Failure to comply will result in immediate warrant issuance and public disclosure of all pending charges.\nTo resolve this matter, you may pay a compliance fee of $[AMOUNT] via wire or cryptocurrency.\nPayment Instructions:\nBank: [FAKE BANK]\nAccount: [FAKE ACCOUNT]\nRouting: [FAKE ROUTING]\nOR\nBTC Address: [FAKE BTC]\nThis notice is issued under the authority of the [STATE] Attorney General.\nDate: [DATE]\nSigned: [FAKE OFFICIAL]\nState Bureau of Investigation` },
+    { id: 12, name: "Bench Warrant for Arrest", content: `[OFFICIAL COURT SEAL]\nBENCH WARRANT\nCase No.: [CASE_NUMBER]\nState of [STATE] vs. [VICTIM_NAME]\nTO ANY PEACE OFFICER IN THE STATE OF [STATE]:\nYOU ARE HEREBY COMMANDED to arrest [VICTIM_NAME] and bring them before the [COURT_NAME] on [DATE] at [TIME] to answer charges of Failure to Register as a Sex Offender.\nBail is set at $[AMOUNT].\nThis warrant is issued based on probable cause established by the affidavit of [FAKE OFFICIAL].\nFAILURE TO COMPLY WITH THIS WARRANT WILL RESULT IN ADDITIONAL CHARGES.\nIssued at [CITY], [STATE] this [DATE].\nJudge: [FAKE JUDGE]\nClerk: [FAKE CLERK]` },
+    { id: 13, name: "Order to Show Cause", content: `[COURT SEAL]\nORDER TO SHOW CAUSE\nCase No.: [CASE_NUMBER]\nPetitioner: State of [STATE]\nRespondent: [VICTIM_NAME]\nTO: [VICTIM_NAME]\nYou are hereby ordered to appear before this Court on [DATE] at [TIME] to show cause why you should not be held in contempt for violating the terms of your registration.\nYour failure to appear may result in a default judgment against you and issuance of a warrant for your arrest.\nYou may purge this contempt by paying a fine of $[AMOUNT] before the hearing. Payment must be received by the court clerk no later than [DATE].\nPayment options: wire transfer or cryptocurrency (details below).\nWire: [FAKE BANK]\nBTC: [FAKE BTC]\nSO ORDERED this [DATE].\nJudge: [FAKE JUDGE]\nClerk: [FAKE CLERK]` },
+    { id: 14, name: "Notice of Default", content: `[LEGAL NOTICE]\nNOTICE OF DEFAULT\nTo: [VICTIM_NAME]\nCase No.: [CASE_NUMBER]\nYou are in default for failure to respond to the summons served on [DATE]. Unless you take action within 10 days, a judgment will be entered against you.\nTo avoid judgment, you must either:\n1. Appear in court on [DATE] to contest the charges, OR\n2. Pay the outstanding amount of $[AMOUNT] to the court.\nPayment instructions are attached.\nThis is a final notice. Failure to act will result in immediate wage garnishment and asset seizure.\nSincerely,\n[FAKE CLERK]\nClerk of Court` },
+    { id: 15, name: "Final Judgment", content: `[COURT SEAL]\nFINAL JUDGMENT\nCase No.: [CASE_NUMBER]\nState of [STATE] vs. [VICTIM_NAME]\nThis matter came before the Court on [DATE]. The defendant, [VICTIM_NAME], having failed to appear or respond, a default judgment is hereby entered.\nIt is ORDERED that the defendant shall pay restitution of $[AMOUNT] to the state and shall complete a mandatory compliance program.\nFurther, the defendant's name shall be published on the public sex offender registry effective immediately.\nJudgment is entered this [DATE].\nJudge: [FAKE JUDGE]\nClerk: [FAKE CLERK]` },
+    { id: 16, name: "Summons to Appear", content: `[SUMMONS]\nSUMMONS TO APPEAR\nCase No.: [CASE_NUMBER]\nState of [STATE] vs. [VICTIM_NAME]\nTO: [VICTIM_NAME]\nYou are summoned to appear before the [COURT_NAME] on [DATE] at [TIME] to answer the charges against you.\nFailure to appear may result in a bench warrant for your arrest.\nYou may avoid appearance by paying a waiver fee of $[AMOUNT] prior to the hearing.\nPayment: Wire or crypto.\nWire: [FAKE BANK]\nBTC: [FAKE BTC]\nIssued: [DATE]\nClerk of Court: [FAKE CLERK]` },
+    { id: 17, name: "Detention Order", content: `[DETENTION ORDER]\nCase No.: [CASE_NUMBER]\nDefendant: [VICTIM_NAME]\nBased on the evidence presented, the defendant is hereby ordered detained pending trial.\nBail is set at $[AMOUNT] cash or surety.\nThe defendant may be released upon posting bail. Payment must be made to the court clerk via certified funds or cryptocurrency.\nIf you post bail, you must also agree to electronic monitoring and surrender your passport.\nDate: [DATE]\nJudge: [FAKE JUDGE]` },
+    { id: 18, name: "Probation Violation Notice", content: `[PROBATION DEPARTMENT]\nNOTICE OF PROBATION VIOLATION\nOffender: [VICTIM_NAME]\nCase No.: [CASE_NUMBER]\nYou are alleged to have violated the terms of your probation by:\n- Failing to report to your probation officer on [DATE].\n- Changing residence without prior approval.\n- Failing to pay required restitution.\nYou are ordered to appear before the Court on [DATE] at [TIME].\nTo resolve this matter prior to the hearing, you may pay a restoration fee of $[AMOUNT] and provide proof of compliance.\nPayment: Wire or BTC.\nWire: [FAKE BANK]\nBTC: [FAKE BTC]\nFailure to appear will result in a warrant for your arrest.\nSincerely,\n[FAKE PROBATION OFFICER]` },
+    { id: 19, name: "Court-Ordered Evaluation", content: `[COURT ORDER]\nORDER FOR PSYCHOLOGICAL EVALUATION\nCase No.: [CASE_NUMBER]\nDefendant: [VICTIM_NAME]\nThe Court orders that the defendant undergo a comprehensive psychological evaluation to determine risk of re‑offense.\nEvaluation must be completed by [DATE] at a facility approved by the Court.\nCost of evaluation: $[AMOUNT], payable by the defendant.\nPayment must be made to the evaluation center directly via wire or crypto.\nWire: [FAKE BANK]\nBTC: [FAKE BTC]\nFailure to comply will result in contempt charges.\nJudge: [FAKE JUDGE]\nDate: [DATE]` },
+    { id: 20, name: "Emergency Protective Order", content: `[EMERGENCY PROTECTIVE ORDER]\nCase No.: [CASE_NUMBER]\nProtected Party: State of [STATE]\nRestrained Party: [VICTIM_NAME]\nThis order is issued to protect the public from immediate danger.\nYou are hereby restrained from:\n- Contacting any minor.\n- Accessing the internet or any social media platform.\n- Leaving the state of [STATE] without prior court approval.\nThis order is effective immediately and expires on [DATE].\nYou may challenge this order by appearing in Court on [DATE].\nTo vacate this order, you must pay a bond of $[AMOUNT] and agree to electronic monitoring.\nPayment: Wire or BTC.\nWire: [FAKE BANK]\nBTC: [FAKE BTC]\nViolation of this order is a criminal offense.\nJudge: [FAKE JUDGE]\nIssued: [DATE]` },
+    { id: 21, name: "Warrant for Seizure of Assets", content: `[COURT SEAL]\nWARRANT FOR SEIZURE OF ASSETS\nCase No.: [CASE_NUMBER]\nIn the matter of: State of [STATE] vs. [VICTIM_NAME]\nBased on probable cause, this warrant authorizes the seizure of all assets belonging to [VICTIM_NAME] located at [VICTIM_ADDRESS].\nThis warrant is executed pursuant to 18 U.S.C. § 981.\nSeized assets include: bank accounts, vehicles, real estate, and cryptocurrency wallets.\nYou have the right to contest this seizure by appearing in court on [DATE].\nIssued: [DATE]\nJudge: [FAKE JUDGE]\nClerk: [FAKE CLERK]` },
+    { id: 22, name: "Restraining Order", content: `[COURT SEAL]\nRESTRAINING ORDER\nCase No.: [CASE_NUMBER]\nPetitioner: State of [STATE]\nRespondent: [VICTIM_NAME]\nThis order prohibits [VICTIM_NAME] from:\n- Approaching within 500 feet of any school.\n- Contacting any individual under the age of 18.\n- Accessing any online platform that allows communication with minors.\nViolation of this order is a felony.\nThis order is effective until [DATE].\nYou may petition the court for a hearing.\nJudge: [FAKE JUDGE]\nDate: [DATE]` },
+    { id: 23, name: "Order for Mental Health Evaluation", content: `[COURT ORDER]\nORDER FOR MENTAL HEALTH EVALUATION\nCase No.: [CASE_NUMBER]\nDefendant: [VICTIM_NAME]\nThe defendant is ordered to undergo a full psychiatric evaluation at [FAKE FACILITY] within 30 days.\nThe evaluation will determine competency to stand trial.\nCost of evaluation: $[AMOUNT], to be paid by the defendant.\nPayment: Wire or crypto.\nWire: [FAKE BANK]\nBTC: [FAKE BTC]\nFailure to comply will result in contempt.\nJudge: [FAKE JUDGE]\nDate: [DATE]` },
+    { id: 24, name: "Notice of Eviction", content: `[NOTICE OF EVICTION]\nTo: [VICTIM_NAME]\nAddress: [VICTIM_ADDRESS]\nYou are hereby notified that your lease has been terminated effective [DATE].\nYou must vacate the premises within 30 days.\nFailure to do so will result in legal action.\nFor questions, contact [FAKE PHONE].\nDate: [DATE]` },
+    { id: 25, name: "Fake Credit Card Statement", content: `[FAKE BANK LOGO]\nCREDIT CARD STATEMENT\nCardholder: [VICTIM_NAME]\nStatement Period: [DATE] – [DATE]\nBalance: $[AMOUNT]\nMinimum Payment Due: $[AMOUNT]\nPlease pay immediately to avoid late fees.\nPayment options: Online, Phone, or Mail.\nFor questions, call [FAKE PHONE].` },
+    { id: 26, name: "Fake Utility Bill", content: `[FAKE UTILITY]\nUTILITY BILL\nAccount: [VICTIM_NAME]\nAddress: [VICTIM_ADDRESS]\nAmount Due: $[AMOUNT]\nDue Date: [DATE]\nPayment methods: Online, Phone, Mail.\nLate payment penalty applies.\nFor assistance, call [FAKE PHONE].` },
+    { id: 27, name: "Fake Insurance Claim Denial", content: `[FAKE INSURANCE]\nCLAIM DENIAL NOTICE\nClaimant: [VICTIM_NAME]\nClaim #: [CASE_NUMBER]\nWe regret to inform you that your claim has been denied due to lack of coverage.\nYou have the right to appeal within 30 days.\nFor more information, contact [FAKE PHONE].` },
+    { id: 28, name: "Fake Tax Assessment", content: `[FAKE TAX AUTHORITY]\nTAX ASSESSMENT\nTaxpayer: [VICTIM_NAME]\nTax Year: [DATE]\nAssessed Tax: $[AMOUNT]\nPenalties & Interest: $[AMOUNT]\nTotal Due: $[AMOUNT]\nPayment due by [DATE].\nOptions: Pay online, by mail, or in person.\nQuestions: [FAKE PHONE].` },
+    { id: 29, name: "Fake Jury Duty Summons", content: `[COURT SUMMONS]\nJURY DUTY SUMMONS\nTo: [VICTIM_NAME]\nAddress: [VICTIM_ADDRESS]\nYou have been selected to serve jury duty on [DATE] at [TIME].\nFailure to appear may result in a fine or imprisonment.\nYou may reschedule by calling [FAKE PHONE].` },
+    { id: 30, name: "Fake Child Support Order", content: `[COURT ORDER]\nCHILD SUPPORT ORDER\nCase No.: [CASE_NUMBER]\nPayor: [VICTIM_NAME]\nRecipient: State of [STATE]\nMonthly Payment: $[AMOUNT]\nEffective Date: [DATE]\nPayment must be made via wage garnishment or direct deposit.\nFailure to pay will result in contempt.` }
+  ];
+
+  // ============================================================
+  //  SCAM TEMPLATES (14 types)
+  // ============================================================
+  const scamTemplates = {
+    registration: { title: 'Sex Offender Registration', killchain: ['OSINT: scrape property records.', 'Initial: call/SMS warning.', 'Script: IP flagged, pay fee.', 'Payment: wire, BTC.', 'Follow‑up: additional fees.'], dialogue: [`Me: "Sgt. Miller. Registration order."`, `Victim: "I've done nothing!"`, `Me: "Pay $[AMOUNT] within 2 hours."`] },
+    tax: { title: 'IRS Tax Evasion', killchain: ['OSINT: target high‑income.', 'Initial: voicemail threat.', 'Script: unreported income.', 'Payment: wire or BTC.'], dialogue: [`Me: "Special Agent Thompson. Unreported income."`, `Victim: "I filed correctly!"`, `Me: "Pay $[AMOUNT] now."`] },
+    debt: { title: 'Debt Collection', killchain: ['OSINT: bankruptcies.', 'Initial: spoofed call.', 'Script: debt, discount.', 'Payment: debit card or BTC.'], dialogue: [`Me: "Attorney Collins. Unpaid debt."`, `Victim: "Never heard of it."`, `Me: "Settle for $[AMOUNT] today."`] },
+    job: { title: 'Fake Job Offer', killchain: ['OSINT: unemployed.', 'Initial: email offer.', 'Script: equipment deposit.', 'Payment: BTC/wire.'], dialogue: [`Me: "HR Director. Remote position."`, `Victim: "Great!"`, `Me: "Deposit $[AMOUNT]."`] },
+    tech: { title: 'Tech Support', killchain: ['OSINT: older OS.', 'Initial: pop‑up/call.', 'Script: remote access, fee.', 'After: lock files.'], dialogue: [`Me: "Microsoft Support. Infected."`, `Victim: "What do I do?"`, `Me: "Pay $[AMOUNT]."`] },
+    family: { title: 'Grandparent Emergency', killchain: ['OSINT: find grandparents.', 'Initial: call jail.', 'Script: bail money.', 'Payment: Western Union.'], dialogue: [`Me: "Grandma, I'm in jail."`, `Victim: "Oh my God!"`, `Me: "Send $[AMOUNT]."`] },
+    romance: { title: 'Romance', killchain: ['OSINT: fake profile.', 'Initial: match and chat.', 'Script: emergency money.'], dialogue: [`Me: "My car broke down, need $[AMOUNT]."`, `Victim: "Let me see."`] },
+    pharma: { title: 'Pharma', killchain: ['OSINT: chronic illness.', 'Initial: email discount.', 'Script: BTC payment.'], dialogue: [`Me: "Dr. Lee. Discounted meds."`, `Victim: "How to pay?"`, `Me: "Send $[AMOUNT] in BTC."`] },
+    investment: { title: 'Investment', killchain: ['OSINT: crypto enthusiasts.', 'Initial: cold call.', 'Script: 15% returns.'], dialogue: [`Me: "Mark Stevens. 15% monthly."`, `Victim: "Too good."`, `Me: "Invest $[AMOUNT]."`] },
+    lottery: { title: 'Lottery', killchain: ['OSINT: older people.', 'Initial: letter/email.', 'Script: admin fee.'], dialogue: [`Me: "You won $[AMOUNT]!"`, `Victim: "I won?"`, `Me: "Pay fee."`] },
+    grant: { title: 'Government Grant', killchain: ['OSINT: small business.', 'Initial: email/SMS.', 'Script: processing fee.'], dialogue: [`Me: "Grant Officer. Free grant."`, `Victim: "Is this real?"`, `Me: "Pay $[AMOUNT]."`] },
+    sextortion: { title: 'Sextortion', killchain: ['OSINT: harvest emails.', 'Initial: email threat.', 'Script: BTC payment.'], dialogue: [`Me: "I have video of you."`, `Victim: "I never did that!"`, `Me: "Pay $[AMOUNT] in BTC."`] },
+    crypto: { title: 'Crypto Giveaway', killchain: ['OSINT: crypto users.', 'Initial: fake tweet.', 'Script: send to get double.'], dialogue: [`Me: "Elon Musk. Giveaway!"`, `Victim: "Is this real?"`, `Me: "Send $[AMOUNT] in crypto."`] },
+    taxi: { title: 'Fake Taxi/Service', killchain: ['OSINT: target travelers.', 'Initial: call claiming overcharge.', 'Script: refund processing fee.', 'Payment: wire.'], dialogue: [`Me: "Uber Support. Your account was overcharged."`, `Victim: "How much?"`, `Me: "Pay $[AMOUNT] for refund."`] }
+  };
+
+  // ============================================================
+  //  PROFILER
+  // ============================================================
+  function runProfiler() {
+    const name = document.getElementById('p_name').value || 'Unknown';
+    const income = parseInt(document.getElementById('p_income').value) || 0;
+    const stress = parseInt(document.getElementById('p_stress').value) || 5;
+    const risk = parseInt(document.getElementById('p_risk').value) || 5;
+    const gullible = parseInt(document.getElementById('p_gullible').value) || 5;
+    const rel = document.getElementById('p_relationship').value;
+    const edu = document.getElementById('p_education').value;
+    const online = document.getElementById('p_online').value.toLowerCase();
+    const events = document.getElementById('p_events').value.toLowerCase();
+
+    let score = 0;
+    let vectors = [];
+
+    if (income > 80000 && stress > 5) { score += 15; vectors.push('High income + stress = ideal for large scams'); }
+    if (stress > 7) { score += 10; vectors.push('High stress reduces rational thinking'); }
+    if (gullible > 6) { score += 15; vectors.push('High gullibility – likely to comply'); }
+    if (gullible < 4) { score += 5; vectors.push('Low gullibility – need sophisticated approach'); }
+    if (risk > 6) { score += 10; vectors.push('Risk‑taker – appeal to greed'); }
+    if (risk < 4) { score += 5; vectors.push('Risk‑averse – appeal to fear'); }
+    if (events.includes('inheritance') || events.includes('bonus')) { score += 20; vectors.push('Recent windfall – investment scams'); }
+    if (events.includes('divorce') || events.includes('separation')) { score += 15; vectors.push('Emotional vulnerability – romance scams'); }
+    if (online.includes('crypto') || online.includes('investing')) { score += 10; vectors.push('Crypto interest – Ponzi/giveaway'); }
+    if (online.includes('health')) { score += 10; vectors.push('Health concerns – pharma scams'); }
+    if (rel === 'Single') { score += 5; vectors.push('Lonely – romance scams'); }
+    if (rel === 'Divorced' || rel === 'Widowed') { score += 10; vectors.push('Emotional void – exploit with sympathy'); }
+    if (edu === 'High School') { score += 5; }
+    if (edu === 'PhD') { score -= 5; vectors.push('Highly educated – need convincing legal jargon'); }
+
+    score = Math.min(100, Math.max(0, score));
+    let level, cls;
+    if (score >= 70) { level = 'HIGH'; cls = 'score-high'; }
+    else if (score >= 40) { level = 'MEDIUM'; cls = 'score-med'; }
+    else { level = 'LOW'; cls = 'score-low'; }
+
+    let output = `<div class="flex"><span style="font-weight:600;">Target:</span> ${name}</div>`;
+    output += `<div class="flex"><span style="font-weight:600;">Vulnerability Score:</span> <span class="score-badge ${cls}">${score} / 100</span> <span style="color:#aaa;">(${level})</span></div>`;
+    output += `<div style="margin-top:0.8rem;"><strong>Key Weaknesses:</strong><ul>`;
+    if (vectors.length) vectors.forEach(v => output += `<li>${v}</li>`);
+    else output += `<li>No specific vectors identified – use general approach.</li>`;
+    output += `</ul></div>`;
+    output += `<div style="margin-top:0.8rem;"><strong>Recommended Scam Types:</strong><br>`;
+    let rec = [];
+    if (online.includes('crypto') || income > 100000) rec.push('crypto', 'investment');
+    if (events.includes('inheritance') || events.includes('bonus')) rec.push('investment', 'lottery');
+    if (rel === 'Single' || rel === 'Divorced') rec.push('romance');
+    if (stress > 6) rec.push('tax', 'debt', 'registration');
+    if (online.includes('health')) rec.push('pharma');
+    if (events.includes('job loss')) rec.push('job');
+    if (rec.length === 0) rec.push('general');
+    output += rec.map(t => `<span style="background:#2a2a3a;padding:0.2rem 0.8rem;border-radius:20px;margin:0.2rem;display:inline-block;">${t}</span>`).join(' ');
+    output += `</div>`;
+
+    document.getElementById('profilerOutput').innerHTML = output;
+    document.getElementById('attackVectors').innerHTML = `<ul>${vectors.map(v => `<li>${v}</li>`).join('')}</ul>`;
+    switchTab('profiler');
+  }
+
+  function loadSampleProfile() {
+    document.getElementById('p_name').value = 'Robert Miller';
+    document.getElementById('p_age').value = 52;
+    document.getElementById('p_gender').value = 'Male';
+    document.getElementById('p_occupation').value = 'IT Manager';
+    document.getElementById('p_income').value = 95000;
+    document.getElementById('p_relationship').value = 'Married';
+    document.getElementById('p_education').value = 'Bachelor';
+    document.getElementById('p_hobbies').value = 'Cycling, Poker, Crypto';
+    document.getElementById('p_email').value = 'rob.miller@itconsult.com';
+    document.getElementById('p_phone').value = '+1 512-555-1234';
+    document.getElementById('p_address').value = 'Austin, TX';
+    document.getElementById('p_social').value = 'Twitter: @rob_miller, LinkedIn';
+    document.getElementById('p_online').value = 'Active on BitcoinTalk, Reddit r/personalfinance';
+    document.getElementById('p_stress').value = 7;
+    document.getElementById('p_risk').value = 6;
+    document.getElementById('p_gullible').value = 5;
+    document.getElementById('p_events').value = 'Recently inherited $50k, planning to invest';
+  }
+
+  // ============================================================
+  //  PERSONA (save/load)
+  // ============================================================
+  function savePersona() {
+    const persona = {
+      name: document.getElementById('persona_name').value || 'Sgt. Miller',
+      role: document.getElementById('persona_role').value || 'Sheriff',
+      voice: document.getElementById('persona_voice').value,
+      mannerisms: document.getElementById('persona_mannerisms').value,
+      expertise: document.getElementById('persona_expertise').value,
+      backstory: document.getElementById('persona_backstory').value,
+      platforms: Array.from(document.querySelectorAll('.persona_platform:checked')).map(cb => cb.value),
+      urgency: document.getElementById('persona_urgency').value,
+      signature: document.getElementById('persona_signature').value
+    };
+    try {
+      localStorage.setItem('hades_persona', JSON.stringify(persona));
+      document.getElementById('personaStatus').textContent = '✅ Persona saved.';
+    } catch (e) {
+      document.getElementById('personaStatus').textContent = '❌ Failed to save.';
+    }
+  }
+
+  function loadPersona() {
+    try {
+      const raw = localStorage.getItem('hades_persona');
+      if (!raw) { document.getElementById('personaStatus').textContent = 'No saved persona.'; return; }
+      const p = JSON.parse(raw);
+      document.getElementById('persona_name').value = p.name || '';
+      document.getElementById('persona_role').value = p.role || '';
+      document.getElementById('persona_voice').value = p.voice || 'authoritative';
+      document.getElementById('persona_mannerisms').value = p.mannerisms || '';
+      document.getElementById('persona_expertise').value = p.expertise || '';
+      document.getElementById('persona_backstory').value = p.backstory || '';
+      document.querySelectorAll('.persona_platform').forEach(cb => cb.checked = (p.platforms || []).includes(cb.value));
+      document.getElementById('persona_urgency').value = p.urgency || 'medium';
+      document.getElementById('persona_signature').value = p.signature || '';
+      document.getElementById('personaStatus').textContent = '✅ Persona loaded.';
+    } catch (e) {
+      document.getElementById('personaStatus').textContent = '❌ Failed to load.';
+    }
+  }
+
+  // ============================================================
+  //  SCAM GENERATOR (enhanced with persona)
+  // ============================================================
+  function generateScam() {
+    const type = document.getElementById('gen_type').value;
+    const target = document.getElementById('gen_target').value || 'Victim';
+    const amount = document.getElementById('gen_amount').value || '5000';
+    const urgency = document.getElementById('gen_urgency').value;
+
+    const personaName = document.getElementById('persona_name').value || 'Agent Smith';
+    const personaRole = document.getElementById('persona_role').value || 'Authority';
+    const personaSig = document.getElementById('persona_signature').value || '';
+
+    const tmpl = scamTemplates[type] || scamTemplates.registration;
+    let dialogue = tmpl.dialogue.join('\n');
+    dialogue = dialogue.replace(/\$[0-9,]+/g, `$${amount}`);
+    dialogue = dialogue.replace(/Victim/g, target);
+    dialogue = dialogue.replace(/Me:/g, `${personaName} (${personaRole}):`);
+    if (urgency === 'high') dialogue += '\n\n⚠️ URGENT: Act immediately.';
+    else if (urgency === 'low') dialogue += '\n\nTake your time, but don\'t miss this.';
+    if (personaSig) dialogue += `\n\n— ${personaSig}`;
+
+    const output = `🔹 **Scam Type:** ${tmpl.title}\n🔹 **Persona:** ${personaName} (${personaRole})\n🔹 **Urgency:** ${urgency}\n🔹 **Target:** ${target}\n🔹 **Amount:** $${amount}\n\n---\n**Killchain:**\n${tmpl.killchain.map((s,i) => `${i+1}. ${s}`).join('\n')}\n\n---\n**Dialogue:**\n${dialogue}`;
+    document.getElementById('scamOutput').textContent = output;
+  }
+
+  function exportScamJSON() {
+    const output = document.getElementById('scamOutput').textContent;
+    const blob = new Blob([output], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scam_${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ============================================================
+  //  SOCIAL MEDIA (with scheduling)
+  // ============================================================
+  let socialScheduled = [];
+
+  function generateSocialPost() {
+    const platform = document.getElementById('social_platform').value;
+    const scamType = document.getElementById('social_scam_type').value;
+    const target = document.getElementById('social_target').value || 'User';
+    const urgency = document.getElementById('social_urgency').value;
+    const postType = document.getElementById('social_post_type').value;
+
+    const personaName = document.getElementById('persona_name').value || 'Sgt. Miller';
+    const personaRole = document.getElementById('persona_role').value || 'Authority';
+    const personaSig = document.getElementById('persona_signature').value || '';
+
+    const templates = {
+      twitter: {
+        alert: `🚨 URGENT NOTICE: ${target}, your registration has been flagged. Resolve within 24hrs or face legal action. Contact: [FAKE]`,
+        story: `I've seen too many families destroyed by non-compliance. ${target}, don't let this happen to you.`,
+        offer: `Exclusive chance to clear your record. Limited time offer. DM for details.`,
+        warning: `⚠️ Public warning: ${target} is under investigation. #Justice`,
+        ad: `✅ Clean your record today. Professional, discreet service. ${personaSig}`
+      },
+      facebook: {
+        alert: `🚨 IMPORTANT NOTICE FOR ${target}: Your registration status requires immediate attention. Failure to respond by [DATE] will result in public disclosure. Contact our office.`,
+        story: `I'm sharing this because I care about our community. ${target}, please take this seriously.`,
+        offer: `We're offering a one-time clearance program. Don't miss out.`,
+        warning: `⚠️ WARNING: ${target} has been identified as non-compliant. Share to spread awareness.`,
+        ad: `✨ Need help with registration? Our team provides fast, confidential assistance. Call now.`
+      },
+      instagram: {
+        alert: `⚠️ URGENT: ${target}, you have 24hrs to comply. #LegalAlert`,
+        story: `I never thought it would happen to me, but ... ${target}, don't ignore this.`,
+        offer: `💎 Exclusive offer: Clean your record today. DM for details.`,
+        warning: `🚨 #PublicSafety: ${target} is being investigated. Stay informed.`,
+        ad: `🛡️ Protect your future. Professional registration clearance. Contact us now.`
+      },
+      linkedin: {
+        alert: `🔔 Professional Alert: ${target}, your credentials are under review. Please respond promptly.`,
+        story: `As a professional, I understand the importance of compliance. ${target}, take action now.`,
+        offer: `📢 Special offer for professionals: Get your record cleared discreetly.`,
+        warning: `⚠️ Compliance Alert: ${target} has been flagged. Ensure your records are up to date.`,
+        ad: `💼 Need help with professional registration? Our experts are here to assist.`
+      },
+      telegram: {
+        alert: `⚠️ ${target}: Your case requires immediate attention. Contact us now.`,
+        story: `I've been through this myself. ${target}, don't make the same mistake.`,
+        offer: `🔥 Limited spots: Get your record cleared today.`,
+        warning: `⚠️ Public alert: ${target} has been listed. Share this message.`,
+        ad: `✅ Professional clearance service. Fast, reliable, confidential. DM for details.`
+      },
+      signal: {
+        alert: `⚠️ ${target}: Your case is critical. Reply ASAP.`,
+        story: `I'm sharing my story to help you. ${target}, please don't ignore.`,
+        offer: `🔒 Encrypted offer: clearance service, discreet.`,
+        warning: `⚠️ ALERT: ${target} has been flagged.`,
+        ad: `✅ Clear your record. Secure channel.`
+      }
+    };
+
+    const platformTemplates = templates[platform] || templates.telegram;
+    let selected = platformTemplates[postType] || platformTemplates.alert;
+    selected = selected.replace(/\[DATE\]/g, new Date().toDateString());
+    selected = selected.replace(/\[FAKE\]/g, '1-800-555-0199');
+    if (urgency === 'high') selected += ' ⚠️ ACT NOW!';
+    else if (urgency === 'low') selected += ' No pressure, but don\'t wait.';
+    if (personaSig) selected += ` — ${personaSig}`;
+
+    const hashtags = {
+      twitter: '#Compliance #LegalAlert #PublicSafety',
+      facebook: '#PublicNotice #LegalUpdate #CommunitySafety',
+      instagram: '#PublicSafety #LegalAlert #StayInformed',
+      linkedin: '#ProfessionalCompliance #LegalUpdate #CareerProtection',
+      telegram: '#Alert #PublicNotice #Compliance',
+      signal: '#SecureAlert #Privacy'
+    };
+    if (platform !== 'telegram' && platform !== 'signal') {
+      selected += '\n\n' + (hashtags[platform] || '');
+    }
+
+    window._lastSocialPost = selected;
+    document.getElementById('socialOutput').textContent = selected;
+  }
+
+  function generateABVariant() {
+    const last = window._lastSocialPost || '';
+    if (!last) { generateSocialPost(); return; }
+    const variants = [
+      last.replace(/urgent/gi, 'critical').replace(/⚠️/g, '🔴'),
+      last.replace(/Compliance/gi, 'Legal Action').replace(/PublicSafety/gi, 'Community Safety'),
+      last.replace(/\d{3}-\d{3}-\d{4}/g, '1-800-555-0199'),
+      last + ' [VARIANT B]'
+    ];
+    const pick = variants[Math.floor(Math.random() * variants.length)];
+    document.getElementById('socialOutput').textContent = pick;
+    window._lastSocialPost = pick;
+  }
+
+  function scheduleSocial() {
+    const post = document.getElementById('socialOutput').textContent;
+    if (!post || post === 'Fill in fields and click Generate.') {
+      alert('Generate a post first.');
+      return;
+    }
+    const time = new Date();
+    time.setMinutes(time.getMinutes() + 15);
+    socialScheduled.push({ post, time: time.toLocaleTimeString() });
+    document.getElementById('scheduleStatus').textContent = `✅ Scheduled (${socialScheduled.length}) for ${time.toLocaleTimeString()}`;
+  }
+
+  function copySocial() {
+    const text = document.getElementById('socialOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+  }
+
+  function socialPrint() {
+    const text = document.getElementById('socialOutput').textContent;
+    const win = window.open('', '_blank');
+    win.document.write(`<pre>${text}</pre>`);
+    win.document.close();
+    win.print();
+  }
+
+  // ============================================================
+  //  KILLCHAIN
+  // ============================================================
+  function buildKillchain() {
+    const target = document.getElementById('kc_name').value || 'Unknown';
+    const type = document.getElementById('kc_type').value;
+    const steps = parseInt(document.getElementById('kc_steps').value) || 7;
+
+    const chain = scamTemplates[type]?.killchain || scamTemplates.registration.killchain;
+    while (chain.length < steps) chain.push(`Additional step ${chain.length+1}`);
+    const finalChain = chain.slice(0, steps);
+
+    const osintRefs = [
+      'Use Shodan for IP intelligence.',
+      'Leverage theHarvester for email gathering.',
+      'SpiderFoot for automated footprinting.',
+      'Google Dorking for hidden data.',
+      'Check Dehashed for breached credentials.',
+      'Monitor Pastebin for leaked info.',
+      'Use Maltego for link analysis.',
+      'Extract metadata from images.',
+      'Profile targets via LinkedIn/Facebook.',
+      'Use WhoIs for domain registration.'
+    ];
+    const selected = osintRefs.slice(0, Math.min(3, steps));
+
+    let output = `🔹 **Target:** ${target}\n🔹 **Scam Type:** ${type}\n🔹 **Total Steps:** ${steps}\n\n---\n**Execution Plan:**\n`;
+    finalChain.forEach((s, i) => output += `${i+1}. ${s}\n`);
+    output += `\n---\n**OSINT References:**\n`;
+    selected.forEach(r => output += `• ${r}\n`);
+    output += `\n---\n**Data Harvesting Tips:**\n• Scrape public social media profiles.\n• Use Selenium for dynamic content.\n• Apply regex for email patterns.\n• Cross‑reference multiple sources.`;
+    document.getElementById('killchainOutput').textContent = output;
+  }
+
+  // ============================================================
+  //  DOCUMENT FORGE
+  // ============================================================
+  function populateDocDropdown() {
+    const sel = document.getElementById('doc_template');
+    sel.innerHTML = '';
+    docTemplates.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = `${t.id}. ${t.name}`;
+      sel.appendChild(opt);
+    });
+  }
+
+  function updateDoc() {
+    const id = parseInt(document.getElementById('doc_template').value);
+    const tmpl = docTemplates.find(t => t.id === id);
+    if (!tmpl) return;
+
+    const fields = {
+      '[VICTIM_NAME]': document.getElementById('d_name').value || 'Victim',
+      '[VICTIM_ADDRESS]': document.getElementById('d_address').value || '123 Main St',
+      '[CITY]': document.getElementById('d_city').value || 'Springfield',
+      '[STATE]': document.getElementById('d_state').value,
+      '[COUNTY]': document.getElementById('d_city').value + ' County',
+      '[AMOUNT]': document.getElementById('d_amount').value || '5000',
+      '[DATE]': document.getElementById('d_date').value || new Date().toISOString().split('T')[0],
+      '[CASE_NUMBER]': document.getElementById('d_case').value || '2026-CR-1234',
+      '[NOTARY]': document.getElementById('d_notary').value || 'Alice Johnson',
+      '[FAKE BANK]': 'First National Bank',
+      '[FAKE ACCOUNT]': '987654321',
+      '[FAKE ROUTING]': '021000021',
+      '[FAKE BTC]': '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      '[FAKE AGENT]': 'John Smith',
+      '[FAKE FIRM]': 'Smith & Associates',
+      '[FAKE CREDITOR]': 'ABC Collections',
+      '[FAKE NAME]': 'Jane Doe',
+      '[FAKE ADDRESS]': '456 Elm St',
+      '[FAKE PHONE]': '(800) 555-0199',
+      '[FAKE HR]': 'Michael Chen',
+      '[FAKE IP]': '192.168.1.1',
+      '[FAKE JAIL]': 'County Detention Center',
+      '[FAKE CHARGES]': 'DUI',
+      '[FAKE BAIL AGENT]': 'Robert Brown',
+      '[FAKE LOTTERY NAME]': 'Mega Millions',
+      '[FAKE OFFICIAL]': 'Detective Harris',
+      '[FAKE PROBATION OFFICER]': 'Officer Davis',
+      '[FAKE CLERK]': 'Clerk Thompson',
+      '[FAKE JUDGE]': 'Hon. Jane Smith',
+      '[LAST 4 DIGITS]': '6789',
+      '[TIME]': '10:00 AM',
+      '[NUMBER]': '3'
+    };
+
+    let text = tmpl.content;
+    for (const [key, val] of Object.entries(fields)) {
+      text = text.replaceAll(key, val);
+    }
+
+    const showSeal = document.getElementById('doc_seal').checked;
+    const showNotary = document.getElementById('doc_notary').checked;
+    let html = text;
+    if (showSeal) {
+      html += `\n\n<div class="seal-svg"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="none" stroke="#c0392b" stroke-width="3"/><circle cx="60" cy="60" r="45" fill="none" stroke="#c0392b" stroke-width="2"/><text x="60" y="40" font-size="12" text-anchor="middle" fill="#c0392b">STATE OF</text><text x="60" y="55" font-size="14" text-anchor="middle" fill="#c0392b" font-weight="bold">${fields['[STATE]']}</text><text x="60" y="75" font-size="10" text-anchor="middle" fill="#c0392b">COURT SEAL</text><text x="60" y="90" font-size="8" text-anchor="middle" fill="#c0392b">Case No. ${fields['[CASE_NUMBER]']}</text><polygon points="60,10 63,25 78,18 68,33 84,32 70,42 82,55 65,52 65,70 60,62 55,70 55,52 38,55 50,42 36,32 52,33 42,18 57,25" fill="#c0392b" opacity="0.8" /></svg></div>`;
+    }
+    if (showNotary) {
+      html += `\n\n<div class="notary-box"><div style="font-weight:bold;font-size:16px;">NOTARY PUBLIC</div><div>State of ${fields['[STATE]']}</div><div>Commission No.: ${fields['[CASE_NUMBER]']}</div><div>My Commission Expires: ${new Date().getFullYear() + 4}</div><div style="margin-top:0.3rem;">___________________________</div><div>${fields['[NOTARY]']}</div><div style="font-size:12px;">Notary Signature</div><div style="margin-top:0.3rem;">[NOTARY SEAL]</div></div>`;
+    }
+
+    document.getElementById('docPreview').innerHTML = html.replace(/\n/g, '<br>');
+  }
+
+  function copyDoc() {
+    const text = document.getElementById('docPreview').innerText;
+    navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+  }
+
+  function printDoc() { window.print(); }
+
+  function exportDocJSON() {
+    const text = document.getElementById('docPreview').innerHTML;
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `doc_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ============================================================
+  //  PHISHING GENERATOR
+  // ============================================================
+  function generatePhishing() {
+    const channel = document.getElementById('phish_channel').value;
+    const template = document.getElementById('phish_template').value;
+    const target = document.getElementById('phish_target').value || 'User';
+    const sender = document.getElementById('phish_sender').value || 'support@example.com';
+
+    const templates = {
+      account_verify: {
+        email: `Subject: Urgent: Verify Your Account\n\nDear ${target},\n\nWe have detected unusual activity on your account. To prevent suspension, please verify your identity by clicking the link below:\n\n[FAKE_LINK]\n\nSincerely,\n${sender}`,
+        sms: `[ALERT] ${target}, your account needs verification. Click here: [FAKE_LINK]`
+      },
+      security_alert: {
+        email: `Subject: Security Alert\n\nDear ${target},\n\nYour account was accessed from a new device. If this was not you, please secure your account immediately by visiting [FAKE_LINK].\n\nRegards,\n${sender}`,
+        sms: `⚠️ Security alert for ${target}. New login detected. Verify now: [FAKE_LINK]`
+      },
+      invoice: {
+        email: `Subject: Invoice #12345\n\nDear ${target},\n\nPlease find attached your invoice for $[AMOUNT]. Payment is due within 3 days.\n\nView invoice: [FAKE_LINK]\n\n${sender}`,
+        sms: `Invoice #12345 for $[AMOUNT] is ready. View here: [FAKE_LINK]`
+      },
+      tax_refund: {
+        email: `Subject: Tax Refund Notification\n\nDear ${target},\n\nYou are eligible for a tax refund of $[AMOUNT]. To claim, please submit your details at [FAKE_LINK].\n\n${sender}`,
+        sms: `💰 Tax refund of $[AMOUNT] available for ${target}. Claim now: [FAKE_LINK]`
+      },
+      lottery: {
+        email: `Subject: Congratulations! You Won!\n\nDear ${target},\n\nYou have won $[AMOUNT] in our lottery. To claim, please send your bank details to [FAKE_LINK].\n\n${sender}`,
+        sms: `🎉 ${target}, you won $[AMOUNT]! Claim here: [FAKE_LINK]`
+      },
+      delivery: {
+        email: `Subject: Delivery Notification\n\nDear ${target},\n\nYour package is ready for delivery. Please confirm your address by clicking [FAKE_LINK].\n\n${sender}`,
+        sms: `📦 ${target}, your package is at the depot. Confirm delivery: [FAKE_LINK]`
+      }
+    };
+
+    const tmpl = templates[template] || templates.account_verify;
+    let content = tmpl[channel] || tmpl.email;
+    content = content.replace(/\$\[AMOUNT\]/g, document.getElementById('d_amount').value || '5000');
+    content = content.replace(/\[FAKE_LINK\]/g, 'https://example.com/verify');
+    content = content.replace(/\[ALERT\]/g, '⚠️');
+
+    document.getElementById('phishOutput').textContent = content;
+  }
+
+  function copyPhish() {
+    const text = document.getElementById('phishOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+  }
+
+  // ============================================================
+  //  VISHING GENERATOR
+  // ============================================================
+  function generateVishing() {
+    const scenario = document.getElementById('vish_scenario').value;
+    const target = document.getElementById('vish_target').value || 'Victim';
+    const tone = document.getElementById('vish_tone').value;
+
+    const scripts = {
+      irs: {
+        authoritative: `(Caller) This is Agent Thompson from the IRS Criminal Investigation Division. We have found evidence of tax evasion. You must pay $5,000 immediately to avoid arrest. Do not hang up.`,
+        sympathetic: `(Caller) I'm calling to help you resolve a tax issue. We can settle this for $5,000 if you act now. I don't want to see you in trouble.`,
+        urgent: `(Caller) This is an urgent matter from the IRS. You have 30 minutes to pay $5,000 or a warrant will be issued.`
+      },
+      tech: {
+        authoritative: `(Caller) This is Microsoft Support. Your computer is infected. You must grant us remote access or all your data will be lost.`,
+        sympathetic: `(Caller) I'm here to help you remove a virus. It's a simple fix, but I need you to follow my instructions.`,
+        urgent: `(Caller) Your system is compromised. If you don't act now, your files will be encrypted.`
+      },
+      grandparent: {
+        authoritative: `(Caller) This is the county jail. Your grandchild has been arrested. You need to post bail of $4,000 immediately.`,
+        sympathetic: `(Caller) I'm so sorry to inform you, but your grandchild is in trouble. They need bail money right away.`,
+        urgent: `(Caller) Your grandchild is in jail – you have one hour to send $4,000 or they will be transferred.`
+      },
+      romance: {
+        sympathetic: `(Caller) I've been thinking about you all day. I need $500 for an emergency – my car broke down.`,
+        urgent: `(Caller) Please, I'm desperate. I need $500 for car repairs. I promise I'll pay you back.`
+      },
+      legal: {
+        authoritative: `(Caller) This is the law firm of Smith & Associates. You are being sued for $50,000. We can settle for $5,000 if you act now.`,
+        urgent: `(Caller) This is a legal notice. You have 24 hours to pay $5,000 or we will file a lawsuit.`
+      },
+      lottery: {
+        sympathetic: `(Caller) Congratulations! You've won $10,000. To claim, you need to pay a processing fee of $500.`,
+        urgent: `(Caller) This is your final notice to claim your lottery prize. Pay $500 now or forfeit.`
+      }
+    };
+
+    const tmpl = scripts[scenario] || scripts.irs;
+    const script = tmpl[tone] || tmpl.authoritative;
+    const final = script.replace(/\$\d+/g, `$${document.getElementById('d_amount').value || '5000'}`);
+    document.getElementById('vishOutput').textContent = final;
+  }
+
+  function copyVish() {
+    const text = document.getElementById('vishOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+  }
+
+  // ============================================================
+  //  SCRAPER
+  // ============================================================
+  function simulateScrape() {
+    const dummy = `Contact: support@example.com, sales@example.com\nPhone: +1 (555) 123-4567\nTwitter: @example, Instagram: @example_inc\nLinkedIn: linkedin.com/company/example\nKeywords: scam, fraud, investigation, compliance, legal`;
+    document.getElementById('scrape_text').value = dummy;
+    parseText();
+  }
+
+  function parseText() {
+    const text = document.getElementById('scrape_text').value;
+    if (!text.trim()) {
+      document.getElementById('scraperOutput').textContent = 'No text to parse.';
+      return;
+    }
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+    const twitterRegex = /@([a-zA-Z0-9_]+)/g;
+    const instagramRegex = /@([a-zA-Z0-9_.]+)/g;
+    const linkedinRegex = /linkedin\.com\/in\/([a-zA-Z0-9-]+)/g;
+    const keywordRegex = /\b(scam|fraud|investigation|compliance|legal|urgent|notice|alert)\b/gi;
+
+    const emails = text.match(emailRegex) || [];
+    const phones = text.match(phoneRegex) || [];
+    const twitter = text.match(twitterRegex) || [];
+    const instagram = text.match(instagramRegex) || [];
+    const linkedin = text.match(linkedinRegex) || [];
+    const keywords = text.match(keywordRegex) || [];
+
+    const output = `📧 Emails: ${emails.length ? emails.join(', ') : 'None'}
+📞 Phones: ${phones.length ? phones.join(', ') : 'None'}
+🐦 Twitter: ${twitter.length ? twitter.join(', ') : 'None'}
+📸 Instagram: ${instagram.length ? instagram.join(', ') : 'None'}
+💼 LinkedIn: ${linkedin.length ? linkedin.join(', ') : 'None'}
+🔑 Keywords: ${keywords.length ? keywords.join(', ') : 'None'}
+
+--- Raw Data ---
+${text}`;
+
+    document.getElementById('scraperOutput').textContent = output;
+  }
+
+  function clearScraper() {
+    document.getElementById('scrape_text').value = '';
+    document.getElementById('scraperOutput').textContent = 'Cleared.';
+  }
+
+  // ============================================================
+  //  CAMPAIGN
+  // ============================================================
+  let campaigns = [];
+
+  function saveCampaign() {
+    const name = document.getElementById('camp_name').value || 'Untitled';
+    const victim = document.getElementById('camp_victim').value || 'Unknown';
+    const scamType = document.getElementById('camp_scam_type').value;
+    const campaign = { name, victim, scamType, timestamp: new Date().toISOString() };
+    campaigns.push(campaign);
+    document.getElementById('campStatus').textContent = `✅ Campaign "${name}" saved. Total: ${campaigns.length}`;
+    updateCampaignOutput();
+  }
+
+  function updateCampaignOutput() {
+    if (campaigns.length === 0) {
+      document.getElementById('campOutput').textContent = 'No campaigns saved.';
+      return;
+    }
+    const last = campaigns[campaigns.length - 1];
+    document.getElementById('campOutput').textContent = `Campaign: ${last.name}\nVictim: ${last.victim}\nScam: ${last.scamType}\nSaved: ${last.timestamp}`;
+  }
+
+  function exportCampaign() {
+    if (campaigns.length === 0) return alert('No campaigns to export.');
+    const blob = new Blob([JSON.stringify(campaigns, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `campaigns_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function loadCampaign() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          campaigns = data;
+          document.getElementById('campStatus').textContent = `✅ Loaded ${campaigns.length} campaigns.`;
+          updateCampaignOutput();
+        } catch (err) {
+          alert('Invalid JSON.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  // ============================================================
+  //  REPORT
+  // ============================================================
+  function generateReport() {
+    const name = document.getElementById('p_name').value || 'Unknown';
+    const report = `🔹 TARGET REPORT\n----------------\nName: ${name}\nIncome: $${document.getElementById('p_income').value}\nStress: ${document.getElementById('p_stress').value}/10\nRisk: ${document.getElementById('p_risk').value}/10\nGullibility: ${document.getElementById('p_gullible').value}/10\nRelationship: ${document.getElementById('p_relationship').value}\nEducation: ${document.getElementById('p_education').value}\nOnline Activity: ${document.getElementById('p_online').value}\nEvents: ${document.getElementById('p_events').value}\n\n🔹 PERSONA\n----------------\n${document.getElementById('persona_name').value} (${document.getElementById('persona_role').value})\nVoice: ${document.getElementById('persona_voice').value}\nMannerisms: ${document.getElementById('persona_mannerisms').value}\nSignature: ${document.getElementById('persona_signature').value}\n\n🔹 RECOMMENDED SCAMS\n----------------\nProfiler recommends: ${document.getElementById('attackVectors')?.innerText || 'N/A'}\n\n🔹 CURRENT CAMPAIGNS\n----------------\n${campaigns.length > 0 ? campaigns.map(c => `${c.name} - ${c.victim} (${c.scamType})`).join('\n') : 'None'}\n\n🔹 OSINT REFERENCE\n----------------\nSee OSINT tab for tools and techniques.`;
+    document.getElementById('reportOutput').textContent = report;
+  }
+
+  function printReport() {
+    const text = document.getElementById('reportOutput').textContent;
+    const win = window.open('', '_blank');
+    win.document.write(`<pre>${text}</pre>`);
+    win.document.close();
+    win.print();
+  }
+
+  // ============================================================
+  //  TARGETS
+  // ============================================================
+  let targets = [];
+  let activeTarget = null;
+
+  function addTarget() {
+    const name = document.getElementById('target_new_name').value.trim();
+    if (!name) { alert('Enter a target name.'); return; }
+    targets.push({ name, data: {} });
+    document.getElementById('target_new_name').value = '';
+    renderTargetList();
+  }
+
+  function renderTargetList() {
+    const list = document.getElementById('targetList');
+    if (targets.length === 0) {
+      list.innerHTML = '<p class="text-muted">No targets added.</p>';
+      return;
+    }
+    list.innerHTML = targets.map((t, i) => `<div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid #1a1a2e;">
+      <span>${t.name}</span>
+      <span>
+        <button class="btn btn-sm btn-outline" onclick="setActiveTarget(${i})">Activate</button>
+        <button class="btn btn-sm btn-outline" onclick="removeTarget(${i})">🗑️</button>
+      </span>
+    </div>`).join('');
+  }
+
+  function setActiveTarget(index) {
+    if (index >= 0 && index < targets.length) {
+      activeTarget = index;
+      document.getElementById('activeTargetDisplay').textContent = `Active: ${targets[index].name}`;
+    }
+  }
+
+  function removeTarget(index) {
+    targets.splice(index, 1);
+    if (activeTarget === index) { activeTarget = null; document.getElementById('activeTargetDisplay').textContent = 'No active target.'; }
+    renderTargetList();
+  }
+
+  // ============================================================
+  //  TAB SWITCHING
+  // ============================================================
+  function switchTab(tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`panel-${tabId}`).classList.add('active');
+    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+  populateDocDropdown();
+  updateDoc();
+  document.getElementById('d_date').value = new Date().toISOString().split('T')[0];
+
+  document.querySelectorAll('#panel-forge input, #panel-forge select, #panel-forge textarea, #panel-forge checkbox')
+    .forEach(el => el.addEventListener('input', updateDoc));
+  document.querySelectorAll('#panel-forge input[type="checkbox"]')
+    .forEach(el => el.addEventListener('change', updateDoc));
+  document.getElementById('doc_template').addEventListener('change', updateDoc);
+
+  loadPersona();
+  renderTargetList();
+
+  console.log('🔥 HADES MAX ULTIMATE 2026 – All systems armed.');
+</script>
+</body>
+</html>

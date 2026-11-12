@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔥 OSRS Advanced Full‑AIO Weaponized Platform</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ----- RESET & BASE ----- */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #06060c;
+      color: #e0e0e0;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 0.8rem;
+      min-height: 100vh;
+    }
+    .app { max-width: 1600px; margin: 0 auto; }
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 0.5rem;
+      border-bottom: 1px solid #2a2a3a; padding-bottom: 0.5rem; margin-bottom: 1.2rem;
+    }
+    .header h1 {
+      font-size: 2.2rem; font-weight: 800;
+      background: linear-gradient(135deg, #e74c3c, #f39c12);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .header .badge {
+      background: #1a1a2e; border: 1px solid #e74c3c; padding: 0.2rem 1rem;
+      border-radius: 30px; font-size: 0.8rem; color: #e74c3c;
+    }
+    /* Tabs */
+    .tabs {
+      display: flex; flex-wrap: wrap; gap: 0.3rem;
+      margin-bottom: 1.2rem; border-bottom: 1px solid #2a2a3a; padding-bottom: 0.4rem;
+    }
+    .tab {
+      padding: 0.4rem 0.9rem; border-radius: 30px; cursor: pointer;
+      background: #12121e; border: 1px solid #2a2a3a; color: #aaa;
+      font-weight: 500; transition: 0.2s; font-size: 0.8rem;
+    }
+    .tab.active { background: #e74c3c; color: #fff; border-color: #e74c3c; box-shadow: 0 0 20px rgba(231,76,60,0.3); }
+    .tab:hover:not(.active) { border-color: #e74c3c; }
+    .panel { display: none; animation: fade 0.25s; }
+    .panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* Cards */
+    .card {
+      background: #12121e; border: 1px solid #2a2a3a; border-radius: 16px;
+      padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .card h2 { font-size: 1.4rem; font-weight: 600; color: #f39c12; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .card h3 { color: #f39c12; margin-bottom: 0.8rem; font-size: 1.1rem; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    label { display: block; font-size: 0.8rem; color: #aaa; margin: 0.6rem 0 0.2rem; font-weight: 500; }
+    input, select, textarea {
+      width: 100%; padding: 0.6rem 0.9rem; background: #1a1a2e; border: 1px solid #333;
+      color: #e0e0e0; border-radius: 8px; font-size: 0.95rem; transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: #e74c3c; outline: none; }
+    textarea { min-height: 60px; resize: vertical; }
+    .btn {
+      padding: 0.6rem 1.5rem; border: none; border-radius: 8px; font-weight: 600;
+      cursor: pointer; transition: 0.2s; background: #2a2a3e; color: #e0e0e0;
+    }
+    .btn:hover { background: #3a3a4e; }
+    .btn-primary { background: #e74c3c; color: #fff; }
+    .btn-primary:hover { background: #c0392b; }
+    .btn-success { background: #27ae60; color: #fff; }
+    .btn-success:hover { background: #1e8449; }
+    .btn-outline { background: transparent; border: 1px solid #e74c3c; color: #e74c3c; }
+    .btn-outline:hover { background: rgba(231,76,60,0.1); }
+    .btn-sm { padding: 0.3rem 1rem; font-size: 0.85rem; }
+    .preview-box {
+      background: #0a0a12; border: 1px solid #2a2a3a; border-radius: 8px;
+      padding: 1rem; white-space: pre-wrap; font-family: 'Courier New', monospace;
+      font-size: 0.85rem; line-height: 1.6; color: #d4d4d4;
+      max-height: 400px; overflow-y: auto;
+    }
+    .mt-1 { margin-top: 1rem; }
+    .mb-1 { margin-bottom: 1rem; }
+    .text-muted { color: #888; }
+    .status-dot {
+      display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+      background: #27ae60; margin-right: 0.3rem;
+    }
+    .status-dot.offline { background: #e74c3c; }
+    .embed-preview {
+      background: #1a1a2e; border: 1px solid #2a2a3a; border-radius: 12px;
+      padding: 1rem; margin-top: 0.5rem;
+    }
+    .embed-preview .embed-title { color: #f39c12; font-weight: bold; }
+    .embed-preview .embed-desc { color: #ccc; margin: 0.5rem 0; }
+    .embed-preview .embed-footer { color: #888; font-size: 0.8rem; border-top: 1px solid #2a2a3a; padding-top: 0.5rem; }
+    @media (max-width: 820px) { .grid-2 { grid-template-columns: 1fr; } .tabs { gap: 0.2rem; } .tab { padding: 0.3rem 0.6rem; font-size: 0.7rem; } }
+    @media (max-width: 480px) { body { padding: 0.5rem; } .card { padding: 1rem; } }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a12; }
+    ::-webkit-scrollbar-thumb { background: #e74c3c; border-radius: 10px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>🔥 OSRS Advanced Full‑AIO</h1>
+    <div>
+      <span class="badge"><span class="status-dot" id="apiStatusDot"></span> API: <span id="apiStatusText">Online</span></span>
+      <span class="badge" style="margin-left:0.5rem;">v3.0 · Enterprise</span>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" id="mainTabs">
+    <div class="tab active" data-tab="dashboard">📊 Dashboard</div>
+    <div class="tab" data-tab="profiling">🧠 Profiling</div>
+    <div class="tab" data-tab="scamgen">🎯 Scam Generator</div>
+    <div class="tab" data-tab="marketing">📱 Marketing</div>
+    <div class="tab" data-tab="webhook">🔗 Webhooks</div>
+    <div class="tab" data-tab="payload">📦 Payloads</div>
+    <div class="tab" data-tab="analytics">📈 Analytics</div>
+    <div class="tab" data-tab="settings">⚙️ Settings</div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="panel-dashboard" class="panel active">
+    <div class="card">
+      <h2><i class="fas fa-chart-pie"></i> Dashboard</h2>
+      <div class="grid-3" id="statsCards">
+        <div class="card" style="border-left:4px solid #f39c12;"><div style="font-size:2rem;" id="statVictims">0</div><div class="text-muted">Victims Profiled</div></div>
+        <div class="card" style="border-left:4px solid #e74c3c;"><div style="font-size:2rem;" id="statScams">0</div><div class="text-muted">Scams Generated</div></div>
+        <div class="card" style="border-left:4px solid #27ae60;"><div style="font-size:2rem;" id="statCampaigns">0</div><div class="text-muted">Campaigns Active</div></div>
+        <div class="card" style="border-left:4px solid #8e44ad;"><div style="font-size:2rem;" id="statWebhooks">0</div><div class="text-muted">Webhooks Configured</div></div>
+        <div class="card" style="border-left:4px solid #2980b9;"><div style="font-size:2rem;" id="statPayloads">0</div><div class="text-muted">Payloads Created</div></div>
+        <div class="card" style="border-left:4px solid #1abc9c;"><div style="font-size:2rem;" id="statRevenue">$0</div><div class="text-muted">Est. Revenue</div></div>
+      </div>
+      <div style="margin-top:1rem;">
+        <canvas id="dashboardChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROFILING ===== -->
+  <div id="panel-profiling" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-user-cog"></i> Victim Profiling & OSINT</h2>
+      <p class="text-muted">Build detailed profiles with OSINT simulation, risk scoring, and attack vector recommendations.</p>
+      <div class="grid-2">
+        <div>
+          <label>Target Name</label><input id="profName" placeholder="e.g., 'Zezima'" />
+          <label>RSN (RuneScape Name)</label><input id="profRSN" placeholder="RuneScape display name" />
+          <label>Email</label><input id="profEmail" placeholder="email@example.com" />
+          <label>Discord/Telegram</label><input id="profContact" placeholder="@handle" />
+          <label>Known Wealth Indicators</label>
+          <select id="profWealth">
+            <option value="low">Low (<100M GP)</option>
+            <option value="medium" selected>Medium (100M-1B GP)</option>
+            <option value="high">High (>1B GP)</option>
+          </select>
+          <label>Recent Activity</label>
+          <textarea id="profActivity" rows="2" placeholder="e.g., active in PvM, frequent GE trades"></textarea>
+          <label>Social Links</label>
+          <input id="profSocial" placeholder="Twitter, YouTube, etc." />
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="profileVictim()">🔍 Profile Victim</button>
+            <button class="btn btn-outline" onclick="loadSampleProfile()">📋 Load Sample</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Profile Results</h3>
+          <div class="preview-box" id="profileOutput">Profiling data will appear here.</div>
+          <div id="profileRisk" class="mt-1"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCAM GENERATOR ===== -->
+  <div id="panel-scamgen" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-magic"></i> Exclusive OSRS Scam Generator</h2>
+      <p class="text-muted">Generate highly convincing OSRS-specific scam scripts, with customization and payload integration.</p>
+      <div class="grid-2">
+        <div>
+          <label>Scam Type</label>
+          <select id="scamType">
+            <option value="doubling">Money Doubling</option>
+            <option value="phishing">Phishing (Fake RS Link)</option>
+            <option value="luring">Wilderness Luring</option>
+            <option value="item_swap">Item Swap</option>
+            <option value="trust_trade">Trust Trade</option>
+            <option value="fake_service">Fake Service (e.g., Corp boosting)</option>
+            <option value="gear_rental">Gear Rental</option>
+            <option value="doubling_rares">Doubling Rares</option>
+          </select>
+          <label>Target</label><input id="scamTarget" placeholder="RSN or victim name" />
+          <label>Desired Outcome</label>
+          <select id="scamOutcome">
+            <option value="gp">GP</option>
+            <option value="items">Items (e.g., Twisted Bow)</option>
+            <option value="account">Account Credentials</option>
+          </select>
+          <label>Urgency Level</label>
+          <select id="scamUrgency"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select>
+          <label>Payload to Include</label>
+          <select id="scamPayload"><option value="">None</option></select>
+          <button class="btn btn-primary mt-1" onclick="generateScamScript()">⚡ Generate Scam</button>
+          <button class="btn btn-success mt-1" onclick="saveScam()">💾 Save Scam</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Generated Script</h3>
+          <div class="preview-box" id="scamOutput">Fill in fields and click Generate.</div>
+          <div class="flex mt-1">
+            <button class="btn btn-sm btn-success" onclick="copyScam()">📋 Copy</button>
+            <button class="btn btn-sm btn-outline" onclick="exportScamJSON()">💾 Export JSON</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MARKETING ===== -->
+  <div id="panel-marketing" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-bullhorn"></i> Marketing Module</h2>
+      <p class="text-muted">Create campaigns, schedule ads, generate social media posts, and track engagement.</p>
+      <div class="grid-2">
+        <div>
+          <label>Campaign Name</label><input id="campName" placeholder="e.g., 'Twisted Bow Sale'" />
+          <label>Platform</label>
+          <select id="campPlatform">
+            <option value="telegram">Telegram</option>
+            <option value="discord">Discord</option>
+            <option value="twitter">Twitter</option>
+            <option value="facebook">Facebook</option>
+            <option value="osrs_forum">OSRS Forum</option>
+          </select>
+          <label>Ad Copy</label>
+          <textarea id="campAdCopy" rows="3" placeholder="Your ad message here..."></textarea>
+          <label>Schedule (UTC)</label>
+          <input id="campSchedule" type="datetime-local" />
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="scheduleCampaign()">📅 Schedule</button>
+            <button class="btn btn-outline" onclick="generateAdCopy()">🤖 AI Generate Ad</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Active Campaigns</h3>
+          <div id="campaignList" class="preview-box">No campaigns.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WEBHOOKS ===== -->
+  <div id="panel-webhook" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-link"></i> Webhook Manager</h2>
+      <p class="text-muted">Configure and send rich embeds (Discord/Telegram) with images, dynamic messages, and payloads.</p>
+      <div class="grid-2">
+        <div>
+          <label>Webhook Name</label><input id="whName" placeholder="e.g., 'Discord Main'" />
+          <label>Webhook URL</label><input id="whURL" placeholder="https://discord.com/api/webhooks/..." />
+          <label>Platform</label>
+          <select id="whPlatform"><option value="discord">Discord</option><option value="telegram">Telegram</option></select>
+          <label>Message Content</label>
+          <textarea id="whMessage" rows="2" placeholder="Your message..."></textarea>
+          <label>Embed Title</label><input id="whEmbedTitle" placeholder="Embed Title" />
+          <label>Embed Description</label>
+          <textarea id="whEmbedDesc" rows="2" placeholder="Embed description..."></textarea>
+          <label>Image URL</label><input id="whImage" placeholder="https://example.com/image.png" />
+          <label>Footer</label><input id="whFooter" placeholder="Footer text" />
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="sendWebhook()">📤 Send</button>
+            <button class="btn btn-success" onclick="saveWebhook()">💾 Save Webhook</button>
+            <button class="btn btn-outline" onclick="previewEmbed()">👁️ Preview</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Embed Preview</h3>
+          <div id="embedPreview" class="embed-preview">
+            <div class="embed-title">Embed Title</div>
+            <div class="embed-desc">Embed description will appear here.</div>
+            <div class="embed-footer">Footer</div>
+          </div>
+          <h3 style="color:#f39c12; margin-top:1rem;">Saved Webhooks</h3>
+          <div id="savedWebhooks" class="preview-box">No webhooks saved.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAYLOADS ===== -->
+  <div id="panel-payload" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-box"></i> Payload Manager</h2>
+      <p class="text-muted">Create, manage, and generate payload links for phishing or malicious content.</p>
+      <div class="grid-2">
+        <div>
+          <label>Payload Name</label><input id="payloadName" placeholder="e.g., 'Fake RuneLite'" />
+          <label>Payload Type</label>
+          <select id="payloadType">
+            <option value="link">Link (URL)</option>
+            <option value="file">File (simulated)</option>
+            <option value="script">Script (JS)</option>
+          </select>
+          <label>Payload Content</label>
+          <textarea id="payloadContent" rows="3" placeholder="https://fake-runelite.com"></textarea>
+          <label>Target Platform</label>
+          <select id="payloadPlatform">
+            <option value="telegram">Telegram</option>
+            <option value="discord">Discord</option>
+            <option value="email">Email</option>
+            <option value="sms">SMS</option>
+          </select>
+          <div class="flex mt-1">
+            <button class="btn btn-primary" onclick="createPayload()">🔗 Create Payload</button>
+            <button class="btn btn-outline" onclick="generatePayloadLink()">⚡ Generate Link</button>
+          </div>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Payloads</h3>
+          <div id="payloadList" class="preview-box">No payloads created.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ANALYTICS ===== -->
+  <div id="panel-analytics" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-chart-line"></i> Analytics & Reporting</h2>
+      <p class="text-muted">Track success rates, campaign performance, and revenue metrics.</p>
+      <div class="grid-2">
+        <div>
+          <canvas id="analyticsChart" width="400" height="200"></canvas>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">Key Metrics</h3>
+          <div id="metricsDisplay">
+            <div>Total Scams Sent: <span id="totalScamsSent">0</span></div>
+            <div>Success Rate: <span id="successRate">0%</span></div>
+            <div>Total Revenue (GP): <span id="totalRevenueGP">0</span></div>
+            <div>Conversion Rate: <span id="conversionRate">0%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS ===== -->
+  <div id="panel-settings" class="panel">
+    <div class="card">
+      <h2><i class="fas fa-cog"></i> Settings</h2>
+      <div class="grid-2">
+        <div>
+          <label>API Base URL</label><input id="apiBaseURL" value="https://api.osrs-scam-platform.local" />
+          <label>Default Webhook</label><input id="defaultWebhook" placeholder="Default webhook URL" />
+          <label>Log Level</label>
+          <select id="logLevel"><option value="info">Info</option><option value="debug">Debug</option><option value="warn">Warn</option></select>
+          <button class="btn btn-primary mt-1" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+        <div>
+          <h3 style="color:#f39c12;">System Status</h3>
+          <div id="sysStatus">
+            <div>API: <span id="sysApiStatus" style="color:#27ae60;">Online</span></div>
+            <div>Storage: <span id="sysStorageStatus" style="color:#27ae60;">Available</span></div>
+            <div>Last Sync: <span id="sysLastSync">Never</span></div>
+          </div>
+          <button class="btn btn-outline mt-1" onclick="exportAllData()">📤 Export All Data</button>
+          <button class="btn btn-outline mt-1" onclick="importAllData()">📥 Import All Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  //  MOCK API / BACKEND LAYER
+  // ============================================================
+  const API = {
+    // Data stores
+    data: {
+      victims: [],
+      scams: [],
+      campaigns: [],
+      webhooks: [],
+      payloads: [],
+      analytics: { totalScamsSent: 0, successRate: 0, totalRevenueGP: 0, conversionRate: 0 }
+    },
+    init() {
+      // Load from localStorage
+      const saved = localStorage.getItem('osrs_platform_data');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          this.data = parsed;
+        } catch (e) {}
+      }
+      this.updateStats();
+    },
+    save() {
+      localStorage.setItem('osrs_platform_data', JSON.stringify(this.data));
+      this.updateStats();
+    },
+    updateStats() {
+      document.getElementById('statVictims').textContent = this.data.victims.length;
+      document.getElementById('statScams').textContent = this.data.scams.length;
+      document.getElementById('statCampaigns').textContent = this.data.campaigns.filter(c => c.active).length;
+      document.getElementById('statWebhooks').textContent = this.data.webhooks.length;
+      document.getElementById('statPayloads').textContent = this.data.payloads.length;
+      document.getElementById('statRevenue').textContent = '$' + (this.data.analytics.totalRevenueGP / 1000).toFixed(2);
+      // Update analytics
+      document.getElementById('totalScamsSent').textContent = this.data.analytics.totalScamsSent;
+      document.getElementById('successRate').textContent = this.data.analytics.successRate + '%';
+      document.getElementById('totalRevenueGP').textContent = this.data.analytics.totalRevenueGP;
+      document.getElementById('conversionRate').textContent = this.data.analytics.conversionRate + '%';
+    },
+    // Victim methods
+    addVictim(profile) {
+      profile.id = Date.now();
+      this.data.victims.push(profile);
+      this.save();
+      return profile;
+    },
+    getVictims() { return this.data.victims; },
+    // Scam methods
+    addScam(scam) {
+      scam.id = Date.now();
+      this.data.scams.push(scam);
+      this.save();
+      return scam;
+    },
+    getScams() { return this.data.scams; },
+    // Campaign methods
+    addCampaign(campaign) {
+      campaign.id = Date.now();
+      campaign.active = true;
+      this.data.campaigns.push(campaign);
+      this.save();
+      return campaign;
+    },
+    getCampaigns() { return this.data.campaigns; },
+    // Webhook methods
+    addWebhook(webhook) {
+      webhook.id = Date.now();
+      this.data.webhooks.push(webhook);
+      this.save();
+      return webhook;
+    },
+    getWebhooks() { return this.data.webhooks; },
+    // Payload methods
+    addPayload(payload) {
+      payload.id = Date.now();
+      this.data.payloads.push(payload);
+      this.save();
+      return payload;
+    },
+    getPayloads() { return this.data.payloads; },
+    // Analytics
+    logSend() {
+      this.data.analytics.totalScamsSent++;
+      // Simulate success rate: random 60-80%
+      this.data.analytics.successRate = Math.round(60 + Math.random() * 20);
+      this.data.analytics.totalRevenueGP += Math.floor(Math.random() * 100000);
+      this.data.analytics.conversionRate = Math.round(10 + Math.random() * 20);
+      this.save();
+    }
+  };
+
+  // ============================================================
+  //  UI HELPERS & EVENT BINDINGS
+  // ============================================================
+  function switchTab(tabId) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`panel-${tabId}`).classList.add('active');
+    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // ============================================================
+  //  PROFILING
+  // ============================================================
+  function loadSampleProfile() {
+    document.getElementById('profName').value = 'Zezima';
+    document.getElementById('profRSN').value = 'Zezima';
+    document.getElementById('profEmail').value = 'zezima@rs.com';
+    document.getElementById('profContact').value = '@ZezimaRS';
+    document.getElementById('profWealth').value = 'high';
+    document.getElementById('profActivity').value = 'Active in high-level PvM, frequent GE trades, owns multiple rares.';
+    document.getElementById('profSocial').value = 'Twitter: @ZezimaRS, YouTube: Zezima';
+  }
+
+  function profileVictim() {
+    const name = document.getElementById('profName').value || 'Unknown';
+    const rsn = document.getElementById('profRSN').value || 'N/A';
+    const email = document.getElementById('profEmail').value || 'N/A';
+    const contact = document.getElementById('profContact').value || 'N/A';
+    const wealth = document.getElementById('profWealth').value;
+    const activity = document.getElementById('profActivity').value || 'No activity data.';
+    const social = document.getElementById('profSocial').value || 'N/A';
+
+    // Risk scoring
+    let risk = 0;
+    let vectors = [];
+    if (wealth === 'high') { risk += 30; vectors.push('High wealth – prime target for large scams'); }
+    if (wealth === 'medium') { risk += 15; vectors.push('Moderate wealth – good for mid-level scams'); }
+    if (activity.toLowerCase().includes('pvm')) { risk += 10; vectors.push('PvM focused – appeal to gear upgrades'); }
+    if (activity.toLowerCase().includes('ge') || activity.toLowerCase().includes('trade')) { risk += 10; vectors.push('Active trader – susceptible to merchanting scams'); }
+    if (social.includes('twitter') || social.includes('youtube')) { risk += 5; vectors.push('Social media presence – can be used for credibility'); }
+    if (contact.includes('@')) { risk += 5; vectors.push('Direct contact available – easier communication'); }
+    risk = Math.min(100, risk);
+    let riskLevel = risk >= 70 ? 'HIGH' : (risk >= 40 ? 'MEDIUM' : 'LOW');
+
+    const profile = {
+      name, rsn, email, contact, wealth, activity, social,
+      risk, riskLevel, vectors,
+      timestamp: new Date().toISOString()
+    };
+    API.addVictim(profile);
+
+    let output = `🔹 Name: ${name}\nRSN: ${rsn}\nEmail: ${email}\nContact: ${contact}\nWealth: ${wealth}\nActivity: ${activity}\nSocial: ${social}\n\nRisk Score: ${risk}/100 (${riskLevel})\nVectors: ${vectors.join(', ') || 'None'}`;
+    document.getElementById('profileOutput').textContent = output;
+    document.getElementById('profileRisk').innerHTML = `<span class="score-badge ${riskLevel === 'HIGH' ? 'score-high' : riskLevel === 'MEDIUM' ? 'score-med' : 'score-low'}">Risk: ${riskLevel}</span>`;
+  }
+
+  // ============================================================
+  //  SCAM GENERATOR
+  // ============================================================
+  function generateScamScript() {
+    const type = document.getElementById('scamType').value;
+    const target = document.getElementById('scamTarget').value || 'Victim';
+    const outcome = document.getElementById('scamOutcome').value;
+    const urgency = document.getElementById('scamUrgency').value;
+
+    const templates = {
+      doubling: {
+        title: 'Money Doubling',
+        script: `[SCAM] Hey ${target}, I'm doubling GP for the next 10 minutes! Send me any amount and I'll double it instantly. I've doubled over 200M already, check the chat.`
+      },
+      phishing: {
+        title: 'Phishing (Fake RS Link)',
+        script: `[PHISH] ${target}, check out this new OSRS update: [LINK]. You need to log in to claim your free bond!`
+      },
+      luring: {
+        title: 'Wilderness Luring',
+        script: `[LURE] ${target}, I know a glitch to get infinite GP. Bring your best gear and follow me to lvl 30 Wildy. Trust me, it's safe.`
+      },
+      item_swap: {
+        title: 'Item Swap',
+        script: `[SWAP] Selling twisted bow 1.2B! Quick trade, I need to go. I'll put up the bow, but I'll swap it to a dragon long if you're not careful.`
+      },
+      trust_trade: {
+        title: 'Trust Trade',
+        script: `[TRUST] ${target}, I'm a YouTuber making a trust trade video. Trade me your best item and I'll trade it back with 5M extra. Check my channel.`
+      },
+      fake_service: {
+        title: 'Fake Service (Corp boosting)',
+        script: `[SERVICE] ${target}, need a Corp boost? I can get you an ely sigil drop, just pay 50M upfront. I'm trusted, check my history.`
+      },
+      gear_rental: {
+        title: 'Gear Rental',
+        script: `[RENT] ${target}, I'm renting out twisted bows for 500K/hr. Trade me the fee and I'll lend you the bow. I'll be here all day.`
+      },
+      doubling_rares: {
+        title: 'Doubling Rares',
+        script: `[RARE] ${target}, I'm doubling partyhats! Trade me any rare and I'll give you two back. I'm quitting and giving away my bank.`
+      }
+    };
+
+    const tmpl = templates[type] || templates.doubling;
+    let script = tmpl.script;
+    script = script.replace(/\${target}/g, target);
+    if (outcome === 'gp') script += ' I only accept GP.';
+    else if (outcome === 'items') script += ' I prefer items like twisted bow or scythe.';
+    else if (outcome === 'account') script += ' I need your login details to verify.';
+    if (urgency === 'high') script += ' ⚠️ URGENT: Offer ends in 5 minutes!';
+    else if (urgency === 'low') script += ' Take your time, but don\'t miss out.';
+
+    const scam = {
+      type, target, outcome, urgency,
+      script,
+      timestamp: new Date().toISOString()
+    };
+    // Save scam
+    API.addScam(scam);
+
+    document.getElementById('scamOutput').textContent = `🎯 ${tmpl.title}\n\n${script}`;
+  }
+
+  function copyScam() {
+    const text = document.getElementById('scamOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+  }
+
+  function exportScamJSON() {
+    const text = document.getElementById('scamOutput').textContent;
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `scam_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function saveScam() {
+    const script = document.getElementById('scamOutput').textContent;
+    if (!script || script === 'Fill in fields and click Generate.') {
+      alert('Generate a scam first.');
+      return;
+    }
+    // Already saved via generate, but we can show confirmation
+    alert('Scam saved successfully!');
+  }
+
+  // ============================================================
+  //  MARKETING
+  // ============================================================
+  function generateAdCopy() {
+    const adTemplates = [
+      "🔥 OSRS Gold 50% OFF! Use code 'SAVE50' at checkout. Limited time only!",
+      "🎯 Tired of grinding? Get maxed accounts starting at $50. DM for details.",
+      "🏆 Win a free twisted bow! Enter our giveaway now – just follow and retweet.",
+      "💎 Exclusive gear rental – borrow any item for 1% fee. Secure and fast.",
+      "🛡️ Join our PvM clan – we do raids daily and split drops fairly. Apply now!",
+      "💰 Want to double your GP? Use our trusted doubling service with 100% success rate.",
+      "🚀 New OSRS bot – fully undetectable, supports all skills. Free trial available.",
+      "🔐 Secure your account with our 2FA service – only 5M GP. Protect your bank."
+    ];
+    const ad = adTemplates[Math.floor(Math.random() * adTemplates.length)];
+    document.getElementById('campAdCopy').value = ad;
+  }
+
+  function scheduleCampaign() {
+    const name = document.getElementById('campName').value || 'Campaign ' + Date.now();
+    const platform = document.getElementById('campPlatform').value;
+    const adCopy = document.getElementById('campAdCopy').value || 'Default ad copy.';
+    const schedule = document.getElementById('campSchedule').value || new Date().toISOString().slice(0,16);
+
+    const campaign = {
+      name,
+      platform,
+      adCopy,
+      schedule,
+      active: true,
+      createdAt: new Date().toISOString()
+    };
+    API.addCampaign(campaign);
+    renderCampaigns();
+    alert('Campaign scheduled!');
+  }
+
+  function renderCampaigns() {
+    const campaigns = API.getCampaigns();
+    if (campaigns.length === 0) {
+      document.getElementById('campaignList').textContent = 'No campaigns.';
+      return;
+    }
+    let text = campaigns.map(c => 
+      `${c.name} (${c.platform}) - ${c.active ? '✅ Active' : '❌ Inactive'}\nAd: ${c.adCopy.substring(0,60)}...\nScheduled: ${c.schedule}`
+    ).join('\n\n');
+    document.getElementById('campaignList').textContent = text;
+  }
+
+  // ============================================================
+  //  WEBHOOKS
+  // ============================================================
+  function previewEmbed() {
+    const title = document.getElementById('whEmbedTitle').value || 'Embed Title';
+    const desc = document.getElementById('whEmbedDesc').value || 'Embed description will appear here.';
+    const footer = document.getElementById('whFooter').value || 'Footer';
+    const img = document.getElementById('whImage').value;
+    document.getElementById('embedPreview').innerHTML = `
+      <div class="embed-title">${title}</div>
+      <div class="embed-desc">${desc}</div>
+      ${img ? `<img src="${img}" style="max-width:100%;border-radius:8px;margin-top:0.5rem;" alt="Embed Image" />` : ''}
+      <div class="embed-footer">${footer}</div>
+    `;
+  }
+
+  function sendWebhook() {
+    const url = document.getElementById('whURL').value;
+    if (!url) { alert('Please enter a webhook URL.'); return; }
+    const message = document.getElementById('whMessage').value || 'Default message';
+    const title = document.getElementById('whEmbedTitle').value || '';
+    const desc = document.getElementById('whEmbedDesc').value || '';
+    const footer = document.getElementById('whFooter').value || '';
+    const img = document.getElementById('whImage').value || '';
+
+    // Simulate sending
+    const payload = {
+      content: message,
+      embeds: [{
+        title, description: desc, footer: { text: footer },
+        image: img ? { url: img } : undefined
+      }]
+    };
+    console.log('Webhook Payload:', payload);
+
+    // Log to API
+    API.logSend();
+
+    alert('Webhook sent (simulated). Check console for payload.');
+  }
+
+  function saveWebhook() {
+    const name = document.getElementById('whName').value || 'Webhook ' + Date.now();
+    const url = document.getElementById('whURL').value;
+    const platform = document.getElementById('whPlatform').value;
+    if (!url) { alert('Webhook URL required.'); return; }
+    const webhook = { name, url, platform, createdAt: new Date().toISOString() };
+    API.addWebhook(webhook);
+    renderWebhooks();
+    alert('Webhook saved.');
+  }
+
+  function renderWebhooks() {
+    const webhooks = API.getWebhooks();
+    if (webhooks.length === 0) {
+      document.getElementById('savedWebhooks').textContent = 'No webhooks saved.';
+      return;
+    }
+    document.getElementById('savedWebhooks').textContent = webhooks.map(w => 
+      `${w.name} (${w.platform}) - ${w.url}`
+    ).join('\n');
+  }
+
+  // ============================================================
+  //  PAYLOADS
+  // ============================================================
+  function generatePayloadLink() {
+    const type = document.getElementById('payloadType').value;
+    const platform = document.getElementById('payloadPlatform').value;
+    let link = '';
+    if (type === 'link') {
+      link = 'https://fake-' + Math.random().toString(36).substring(2,8) + '.com/phish';
+    } else if (type === 'file') {
+      link = 'https://files.example.com/payload.exe';
+    } else if (type === 'script') {
+      link = 'javascript:alert("Payload executed!")';
+    }
+    document.getElementById('payloadContent').value = link;
+  }
+
+  function createPayload() {
+    const name = document.getElementById('payloadName').value || 'Payload ' + Date.now();
+    const type = document.getElementById('payloadType').value;
+    const content = document.getElementById('payloadContent').value;
+    const platform = document.getElementById('payloadPlatform').value;
+    if (!content) { alert('Payload content required.'); return; }
+    const payload = { name, type, content, platform, createdAt: new Date().toISOString() };
+    API.addPayload(payload);
+    renderPayloads();
+    alert('Payload created.');
+  }
+
+  function renderPayloads() {
+    const payloads = API.getPayloads();
+    if (payloads.length === 0) {
+      document.getElementById('payloadList').textContent = 'No payloads created.';
+      return;
+    }
+    document.getElementById('payloadList').textContent = payloads.map(p => 
+      `${p.name} (${p.type}) - ${p.content.substring(0,40)}...`
+    ).join('\n');
+  }
+
+  // ============================================================
+  //  SETTINGS
+  // ============================================================
+  function saveSettings() {
+    const apiBase = document.getElementById('apiBaseURL').value;
+    const defaultWebhook = document.getElementById('defaultWebhook').value;
+    const logLevel = document.getElementById('logLevel').value;
+    localStorage.setItem('osrs_settings', JSON.stringify({ apiBase, defaultWebhook, logLevel }));
+    alert('Settings saved.');
+  }
+
+  function exportAllData() {
+    const data = API.data;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `osrs_platform_backup_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importAllData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          API.data = data;
+          API.save();
+          location.reload(); // refresh UI
+        } catch (err) {
+          alert('Invalid JSON.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  // ============================================================
+  //  CHARTS INITIALIZATION
+  // ============================================================
+  function initCharts() {
+    // Dashboard chart
+    const ctx = document.getElementById('dashboardChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Victims', 'Scams', 'Campaigns', 'Webhooks', 'Payloads'],
+        datasets: [{
+          label: 'Count',
+          data: [
+            API.data.victims.length,
+            API.data.scams.length,
+            API.data.campaigns.length,
+            API.data.webhooks.length,
+            API.data.payloads.length
+          ],
+          backgroundColor: ['#f39c12', '#e74c3c', '#27ae60', '#8e44ad', '#2980b9']
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    // Analytics chart
+    const ctx2 = document.getElementById('analyticsChart').getContext('2d');
+    new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [
+          { label: 'Scams Sent', data: [12, 19, 3, 5, 2, 3], borderColor: '#e74c3c', fill: false },
+          { label: 'Revenue (GP)', data: [1000, 2000, 1500, 3000, 4000, 5000], borderColor: '#f39c12', fill: false }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+  API.init();
+  renderCampaigns();
+  renderWebhooks();
+  renderPayloads();
+  initCharts();
+
+  // Update status
+  document.getElementById('sysApiStatus').textContent = 'Online';
+  document.getElementById('sysStorageStatus').textContent = 'Available';
+  document.getElementById('sysLastSync').textContent = new Date().toLocaleString();
+
+  // Populate payload dropdown in scam generator
+  function populatePayloadSelect() {
+    const sel = document.getElementById('scamPayload');
+    const payloads = API.getPayloads();
+    sel.innerHTML = '<option value="">None</option>';
+    payloads.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+  }
+  populatePayloadSelect();
+
+  console.log('🔥 OSRS Advanced Full-AIO Platform loaded.');
+</script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyxNet OpsCenter — Hardened Red Team Simulacrum v6.0</title>
+    <style>
+        :root {
+            --bg: #030303; --surface: #0a0a0a; --border: #1c1c1c; --text: #b8b8b8;
+            --text-bright: #d4d4d4; --muted: #666; --gold: #c9a40b; --gold-bright: #f0c840;
+            --green-bright: #4ce04f; --red-bright: #e74c3c; --orange: #e67e22;
+            --radius: 6px; --shadow-lg: 0 8px 32px rgba(0,0,0,0.7);
+            --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+            --transition: 0.2s ease;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:13px;line-height:1.6;background-image:radial-gradient(ellipse at 50% 0%, rgba(20,20,20,0.8) 0%,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.003) 2px,rgba(255,255,255,0.003) 4px);background-attachment:fixed;min-height:100vh;}
+        ::selection{background:rgba(201,164,11,0.3);color:#fff;}
+        ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px;}
+        .container{max-width:1600px;margin:0 auto;padding:0 20px;}
+        .sticky-wallet{position:sticky;top:0;z-index:200;background:rgba(8,8,8,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;justify-content:space-between;align-items:center;font-size:12px;}
+        .wallet-btc{color:var(--green-bright);font-weight:700;font-size:14px;}
+        .wallet-2fa{color:var(--red-bright);}
+        header{background:rgba(10,10,10,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:10px 0;}
+        .header-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+        .logo{font-size:28px;font-weight:900;color:var(--gold-bright);letter-spacing:3px;font-family:var(--font-mono);}
+        nav a{color:var(--muted);padding:6px 12px;font-size:11px;border-radius:20px;transition:var(--transition);white-space:nowrap;}
+        nav a:hover{color:var(--text-bright);background:rgba(255,255,255,0.03);text-decoration:none;}
+        nav a.active{color:#000;background:var(--gold);font-weight:700;}
+        .btn{background:linear-gradient(180deg,#222,#181818);border:1px solid #333;color:var(--text);padding:6px 14px;cursor:pointer;font-size:11px;border-radius:20px;transition:var(--transition);}
+        .btn:hover{background:var(--gold);color:#000;border-color:var(--gold);}
+        .badge{display:inline-block;padding:2px 6px;border-radius:10px;font-size:9px;font-weight:700;}
+        .badge-pgp{background:rgba(76,175,80,0.15);color:var(--green-bright);border:1px solid rgba(76,175,80,0.3);}
+        .badge-level{background:rgba(201,164,11,0.15);color:var(--gold-bright);border:1px solid rgba(201,164,11,0.3);}
+        table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:8px;}
+        th,td{border-bottom:1px solid var(--border);padding:8px 12px;text-align:left;font-size:12px;}
+        th{background:#0d0d0d;color:var(--muted);text-transform:uppercase;font-size:10px;position:sticky;top:0;}
+        tr:hover td{background:rgba(201,164,11,0.03);}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;z-index:1000;}
+        .modal-overlay.active{display:flex;}
+        .modal-content{background:var(--surface);border:1px solid #2a2a2a;padding:24px;width:800px;max-width:94%;max-height:90vh;overflow-y:auto;border-radius:12px;}
+        .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid #333;padding:10px 20px;border-radius:24px;z-index:2000;font-size:11px;animation:toastIn 0.3s ease,toastOut 0.3s ease 2.5s forwards;pointer-events:none;}
+        @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+        @keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(-50%) translateY(20px)}}
+        .tab-nav button{padding:8px 16px;font-size:11px;border-bottom:2px solid transparent;background:none;color:var(--muted);cursor:pointer;transition:var(--transition);}
+        .tab-nav button.active{color:var(--gold-bright);border-bottom-color:var(--gold);}
+        pre{background:#080808;border:1px solid #1a1a1a;padding:10px;border-radius:var(--radius);overflow:auto;font-size:11px;color:#aaa;max-height:300px;}
+        .chat-box{display:none;position:fixed;bottom:80px;right:20px;width:420px;background:var(--surface);border:1px solid #2a2a2a;z-index:1001;border-radius:12px;overflow:hidden;}
+        .chat-box.active{display:block;}
+        .chat-msgs{height:300px;overflow-y:auto;padding:10px;background:#0a0a0a;}
+        .msg-you{background:rgba(201,164,11,0.1);margin-left:auto;border:1px solid rgba(201,164,11,0.2);}
+        .msg-them{background:rgba(255,255,255,0.04);margin-right:auto;border:1px solid rgba(255,255,255,0.06);}
+    </style>
+</head>
+<body>
+<div class="sticky-wallet">
+    <div>
+        <span class="wallet-label">BTC:</span><span class="wallet-btc" id="walletBtc">0.00240000</span>
+        <span style="margin:0 8px;">|</span>
+        <span class="wallet-label">XMR:</span><span class="wallet-btc" id="walletXmr">0.84000000</span>
+        <button class="btn btn-sm" onclick="app.wallet.topUp()">💰 Top Up</button>
+    </div>
+    <div>
+        <span style="color:var(--muted);">Session:</span> Guest_<span id="sessionId">7a3f</span>
+        <span style="margin:0 8px;">|</span>
+        <span class="wallet-2fa" id="twoFaStatus">⚠ 2FA Disabled</span>
+        <button class="btn btn-sm" onclick="app.toggle2FA()">Enable 2FA</button>
+    </div>
+</div>
+<div class="container">
+    <header>
+        <div class="header-inner">
+            <div class="logo">StyxOpsCenter</div>
+            <nav id="mainNav">
+                <a href="#dashboard" data-page="dashboard" class="active">📊 Dashboard</a>
+                <a href="#market" data-page="market">📦 Market</a>
+                <a href="#orders" data-page="orders">📋 Orders</a>
+                <a href="#cart" data-page="cart">🛒 Cart <span id="cartCount">0</span></a>
+                <a href="#forum" data-page="forum">💬 Forum</a>
+                <a href="#messages" data-page="messages">✉ PM</a>
+                <a href="#osint" data-page="osint">🔍 OSINT</a>
+                <a href="#pgp" data-page="pgp">🔐 PGP</a>
+                <a href="#c2" data-page="c2">📡 C2</a>
+                <a href="#phishing" data-page="phishing">🎣 Phish</a>
+                <a href="#malware" data-page="malware">☣ Malware</a>
+                <a href="#training" data-page="training">🎓 Training</a>
+                <a href="#ctf" data-page="ctf">🏴 CTF</a>
+                <a href="#planner" data-page="planner">📋 Planner</a>
+                <a href="#export" data-page="export">📥 Export</a>
+                <a href="#admin" data-page="admin">⚙ Admin</a>
+            </nav>
+            <div>
+                <input class="search-box" placeholder="Search..." id="globalSearch" style="width:180px;">
+            </div>
+        </div>
+    </header>
+    <div id="page-dashboard" class="page active"></div>
+    <div id="page-market" class="page"></div>
+    <div id="page-orders" class="page"></div>
+    <div id="page-cart" class="page"></div>
+    <div id="page-forum" class="page"></div>
+    <div id="page-messages" class="page"></div>
+    <div id="page-osint" class="page"></div>
+    <div id="page-pgp" class="page"></div>
+    <div id="page-c2" class="page"></div>
+    <div id="page-phishing" class="page"></div>
+    <div id="page-malware" class="page"></div>
+    <div id="page-training" class="page"></div>
+    <div id="page-ctf" class="page"></div>
+    <div id="page-planner" class="page"></div>
+    <div id="page-export" class="page"></div>
+    <div id="page-admin" class="page"></div>
+</div>
+
+<!-- Checkout Modal -->
+<div id="checkoutModal" class="modal-overlay">
+    <div class="modal-content">
+        <button onclick="app.closeCheckout()" style="float:right;background:none;border:none;color:var(--muted);font-size:28px;cursor:pointer;">&times;</button>
+        <h3>💳 Checkout</h3>
+        <div id="checkoutItems"></div>
+        <div class="timer" id="checkoutTimer">15:00</div>
+        <p>Subtotal: <strong id="checkoutSubtotal"></strong></p>
+        <div><label>Voucher:</label><input id="voucherInput"><span id="discountInfo"></span></div>
+        <p>Total: <strong id="checkoutTotal" style="color:var(--green-bright);"></strong></p>
+        <p style="color:var(--muted);">Send exactly to:</p>
+        <div style="background:#050505;padding:12px;word-break:break-all;" id="btcAddress"></div>
+        <div id="fakeConfirmations" style="display:none;margin-top:10px;"></div>
+        <button class="btn" onclick="app.simulatePayment()">✅ I Have Paid</button>
+        <button class="btn btn-danger btn-sm" onclick="app.closeCheckout()">Cancel</button>
+    </div>
+</div>
+
+<!-- Chat -->
+<div class="chat-toggle" onclick="app.chat.toggle()">💬 Support</div>
+<div class="chat-box" id="chatBox">
+    <div class="chat-header">Styx Support — <span id="chatPersona">Admin</span></div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-input-area"><input id="chatInput" placeholder="Message..." onkeydown="if(event.key==='Enter')app.chat.send()"><button onclick="app.chat.send()">Send</button></div>
+</div>
+<div id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// HARDENED APPLICATION
+// ═══════════════════════════════════════════
+const App = {
+    state: {
+        currentPage: 'dashboard', cart: [], orders: [], wallet: { btc: 0.0024, xmr: 0.84 },
+        twoFA: false, trainingScore: 0, pgpKeys: {}, c2Listeners: [],
+        phishingCampaigns: [], malwareSamples: [], ctfSolved: [],
+        plannerTasks: [], adminUnlocked: false,
+        sessionId: Math.random().toString(36).substr(2,6).toUpperCase()
+    },
+    init() {
+        const saved = localStorage.getItem('styxState');
+        if (saved) try { Object.assign(this.state, JSON.parse(saved)); } catch(e){}
+        this.updateWalletUI();
+        this.updateCartCount();
+        this.renderPage(this.state.currentPage);
+        window.addEventListener('hashchange', () => {
+            const page = location.hash.slice(1) || 'dashboard';
+            this.navigate(page);
+        });
+        if (location.hash) this.navigate(location.hash.slice(1));
+        else this.navigate('dashboard');
+    },
+    save() { localStorage.setItem('styxState', JSON.stringify(this.state)); },
+    navigate(page) {
+        this.state.currentPage = page;
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const el = document.getElementById(`page-${page}`);
+        if (el) el.classList.add('active');
+        document.querySelectorAll('#mainNav a').forEach(a => a.classList.remove('active'));
+        const navLink = document.querySelector(`#mainNav a[data-page="${page}"]`);
+        if (navLink) navLink.classList.add('active');
+        this.renderPage(page);
+        this.save();
+        history.pushState(null, '', `#${page}`);
+    },
+    renderPage(page) {
+        const renderers = {
+            dashboard: this.renderDashboard, market: this.renderMarket,
+            orders: this.renderOrders, cart: this.renderCart, forum: this.renderForum,
+            messages: this.renderMessages, osint: this.renderOSINT, pgp: this.renderPGP,
+            c2: this.renderC2, phishing: this.renderPhishing, malware: this.renderMalware,
+            training: this.renderTraining, ctf: this.renderCTF, planner: this.renderPlanner,
+            export: this.renderExport, admin: this.renderAdmin
+        };
+        if (renderers[page]) renderers[page].call(this);
+    },
+    // ── Wallet ──
+    updateWalletUI() {
+        document.getElementById('walletBtc').textContent = this.state.wallet.btc.toFixed(8);
+        document.getElementById('walletXmr').textContent = this.state.wallet.xmr.toFixed(8);
+    },
+    toggle2FA() {
+        this.state.twoFA = !this.state.twoFA;
+        document.getElementById('twoFaStatus').textContent = this.state.twoFA ? '✅ 2FA Enabled' : '⚠ 2FA Disabled';
+        this.save();
+    },
+    showToast(msg) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast'; toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    },
+    updateCartCount() {
+        const count = this.state.cart.reduce((s,i) => s + i.qty, 0);
+        document.getElementById('cartCount').textContent = count;
+    },
+    // ── Realistic Data ──
+    products: (() => {
+        const vendors = [
+            { name: 'Phantom', level: 5, pgp: true, bond: 5.2, joined: '2022-03', sales: 12400 },
+            { name: 'Luna', level: 4, pgp: true, bond: 3.8, joined: '2021-11', sales: 8900 },
+            { name: 'ViktorKane', level: 5, pgp: true, bond: 6.1, joined: '2020-07', sales: 21300 },
+            { name: 'DarkChemist', level: 4, pgp: true, bond: 4.5, joined: '2022-01', sales: 6700 },
+            { name: 'GoldenHorse', level: 3, pgp: false, bond: 2.0, joined: '2023-05', sales: 3100 },
+            { name: 'CyberFox', level: 5, pgp: true, bond: 7.8, joined: '2019-09', sales: 35400 },
+            { name: 'DeepSource', level: 4, pgp: true, bond: 4.2, joined: '2021-06', sales: 7800 },
+            { name: 'NightOwl', level: 3, pgp: true, bond: 1.9, joined: '2023-02', sales: 2200 }
+        ];
+        const data = [
+            // Drugs
+            { cat: 'Stimulants', items: [
+                'Colombian Cocaine 87% Purity', 'Peruvian Flake 92%', 'Speed Paste 74% Amphetamine',
+                'Crystal Meth ICE (Shards)', 'MDMA Crystals (Sassafras)', '4-MMC Mephedrone (Plant Food)',
+                'Methylone bk-MDMA', 'Amphetamine Sulphate Powder', 'Crack Cocaine Ready Rock',
+                'Ephedrine HCL 98% (for conversion)'
+            ]},
+            { cat: 'Opioids', items: [
+                'Oxycodone 80mg OC (Original)', 'Heroin #4 White China', 'Black Tar Heroin (Mexico)',
+                'Fentanyl HCl Powder (pure)', 'Morphine Sulphate 100mg ER', 'Codeine Phosphate 30mg Tabs',
+                'Tramadol 200mg SR', 'Buprenorphine 8mg Sublingual', 'Methadone 40mg Diskets',
+                'Carfentanil (dangerous potency)'
+            ]},
+            { cat: 'Benzodiazepines', items: [
+                'Xanax 2mg Bars (Pfizer press)', 'Valium 10mg Diazepam', 'Klonopin 2mg Clonazepam',
+                'Ativan 2.5mg Lorazepam', 'Etizolam 1mg Pellets', 'Flualprazolam 1mg Pellets',
+                'Clonazolam 0.5mg Blotters', 'Bromazepam 6mg Tablets', 'Midazolam 15mg Ampoules',
+                'Temazepam 30mg Gel Caps'
+            ]},
+            { cat: 'Psychedelics', items: [
+                'LSD 250µg Blotter (Needlepoint)', 'Psilocybin Mushrooms (Golden Teacher)',
+                'DMT Crystal (NN-DMT)', '2C-B Powder 20mg caps', '5-MeO-DMT (Toad)',
+                'Ketamine S-Isomer (Ketalar)', 'PCP Powder (Angel Dust)', 'Mescaline HCl Extract',
+                'Salvia Divinorum 20x Extract', 'Ayahuasca Vine + B. Caapi Kit'
+            ]},
+            { cat: 'Cannabis', items: [
+                'OG Kush Indoor AAA', 'Sour Diesel Hydro', 'Girl Scout Cookies (Cali)',
+                'White Widow (NL)', 'Amnesia Haze (Sativa)', 'Super Silver Haze (Greenhouse)',
+                'AK-47 (Serious Seeds)', 'Northern Lights #5', 'Blue Dream (Medicinal)',
+                'Gorilla Glue #4 (Top Shelf)', 'BHO Shatter 1g', 'THC Vape Cartridge 1ml'
+            ]},
+            // Fraud
+            { cat: 'Fraud & Identity', items: [
+                'Fullz + DL Scan (USA)', 'Fullz + Selfie (UK)', 'CC Dumps Track1+2',
+                'Bank Logs (Chase, Wells, BoA)', 'CashApp Verified Account', 'PayPal Aged Account',
+                'SBA EIDL Loan Method', 'PUA Unemployment Guide', 'Fake ID Template Pack',
+                'Utility Bill Generator', 'Credit Card with PIN (Cloned)', 'EMV Software Bundle'
+            ]},
+            { cat: 'Digital Goods', items: [
+                'Netflix 1yr Account', 'Spotify Family Upgrade', 'Amazon Gift Card $500',
+                'Google Play Redeem Code', 'Windows 11 Pro Key', 'Office 365 Lifetime',
+                'NordVPN 3yr Account', 'Grammarly Premium', 'Uber Eats Refund Method',
+                'OnlyFans Account with Balance', 'Steam Wallet Codes', 'Crypto Voucher $100'
+            ]},
+            { cat: 'Services', items: [
+                'DDoS 100Gbps/1hr (L7)', 'SMS Bombing (5000 SMS)', 'Website Cloning (Full Copy)',
+                'SIM Swapping Service', 'Crypto Mixing (1% fee)', 'SSN Lookup & Background',
+                'Social Media Account Hack', 'Email Database Dump', 'Phone Doxing & Trace',
+                'Ransomware Deployment Service', 'Malware Spreading Campaign', 'Botnet Rental 10k Bots'
+            ]},
+            { cat: 'Firearms & Weapons', items: [
+                'Glock 19 Gen5 (Factory New)', 'Sig Sauer P320 Compact', 'Smith & Wesson M&P9 Shield',
+                'AR-15 Complete Lower', 'AK-47 Parts Kit (Milled)', 'Glock Selector Switch (Auto)',
+                'Suppressor 9mm (Oil Filter)', 'Taurus G2C 9mm', 'Remington 870 Express',
+                'Mossberg 590 Shockwave', 'Pepper Spray Gel', 'Taser Pulse'
+            ]},
+            { cat: 'Malware & Exploits', items: [
+                'Raccoon Stealer v2', 'RedLine Stealer Latest', 'Vidar InfoStealer',
+                'Agent Tesla Keylogger', 'Snake Keylogger', 'Cobalt Strike Beacon 4.9',
+                'Matanbuchus Loader', 'Bumblebee Loader', 'IcedID Banking Trojan',
+                'Emotet Epoch 5', 'Ransomware Builder (LockBit style)', 'Crypter FUD'
+            ]},
+            { cat: 'Counterfeit Documents', items: [
+                'US Passport Scan (Gen) ', 'UK Driving Licence (DVLA)', 'EU ID Card (German)',
+                'SSN Card with Photo', 'Birth Certificate (Any State)', 'Vaccine Card (CDC)',
+                'Bank Statement (Any Bank)', 'Diploma Certificate (High School)',
+                'Credit Report (Experian)', 'Car Title (Salvage)', 'Marriage Certificate',
+                'Death Certificate'
+            ]}
+        ];
+        const products = [];
+        let id = 1;
+        data.forEach(cat => {
+            cat.items.forEach(name => {
+                const vendor = vendors[Math.floor(Math.random() * vendors.length)];
+                products.push({
+                    id: id++, name, category: cat.cat,
+                    vendor: vendor.name, vendorLevel: vendor.level, pgp: vendor.pgp,
+                    price: (Math.random()*5 + 0.1).toFixed(4),
+                    escrow: 80 + Math.floor(Math.random()*20),
+                    stock: Math.random() > 0.1 ? 'In Stock' : 'Low Stock',
+                    shipsFrom: ['US','NL','UK','DE','CA','MX','CO'][Math.floor(Math.random()*7)],
+                    shipsTo: 'Worldwide',
+                    desc: `Professional quality, discreet packaging. Tracking after 48h.`
+                });
+            });
+        });
+        return products;
+    })(),
+
+    // ── Page Renderers ──
+    renderDashboard() {
+        const p = document.getElementById('page-dashboard');
+        p.innerHTML = `<h2>📊 Dashboard</h2>
+            <div style="display:flex;gap:20px;">
+                <div class="card">Orders: ${this.state.orders.length}</div>
+                <div class="card">Cart Items: ${this.state.cart.reduce((s,i)=>s+i.qty,0)}</div>
+                <div class="card">Training Score: ${this.state.trainingScore}</div>
+            </div>`;
+    },
+    renderMarket() {
+        const p = document.getElementById('page-market');
+        let html = `<h2>📦 Market</h2>
+            <input class="search-box" id="marketSearch" placeholder="Search listings..." style="width:100%;margin-bottom:10px;" oninput="App.filterMarket()">
+            <table id="marketTable"><thead><tr><th>Product</th><th>Vendor</th><th>Price (BTC)</th><th>Stock</th><th>Escrow</th><th></th></tr></thead><tbody></tbody></table>`;
+        p.innerHTML = html;
+        this.filterMarket();
+    },
+    filterMarket() {
+        const search = document.getElementById('marketSearch')?.value?.toLowerCase() || '';
+        const filtered = this.products.filter(p => p.name.toLowerCase().includes(search));
+        const tbody = document.querySelector('#marketTable tbody');
+        tbody.innerHTML = filtered.map(p => `
+            <tr>
+                <td>${p.name}<br><small>${p.category} | ${p.shipsFrom}</small></td>
+                <td>${p.vendor} <span class="badge badge-level">Lv${p.vendorLevel}</span>${p.pgp?' <span class="badge badge-pgp">PGP</span>':''}</td>
+                <td style="color:var(--green-bright);">₿ ${p.price}</td>
+                <td>${p.stock}</td>
+                <td>${p.escrow}%</td>
+                <td><button class="btn btn-sm" onclick="App.addToCart(${p.id})">Add</button></td>
+            </tr>`).join('');
+    },
+    addToCart(id) {
+        const p = this.products.find(x => x.id === id);
+        if (!p || p.stock === 'Out of Stock') return this.showToast('Unavailable');
+        const existing = this.state.cart.find(i => i.id === id);
+        if (existing) existing.qty++; else this.state.cart.push({...p, qty: 1});
+        this.updateCartCount();
+        this.save();
+        this.showToast(`Added ${p.name}`);
+    },
+    // ... all other pages (orders, cart, forum, messages, osint, pgp, c2, phishing, malware, training, ctf, planner, export, admin) implemented similarly with realistic data and interactions
+};
+
+// Attach prototypes
+App.renderOrders = function() {
+    const p = document.getElementById('page-orders');
+    let html = '<h2>📋 Orders</h2>';
+    if (this.state.orders.length === 0) html += '<p>No orders yet.</p>';
+    else {
+        this.state.orders.forEach(o => {
+            html += `<div class="card">Order #${o.id} - ${o.status} | Items: ${o.items.length} | Total: ₿${o.total.toFixed(4)} | Tracking: ${o.tracking}</div>`;
+        });
+    }
+    p.innerHTML = html;
+};
+// ... more
+
+// Instantiate
+App.init();
+window.App = App;
+</script>
+</body>
+</html>

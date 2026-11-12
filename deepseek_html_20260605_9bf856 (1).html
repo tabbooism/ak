@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StyxNet Omnibus — 2027 Underworld Exchange</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --surface: #0f0f0f;
+            --border: #2a2a2a;
+            --text: #cccccc;
+            --muted: #666666;
+            --link: #c9a40b;
+            --green: #4caf50;
+            --red: #c0392b;
+            --gold: #c9a40b;
+            --gold-light: #f1c40f;
+            --radius: 6px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg); color:var(--text);
+            font-family:'Courier New',monospace; font-size:13px; line-height:1.5;
+            background-image: radial-gradient(circle at 50% 0%,#1a1a1a 0%,#050505 80%);
+            background-attachment:fixed;
+        }
+        a { color:var(--link); text-decoration:none; } a:hover { text-decoration:underline; }
+        .container { max-width:1500px; margin:0 auto; padding:0 20px; }
+        header {
+            background:rgba(5,5,5,0.95); backdrop-filter:blur(10px);
+            border-bottom:1px solid #2a2a2a; padding:12px 0; margin-bottom:20px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.8);
+        }
+        .header-inner { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
+        .logo { font-size:28px; font-weight:bold; color:var(--gold-light); letter-spacing:2px; text-shadow:0 0 10px rgba(201,164,11,0.5); }
+        .logo span { color:var(--red); }
+        nav a { color:var(--muted); margin-left:16px; font-size:13px; font-weight:500; transition:color 0.3s; }
+        nav a.active { color:var(--gold-light); font-weight:bold; text-decoration:underline; }
+        .search-box { background:#000; border:1px solid #333; padding:6px 12px; color:var(--text); width:200px; margin:0 10px; border-radius:20px; }
+        .online-counter { color:var(--green); margin-left:15px; font-size:12px; }
+        .phishing-alert { background:#1e1414; border-bottom:1px solid #444; padding:6px 20px; font-size:12px; color:var(--red); text-align:center; }
+        .news-ticker { background:#0d0d0d; border:1px solid #222; padding:8px 15px; margin:15px 0; overflow:hidden; white-space:nowrap; border-radius:var(--radius); box-shadow:var(--shadow); }
+        .grid-2col { display:grid; grid-template-columns:230px 1fr; gap:20px; }
+        .sidebar { background:#0f0f0f; border:1px solid #222; padding:15px; border-radius:var(--radius); box-shadow:var(--shadow); }
+        .sidebar h4 { color:var(--gold); margin-bottom:8px; font-size:14px; letter-spacing:1px; }
+        .sidebar ul { list-style:none; } .sidebar li { padding:4px 0; } .sidebar li a { color:var(--muted); font-size:12px; } .sidebar li a:hover { color:var(--text); }
+        .main-content { min-height:700px; }
+        .page { display:none; } .page.active { display:block; }
+        table { width:100%; border-collapse:collapse; margin-top:10px; background:#0f0f0f; border:1px solid #222; box-shadow:var(--shadow); }
+        th,td { border:1px solid #222; padding:8px 10px; text-align:left; font-size:12px; }
+        th { background:#141414; color:var(--muted); font-weight:bold; text-transform:uppercase; letter-spacing:1px; }
+        tr:hover { background:rgba(201,164,11,0.06); }
+        .btn { background:linear-gradient(to bottom,#2a2a2a,#1a1a1a); border:1px solid #333; color:var(--text); padding:5px 14px; cursor:pointer; font-family:inherit; font-size:12px; border-radius:20px; transition:all 0.3s; }
+        .btn:hover { background:var(--gold); color:#000; border-color:var(--gold); }
+        .escrow-bar { background:#333; height:5px; margin:4px 0; width:80px; border-radius:3px; overflow:hidden; }
+        .escrow-fill { background:var(--green); height:100%; }
+        .pgp { color:var(--green); }
+        .vendor-level { color:var(--gold); }
+        .product-detail { background:#0f0f0f; border:1px solid #222; padding:20px; margin-top:15px; border-radius:var(--radius); box-shadow:var(--shadow); }
+        .review { border-bottom:1px solid #1a1a1a; padding:6px 0; font-size:12px; }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); align-items:center; justify-content:center; z-index:1000; }
+        .modal-content { background:#0f0f0f; border:1px solid #333; padding:25px; width:650px; max-width:90%; color:var(--text); max-height:85vh; overflow-y:auto; border-radius:8px; box-shadow:0 0 30px rgba(0,0,0,0.8); }
+        .timer { font-size:24px; color:var(--red); }
+        input,textarea,select { background:#000; border:1px solid #333; color:var(--text); padding:8px 12px; margin:6px 0; width:100%; font-family:inherit; font-size:12px; border-radius:4px; }
+        .forum-thread { background:#0f0f0f; border:1px solid #222; padding:10px; margin-bottom:6px; border-radius:var(--radius); cursor:pointer; transition:background 0.2s; }
+        .forum-thread:hover { background:#1a1a1a; } .forum-thread strong { color:var(--link); }
+        .chat-toggle { position:fixed; bottom:25px; right:25px; background:linear-gradient(to bottom,#2a2a2a,#1a1a1a); border:1px solid #333; padding:10px 20px; color:var(--text); cursor:pointer; z-index:999; border-radius:30px; box-shadow:var(--shadow); }
+        .chat-box { display:none; position:fixed; bottom:80px; right:25px; width:360px; background:#0f0f0f; border:1px solid #333; z-index:1001; border-radius:8px; box-shadow:0 0 20px rgba(0,0,0,0.7); }
+        .chat-header { background:#1a1a1a; padding:8px 12px; border-bottom:1px solid #222; }
+        .chat-msgs { height:200px; overflow-y:auto; padding:8px; font-size:12px; }
+        .chat-input-area { display:flex; border-top:1px solid #222; }
+        .chat-input-area input { flex:1; border:none; background:#000; padding:8px; }
+        .chat-input-area button { background:#333; border:none; color:var(--text); padding:8px 15px; cursor:pointer; }
+        .cart-row { display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:6px 0; }
+        .remove-btn { color:var(--red); cursor:pointer; margin-left:10px; }
+        .sticky-wallet { position:sticky; top:0; background:#0f0f0f; border-bottom:1px solid #222; padding:6px 20px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; z-index:100; box-shadow:var(--shadow); }
+        .sticky-wallet span { color:var(--green); }
+        .pgp-encryptor { background:#0f0f0f; border:1px solid #222; padding:20px; margin-top:15px; border-radius:var(--radius); }
+        .monero-widget { background:#0f0f0f; border:1px solid #222; padding:12px; margin:12px 0; display:flex; gap:10px; align-items:center; border-radius:var(--radius); }
+        .monero-widget input { width:80px; }
+        .pm-list { background:#0f0f0f; border:1px solid #222; padding:12px; border-radius:var(--radius); }
+        .pm-list .pm { border-bottom:1px solid #222; padding:5px; cursor:pointer; transition:background 0.2s; }
+        .pm-list .pm:hover { background:#1a1a1a; }
+        .admin-panel { display:none; }
+    </style>
+</head>
+<body>
+<div class="sticky-wallet"><span>BTC: 0.0024</span><span style="color:var(--muted);">User: Guest</span><span style="color:var(--muted);">2FA: Disabled</span></div>
+<div class="phishing-alert">⚠️ ALERT: Never share your mnemonic or private keys. Styx staff will never ask for your password or 2FA.</div>
+<div class="container">
+    <header>
+        <div class="header-inner">
+            <div class="logo">Styx<span>Omnibus</span></div>
+            <nav>
+                <a href="#market" class="active" onclick="showPage('market')">Market</a>
+                <a href="#cart" onclick="showPage('cart')">Cart (<span id="cartCount">0</span>)</a>
+                <a href="#forum" onclick="showPage('forum')">Forum</a>
+                <a href="#messages" onclick="showPage('messages')">Messages</a>
+                <a href="#generator" onclick="showPage('generator')">Narratives</a>
+                <a href="#persona-builder" onclick="showPage('persona-builder')">Persona AI</a>
+                <a href="#profile" onclick="showPage('profile')">Profile</a>
+                <a href="#disputes" onclick="showPage('disputes')">Disputes</a>
+                <a href="#support" onclick="showPage('support')">Support</a>
+                <a href="#vendor-apply" onclick="showPage('vendor-apply')">Vendor</a>
+            </nav>
+            <div><input class="search-box" placeholder="Search..." id="searchInput" oninput="filterProducts()"><span class="online-counter">Online: <span id="onlineCount">2,145</span></span></div>
+        </div>
+    </header>
+    <div class="news-ticker"><marquee behavior="scroll" direction="left">🚨 Monero swap fees reduced to 1% | OSRS gold bulk stock added | OnlyFans playbooks updated | Escrow mandatory — never FE | New vendor "NightQueen" for elite escorts</marquee></div>
+
+    <!-- MARKET PAGE -->
+    <div id="page-market" class="page active">
+        <div class="grid-2col">
+            <div class="sidebar"><h4>Categories</h4><ul id="categoryList"></ul></div>
+            <div class="main-content">
+                <div style="display:flex; justify-content:space-between; align-items:center;"><h2>Latest Listings</h2>
+                    <select id="sortSelect" onchange="renderMarket()"><option value="default">Sort: Default</option><option value="price-asc">Price: Low to High</option><option value="price-desc">Price: High to Low</option><option value="escrow">Highest Escrow</option></select>
+                </div>
+                <table id="productTable"><thead><tr><th>Product</th><th>Vendor</th><th>Price</th><th>Stock</th><th>Escrow</th><th></th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT DETAIL PAGE -->
+    <div id="page-product" class="page"><button class="btn" onclick="showPage('market')">← Back</button><div id="productDetailContainer" class="product-detail"></div></div>
+    <!-- VENDOR PROFILE PAGE -->
+    <div id="page-vendor" class="page"><button class="btn" onclick="showPage('market')">← Back</button><div id="vendorProfileContainer" class="product-detail"></div></div>
+    <!-- CART PAGE -->
+    <div id="page-cart" class="page"><h2>Your Cart</h2><div id="cartItems"><p>Cart is empty.</p></div><div id="cartTotal" style="margin-top:10px;"></div><button class="btn" id="checkoutBtn" style="display:none;" onclick="openCheckout()">Proceed to Checkout</button><div class="monero-widget"><span>Buy XMR with BTC:</span><input type="number" id="btcAmount" placeholder="BTC" oninput="calcXmr()"><span>=</span><input type="text" id="xmrAmount" placeholder="XMR" readonly><span>(0.023 XMR/BTC)</span><button class="btn" onclick="alert('Swap simulated.')">Swap</button></div></div>
+    <!-- FORUM PAGE -->
+    <div id="page-forum" class="page"><h2>Community Forum</h2><div id="forumThreads"></div><h3>New Thread</h3><form onsubmit="return false;"><input type="text" placeholder="Title" id="newThreadTitle"><textarea rows="3" placeholder="Your post..."></textarea><button class="btn" onclick="postThread()">Post</button></form></div>
+    <!-- MESSAGES PAGE -->
+    <div id="page-messages" class="page"><h2>Private Messages</h2><div class="pm-list" id="pmList"></div><div id="pmView" style="display:none; margin-top:15px;"><h3>Conversation with <span id="pmUser"></span></h3><div id="pmMessages" style="background:#0f0f0f; padding:10px; height:200px; overflow-y:auto; border:1px solid #222;"></div><input type="text" id="pmInput" placeholder="Reply..."><button class="btn" onclick="sendPM()">Send</button><button class="btn" onclick="document.getElementById('pmView').style.display='none'">Close</button></div></div>
+    <!-- PROFILE PAGE -->
+    <div id="page-profile" class="page"><h2>Your Account</h2><div style="background:#0f0f0f; padding:20px; border:1px solid #222; margin-bottom:20px; border-radius:var(--radius);"><h3>Wallet Balance</h3><div style="font-size:28px; color:var(--green);">$5,670.00</div><p style="color:var(--muted);">Available for withdrawal</p><button class="btn" id="withdrawBtn">Withdraw Funds</button><div id="withdrawSection" style="display:none; margin-top:15px; border-top:1px solid #222; padding-top:15px;"><p style="color:var(--red);">⚠️ Verification deposit required: 0.001 BTC</p><div style="background:#000; padding:10px;">bc1qve9r3x8h0fakeadrsn3s5wz2u3</div><button class="btn" id="confirmDeposit">I Have Sent Deposit</button></div></div><div style="background:#0f0f0f; padding:20px; border:1px solid #222; border-radius:var(--radius);"><h4>Recent Orders</h4><div id="orderHistory"></div></div></div>
+    <!-- DISPUTES PAGE -->
+    <div id="page-disputes" class="page"><h2>Dispute Resolution</h2><table><thead><tr><th>Dispute ID</th><th>Vendor</th><th>Buyer</th><th>Amount</th><th>Status</th></tr></thead><tbody id="disputesTableBody"></tbody></table><div style="margin-top:20px;"><h3>Open a New Dispute</h3><form onsubmit="return false;"><input type="text" placeholder="Order ID"><textarea rows="3" placeholder="Explain..."></textarea><button class="btn" onclick="alert('Dispute opened (sim).')">Submit</button></form></div></div>
+    <!-- SUPPORT PAGE -->
+    <div id="page-support" class="page"><h2>Support</h2><div style="background:#0f0f0f; padding:20px; border:1px solid #222; border-radius:var(--radius);"><h3>Message Admin</h3><textarea rows="4" placeholder="Your issue..."></textarea><button class="btn" style="margin-top:10px;">Send (PGP encrypted)</button><div style="margin-top:20px; font-size:12px; color:var(--muted);"><strong>Admin PGP Key:</strong><br>-----BEGIN PGP PUBLIC KEY BLOCK-----<br>mQINBGJ7...<br>-----END PGP PUBLIC KEY BLOCK-----</div><div class="pgp-encryptor"><h4>Encrypt Message (Simulated)</h4><textarea id="pgpInput" rows="3" placeholder="Message..."></textarea><button class="btn" onclick="simulatePgpEncrypt()">Encrypt</button><div id="pgpOutput" style="margin-top:10px; background:#000; padding:10px; display:none;"></div></div></div></div>
+    <!-- VENDOR APPLICATION PAGE -->
+    <div id="page-vendor-apply" class="page"><h2>Become a Vendor</h2><div style="background:#0f0f0f; padding:20px; border:1px solid #222; border-radius:var(--radius);"><p>Bond: 0.1 BTC. PGP required.</p><form onsubmit="return false;"><input type="text" placeholder="Vendor Name"><textarea rows="3" placeholder="PGP Public Key..."></textarea><button class="btn" onclick="alert('Application submitted (sim).')">Apply</button></form></div></div>
+    <!-- NARRATIVE GENERATOR PAGE -->
+    <div id="page-generator" class="page"><h2>Scam Script Generator</h2><div style="background:#0f0f0f; padding:20px; border:1px solid #222; border-radius:var(--radius);"><label>Scam Type:</label><select id="scamType"><option>Romance</option><option>OnlyFans Blackmail</option><option>Investment</option><option>Fake Job Offer</option><option>OSRS Gold Trust Trade</option><option>Ransomware Note</option></select><div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0;"><input type="text" id="targetName" placeholder="Target Name"><input type="text" id="targetAmount" placeholder="Amount (e.g. $500)"></div><textarea id="scriptOutput" rows="10" readonly style="background:#000;"></textarea><button class="btn" onclick="generateScript()">Generate</button></div></div>
+    <!-- PERSONA BUILDER PAGE -->
+    <div id="page-persona-builder" class="page"><h2>AI Persona Prompt Builder</h2><div style="background:#0f0f0f; padding:20px; border:1px solid #222; border-radius:var(--radius);"><label>Persona Name:</label><input type="text" id="personaName" placeholder="e.g. DarkAngel"><label>Role:</label><select id="personaRole"><option>Vendor</option><option>Buyer</option><option>Admin</option><option>Scam Artist</option><option>Hacker</option></select><label>Tone:</label><select id="personaTone"><option>Aggressive</option><option>Friendly</option><option>Professional</option><option>Mysterious</option></select><label>Special Instructions:</label><textarea id="personaInstructions" rows="3" placeholder="Additional traits..."></textarea><button class="btn" onclick="generatePersonaPrompt()">Generate Prompt</button><div style="margin-top:15px;"><strong>Generated Prompt:</strong><pre id="personaPromptOutput" style="background:#000; padding:10px; white-space:pre-wrap;"></pre></div></div></div>
+    <!-- ADMIN PANEL (hidden) -->
+    <div id="page-admin" class="page" style="display:none;"><h2>Administrator Panel</h2><div style="background:#0f0f0f; padding:20px; border:1px solid #222; border-radius:var(--radius);"><h3>Market Statistics</h3><table><tr><th>Active Users</th><td>2,145</td></tr><tr><th>Total BTC Volume</th><td>348.2 BTC</td></tr><tr><th>Pending Disputes</th><td>3</td></tr></table><h3>Recent Reports</h3><div id="adminReports"></div></div></div>
+
+    <!-- CHECKOUT MODAL -->
+    <div id="checkoutModal" class="modal"><div class="modal-content"><button onclick="closeCheckout()" style="float:right; background:none; border:none; color:var(--muted); font-size:24px;">&times;</button><h3>Order Checkout</h3><div id="checkoutItems"></div><div class="timer" id="checkoutTimer">15:00</div><p>Subtotal: <strong id="checkoutSubtotal"></strong></p><div><label>Voucher Code:</label><input type="text" id="voucherInput" oninput="applyVoucher()"><span id="discountInfo" style="font-size:12px; color:var(--green);"></span></div><p>Total: <strong id="checkoutTotal"></strong></p><p>Send exactly to:</p><div style="background:#000; padding:10px; word-break:break-all;" id="btcAddress">bc1q...</div><div id="fakeConfirmations" style="display:none; margin-top:10px;"><p style="color:var(--green);">Blockchain confirmations:</p><div id="confList"></div></div><button class="btn" onclick="simulatePayment()">I Have Paid</button></div></div>
+
+    <!-- CHAT WIDGET -->
+    <div class="chat-toggle" onclick="toggleChat()">💬 Support</div>
+    <div class="chat-box" id="chatBox"><div class="chat-header">Styx Support — <span id="chatPersona">Admin</span></div><div class="chat-msgs" id="chatMsgs"><p><strong>Admin:</strong> Welcome. How can I assist?</p></div><div class="chat-input-area"><input id="chatInput" placeholder="Type..."><button onclick="sendChat()">Send</button></div></div>
+</div>
+
+<script>
+// ==================== PRODUCT DATABASE ====================
+const products = [
+    // Stimulants
+    {id:1,name:"MDMA Crystals (3.5g)",vendor:"DutchDreams",price:0.042,escrow:98,pgp:true,cat:"stimulants",stock:"In Stock",desc:"Pure white crystal MDMA, lab tested 98%+. Stealth shipping worldwide.",reviews:[{u:"raveon",t:"NDD, stealth A+, product fire 🔥"},{u:"psychonaut",t:"Best quality on the market."}]},
+    {id:2,name:"Fishscale Cocaine (1g)",vendor:"ColombiaExpress",price:0.031,escrow:95,pgp:true,cat:"stimulants",stock:"In Stock",desc:"94% pure fishscale, no cuts. Vacuum sealed.",reviews:[{u:"snowman",t:"Straight fire! Stealth was insane."},{u:"blowking",t:"Cleanest coke I've had in years."}]},
+    {id:3,name:"Adderall 30mg (x10)",vendor:"PharmaKing",price:0.052,escrow:87,pgp:false,cat:"stimulants",stock:"In Stock",desc:"Instant release, pharmacy grade.",reviews:[{u:"studyhard",t:"Clean focus, fast delivery."}]},
+    // Opioids
+    {id:4,name:"Oxycodone 80mg (x5)",vendor:"PharmaKing",price:0.065,escrow:90,pgp:false,cat:"opioids",stock:"Limited",desc:"Pharma grade, original packaging.",reviews:[{u:"painfree",t:"Legit pharma, NDD."}]},
+    {id:5,name:"Heroin #4 (1g)",vendor:"AfghanKings",price:0.087,escrow:93,pgp:true,cat:"opioids",stock:"Limited",desc:"White powder, high purity.",reviews:[{u:"nodder",t:"Clean and strong."}]},
+    {id:6,name:"Fentanyl Patches (25mcg/h) x5",vendor:"DutchDreams",price:0.098,escrow:94,pgp:true,cat:"opioids",stock:"Limited",desc:"Original packaging, extended release.",reviews:[{u:"chronpain",t:"Legit pharmaceutical."}]},
+    // Psychedelics
+    {id:7,name:"LSD Blotter (10 tabs)",vendor:"PsychonautPrime",price:0.019,escrow:100,pgp:true,cat:"psychedelics",stock:"In Stock",desc:"250µg tabs, needlepoint crystal.",reviews:[{u:"alice",t:"Beautiful trip, clean visuals."},{u:"trippy",t:"Strong tabs, great stealth."}]},
+    {id:8,name:"DMT Crystals (500mg)",vendor:"PsychonautPrime",price:0.045,escrow:99,pgp:true,cat:"psychedelics",stock:"In Stock",desc:"Pure N,N-DMT, white crystals.",reviews:[{u:"traveler",t:"Breakthrough every time."}]},
+    {id:9,name:"Ketamine (1g)",vendor:"DutchDreams",price:0.038,escrow:96,pgp:true,cat:"psychedelics",stock:"In Stock",desc:"S-Isomer, pharmaceutical grade.",reviews:[{u:"keta",t:"High quality, great hole."}]},
+    // Cannabis
+    {id:10,name:"Amnesia Haze (5g)",vendor:"GreenThumbCo",price:0.023,escrow:97,pgp:true,cat:"cannabis",stock:"In Stock",desc:"Top-shelf sativa, vacuum sealed.",reviews:[{u:"ganjaman",t:"Very potent, great smell."}]},
+    {id:11,name:"Cannabis Oil Cartridge (1ml)",vendor:"GreenThumbCo",price:0.028,escrow:95,pgp:true,cat:"cannabis",stock:"In Stock",desc:"90% THC, discreet shipping.",reviews:[{u:"dabber",t:"Potent and smooth."}]},
+    // Benzos
+    {id:12,name:"Xanax Bars (20x 2mg)",vendor:"BenzosRUs",price:0.018,escrow:85,pgp:false,cat:"benzos",stock:"In Stock",desc:"Professionally pressed, accurate dosage.",reviews:[{u:"chillpill",t:"Good quality, decent press."}]},
+    {id:13,name:"Viagra 100mg (x10)",vendor:"PharmaKing",price:0.025,escrow:89,pgp:false,cat:"benzos",stock:"In Stock",desc:"Generic sildenafil, discreet packaging.",reviews:[{u:"hardman",t:"Works like a charm."}]},
+    // Guns
+    {id:14,name:"Glock 19 Gen5 (9mm)",vendor:"BlackMarketArms",price:0.82,escrow:92,pgp:true,cat:"guns",stock:"In Stock",desc:"Brand new, serial numbers removed. Includes two magazines.",reviews:[{u:"gunner",t:"Clean piece, fast shipping."}]},
+    {id:15,name:"AR-15 Rifle Kit",vendor:"PatriotSupply",price:1.45,escrow:96,pgp:true,cat:"guns",stock:"Low Stock",desc:"Complete lower parts kit, barrel, stock. Requires assembly.",reviews:[{u:"rifleman",t:"Perfect kit, well packaged."}]},
+    {id:16,name:"Desert Eagle .50 AE",vendor:"PatriotSupply",price:1.2,escrow:93,pgp:true,cat:"guns",stock:"In Stock",desc:"Black finish, one magazine included.",reviews:[{u:"bigiron",t:"Massive firepower, great condition."}]},
+    // Counterfeit Docs
+    {id:17,name:"Fake ID (USA)",vendor:"DocFactory",price:0.18,escrow:96,pgp:true,cat:"counterfeit",stock:"In Stock",desc:"High-quality scannable US driver's license.",reviews:[{u:"anon123",t:"Looks perfect."}]},
+    {id:18,name:"Counterfeit Euro Bills (€5000 bundle)",vendor:"DocFactory",price:0.65,escrow:94,pgp:true,cat:"counterfeit",stock:"In Stock",desc:"High-quality, UV-passing.",reviews:[{u:"traveler",t:"Passed the pen test."}]},
+    {id:19,name:"Fake UK Passport",vendor:"DocFactory",price:0.45,escrow:97,pgp:true,cat:"counterfeit",stock:"In Stock",desc:"Biometric chip included, scannable.",reviews:[{u:"jetsetter",t:"Worked for travel."}]},
+    // Stolen Accounts / Carding
+    {id:20,name:"Cloned Credit Card (Platinum)",vendor:"CardMaster",price:0.32,escrow:92,pgp:true,cat:"electronics",stock:"In Stock",desc:"Balance $2k-$5k, shipped worldwide.",reviews:[{u:"swiper",t:"Worked at ATM, balance confirmed."}]},
+    {id:21,name:"Stolen PayPal Account (Balance $1k)",vendor:"CardMaster",price:0.12,escrow:89,pgp:true,cat:"electronics",stock:"In Stock",desc:"With email access, verified.",reviews:[{u:"cashout",t:"Transferred successfully."}]},
+    // Digital Goods / Scam Playbooks
+    {id:22,name:"OnlyFans Blackmail Playbook",vendor:"David Mitchell",price:0.035,escrow:88,pgp:false,cat:"digital",stock:"In Stock",desc:"Step-by-step guide, scripts, opsec.",reviews:[{u:"lonelyheart",t:"Profitable."}]},
+    {id:23,name:"Romance Scam Full Script Pack",vendor:"David Mitchell",price:0.025,escrow:87,pgp:false,cat:"digital",stock:"In Stock",desc:"Voice training, psychological profiles.",reviews:[{u:"smooth",t:"Incredibly effective."}]},
+    // OSRS Gold / Accounts
+    {id:24,name:"OSRS Gold (100M)",vendor:"GoldVault",price:0.035,escrow:95,pgp:true,cat:"osrs",stock:"In Stock",desc:"Instant delivery, no ban.",reviews:[{u:"pker",t:"Fast trade, legit."}]},
+    {id:25,name:"OSRS Maxed Main Account",vendor:"GoldVault",price:0.45,escrow:96,pgp:true,cat:"osrs",stock:"In Stock",desc:"2277 total, infernal cape.",reviews:[{u:"maxer",t:"Exactly as described."}]},
+    // Escort Services
+    {id:26,name:"VIP Escort — New York",vendor:"NightQueen",price:0.15,escrow:90,pgp:false,cat:"escort",stock:"Available",desc:"Discreet, upscale.",reviews:[{u:"gentleman",t:"Professional and beautiful."}]},
+    {id:27,name:"Premium Companion — London",vendor:"NightQueen",price:0.12,escrow:92,pgp:false,cat:"escort",stock:"Available",desc:"High class, verified.",reviews:[{u:"jetset",t:"Unforgettable."}]},
+    // Exploit Kits (inert descriptions only)
+    {id:28,name:"Zero-day Exploit (RCE) — Windows",vendor:"Phantom",price:4.5,escrow:99,pgp:true,cat:"exploit",stock:"In Stock",desc:"Unpatched, full chain, Metasploit module. (Simulated)",reviews:[{u:"redteam",t:"Worked perfectly."}]},
+    {id:29,name:"Phishing Kit — Bank of America",vendor:"Phantom",price:0.8,escrow:96,pgp:true,cat:"exploit",stock:"In Stock",desc:"Clone with OTP capture. (Simulated)",reviews:[{u:"phisher",t:"High conversion."}]},
+    // Bulk
+    {id:30,name:"1kg Cocaine Brick",vendor:"ColombiaExpress",price:2.4,escrow:94,pgp:true,cat:"bulk",stock:"Limited",desc:"Uncut, direct from source. Vacuum sealed.",reviews:[{u:"wholesale",t:"Best bulk purchase ever, pure profit."}]},
+    {id:31,name:"Bulk Cannabis (1kg)",vendor:"GreenThumbCo",price:1.1,escrow:96,pgp:true,cat:"bulk",stock:"In Stock",desc:"Mixed strains, vacuum packed.",reviews:[{u:"distributor",t:"Great wholesale."}]},
+    // Additional to fill 40+
+    {id:32,name:"Methamphetamine (1g)",vendor:"DutchDreams",price:0.055,escrow:94,pgp:true,cat:"stimulants",stock:"In Stock",desc:"Crystal, high purity.",reviews:[{u:"crank",t:"Intense and clean."}]},
+    {id:33,name:"Hashish (5g)",vendor:"GreenThumbCo",price:0.028,escrow:95,pgp:true,cat:"cannabis",stock:"In Stock",desc:"Moroccan blonde, pressed.",reviews:[{u:"hashlover",t:"Smooth and strong."}]},
+    {id:34,name:"Dilaudid 8mg (x10)",vendor:"PharmaKing",price:0.088,escrow:91,pgp:false,cat:"opioids",stock:"In Stock",desc:"Hydromorphone, pharmacy.",reviews:[{u:"chronic",t:"Effective."}]},
+    {id:35,name:"Suboxone Strips (8mg) x10",vendor:"PharmaKing",price:0.042,escrow:89,pgp:false,cat:"opioids",stock:"In Stock",desc:"Generic, sealed.",reviews:[]},
+    {id:36,name:"SIG Sauer P226",vendor:"BlackMarketArms",price:0.9,escrow:94,pgp:true,cat:"guns",stock:"In Stock",desc:"9mm, Navy model.",reviews:[{u:"sigfan",t:"Excellent condition."}]},
+    {id:37,name:"Fake Passport (Canada)",vendor:"DocFactory",price:0.42,escrow:97,pgp:true,cat:"counterfeit",stock:"In Stock",desc:"Biometric, scannable.",reviews:[]},
+    {id:38,name:"Stolen Uber Account (Balance $500)",vendor:"CardMaster",price:0.06,escrow:88,pgp:true,cat:"electronics",stock:"In Stock",desc:"Login credentials.",reviews:[]},
+    {id:39,name:"OSRS Gold (500M)",vendor:"GoldVault",price:0.17,escrow:97,pgp:true,cat:"osrs",stock:"In Stock",desc:"Bulk discount available.",reviews:[{u:"flipper",t:"Fast and cheap."}]},
+    {id:40,name:"Elite Escort — Dubai",vendor:"NightQueen",price:0.25,escrow:93,pgp:false,cat:"escort",stock:"Available",desc:"VIP experience.",reviews:[]}
+];
+
+// Categories
+const categories = ["all","stimulants","opioids","psychedelics","cannabis","benzos","guns","counterfeit","electronics","digital","osrs","escort","exploit","bulk"];
+function renderSidebar(){
+    const list = document.getElementById('categoryList');
+    list.innerHTML = categories.map(c=>`<li><a href="#" onclick="filterCategory('${c}')">${c.charAt(0).toUpperCase()+c.slice(1)}</a></li>`).join('');
+}
+renderSidebar();
+
+// Vendors with bios
+const vendorBios = {
+    "DutchDreams":"Viktor Kane: NDD, stealth that could fool a K9, product always tested. No FE ever. If you got a problem, dispute it. I'm here to stay.",
+    "ColombiaExpress":"Direct from source. Only the purest fishscale. Multi‑sig escrow optional. Ask about bulk discounts.",
+    "PsychonautPrime":"Pharmaceutical grade psychedelics. Every batch GC/MS tested. I trip on my own supply — that's my guarantee.",
+    "PharmaKing":"Legit pharma only. No presses, no cuts. NDD within EU.",
+    "GreenThumbCo":"Organically grown, properly cured. I treat this plant with respect.",
+    "BenzosRUs":"Bulk presser. Consistent dosage, professional dies. Reseller packs available.",
+    "BlackMarketArms":"Clean pieces, no serials. Shipped disassembled. Know your local laws.",
+    "PatriotSupply":"Military‑grade hardware. Build your own. All parts mill‑spec.",
+    "DocFactory":"High‑quality counterfeits. UV, holograms, microprint. We replicate the unreplicable.",
+    "CardMaster":"Cloned cards, PayPal logs, fullz. Track 1/2 included. High validity rate.",
+    "ElectroDrops":"Stolen electronics, direct from warehouse. Sealed, unlocked. Fast shipping.",
+    "BullionVault":"Physical gold and silver. Assay certificates included. Money is a promise, gold is real.",
+    "AfghanKings":"#4 from the source. Stealth is our specialty.",
+    "Phantom":"I write exploits. If it has code, I can break it. 0‑days, custom malware, red team tools. PGP only. No exceptions.",
+    "Marcus Webb":"Former SEC regulator. I know every loophole. Let me protect your assets from the system I used to enforce.",
+    "David Mitchell":"I understand loneliness. I've been there. My playbook helps you find connection — and financial support. It's not manipulation, it's empathy.",
+    "NightQueen":"Elite discretion. Verified companions worldwide. Your privacy is absolute.",
+    "GoldVault":"OSRS gold & accounts. Instant delivery, 0 bans. Bulk prices for resellers."
+};
+
+// Build vendor objects
+const vendors = {};
+products.forEach(p => {
+    if (!vendors[p.vendor]) {
+        vendors[p.vendor] = {
+            name: p.vendor,
+            level: p.vendorLevel || 4,
+            pgp: p.pgp,
+            feedback: [],
+            bio: vendorBios[p.vendor] || "Trusted vendor.",
+            pgpKey: `-----BEGIN PGP PUBLIC KEY BLOCK-----\n... (simulated key for ${p.vendor})\n-----END PGP PUBLIC KEY BLOCK-----`
+        };
+    }
+    vendors[p.vendor].feedback.push(...p.reviews);
+});
+
+// State
+let currentFilter = 'all';
+let cart = [];
+let currentCheckoutTotal = 0;
+let appliedDiscount = 0;
+let checkoutTimerInterval;
+let pmConversation = {};
+let currentChatPersona = 'Admin';
+
+// ==================== MARKET ====================
+function renderMarket(filter = 'all', search = '') {
+    const tbody = document.querySelector('#productTable tbody');
+    tbody.innerHTML = '';
+    let filtered = products.filter(p => (filter === 'all' || p.cat === filter) && (!search || p.name.toLowerCase().includes(search.toLowerCase())));
+    const sortBy = document.getElementById('sortSelect')?.value;
+    if (sortBy === 'price-asc') filtered.sort((a,b) => a.price - b.price);
+    else if (sortBy === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+    else if (sortBy === 'escrow') filtered.sort((a,b) => b.escrow - a.escrow);
+    filtered.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><a href="#" onclick="showProduct(${p.id})">${p.name}</a></td>
+            <td><a href="#" onclick="showVendor('${p.vendor}')">${p.vendor}</a> ${p.pgp?'<span class="pgp">PGP</span>':''}</td>
+            <td>${p.price.toFixed(3)} BTC</td>
+            <td>${p.stock}</td>
+            <td><div class="escrow-bar"><div class="escrow-fill" style="width:${p.escrow}%"></div></div></td>
+            <td><button class="btn" onclick="event.stopPropagation(); addToCart(${p.id})">Buy</button></td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function filterCategory(cat) {
+    currentFilter = cat;
+    document.getElementById('searchInput').value = '';
+    renderMarket(cat);
+}
+function filterProducts() {
+    renderMarket(currentFilter, document.getElementById('searchInput').value);
+}
+
+// ==================== PRODUCT / VENDOR ====================
+function showProduct(id) {
+    const p = products.find(x => x.id === id);
+    const container = document.getElementById('productDetailContainer');
+    container.innerHTML = `
+        <h2>${p.name}</h2>
+        <p>Vendor: <a href="#" onclick="showVendor('${p.vendor}')">${p.vendor}</a> ${p.pgp?'<span class="pgp">PGP Verified</span>':''}</p>
+        <div class="escrow-bar" style="width:160px;"><div class="escrow-fill" style="width:${p.escrow}%"></div></div>
+        <p style="font-size:20px; color:var(--gold);">${p.price.toFixed(3)} BTC</p>
+        <p>${p.desc}</p>
+        <button class="btn" onclick="addToCart(${p.id})">Add to Cart</button>
+        <h4>Reviews</h4>
+        ${p.reviews.length ? p.reviews.map(r => `<div class="review"><strong>${r.u}</strong>: ${r.t}</div>`).join('') : '<p>No reviews yet.</p>'}
+    `;
+    showPage('product');
+}
+
+function showVendor(name) {
+    const v = vendors[name];
+    if (!v) return;
+    const container = document.getElementById('vendorProfileContainer');
+    container.innerHTML = `
+        <h2>${v.name}</h2>
+        <p>Level: ${v.level} | ${v.pgp ? '<span class="pgp">PGP Verified</span>' : 'No PGP'}</p>
+        <h4>Bio</h4><p>${v.bio}</p>
+        <h4>PGP Key</h4>
+        <pre style="background:#000; padding:8px; font-size:11px; overflow-x:auto;">${v.pgpKey}</pre>
+        <h4>Recent Feedback</h4>
+        ${v.feedback.length ? v.feedback.slice(0,10).map(r => `<div class="review"><strong>${r.u}</strong>: ${r.t}</div>`).join('') : '<p>No feedback yet.</p>'}
+    `;
+    showPage('vendor');
+}
+
+// ==================== CART ====================
+function addToCart(id) {
+    const existing = cart.find(i => i.id === id);
+    if (existing) existing.qty++;
+    else {
+        const prod = products.find(x => x.id === id);
+        cart.push({...prod, qty: 1});
+    }
+    updateCartUI();
+    alert('Added to cart.');
+}
+function removeFromCart(id) {
+    cart = cart.filter(i => i.id !== id);
+    updateCartUI();
+}
+function updateCartUI() {
+    const count = cart.reduce((s, i) => s + i.qty, 0);
+    document.getElementById('cartCount').textContent = count;
+    const items = document.getElementById('cartItems');
+    const btn = document.getElementById('checkoutBtn');
+    if (cart.length === 0) {
+        items.innerHTML = '<p>Cart is empty.</p>';
+        btn.style.display = 'none';
+        document.getElementById('cartTotal').innerHTML = '';
+        return;
+    }
+    btn.style.display = 'inline-block';
+    let html = '', total = 0;
+    cart.forEach(i => {
+        const lt = i.price * i.qty;
+        total += lt;
+        html += `<div class="cart-row"><span>${i.name} x${i.qty}</span><span>${lt.toFixed(3)} BTC <span class="remove-btn" onclick="removeFromCart(${i.id})">[X]</span></span></div>`;
+    });
+    items.innerHTML = html;
+    document.getElementById('cartTotal').innerHTML = `<strong>Total: ${total.toFixed(3)} BTC</strong>`;
+}
+
+// ==================== MONERO SWAP ====================
+function calcXmr() {
+    const btc = parseFloat(document.getElementById('btcAmount').value) || 0;
+    document.getElementById('xmrAmount').value = (btc * 0.023).toFixed(4);
+}
+
+// ==================== CHECKOUT ====================
+function openCheckout() {
+    if (cart.length === 0) return;
+    const subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+    currentCheckoutTotal = subtotal;
+    appliedDiscount = 0;
+    document.getElementById('voucherInput').value = '';
+    document.getElementById('discountInfo').innerText = '';
+    document.getElementById('checkoutSubtotal').innerText = subtotal.toFixed(3) + ' BTC';
+    updateCheckoutTotal();
+    document.getElementById('btcAddress').innerText = 'bc1q' + Math.random().toString(36).substr(2,12);
+    document.getElementById('checkoutModal').style.display = 'flex';
+    startCheckoutTimer();
+}
+function closeCheckout() {
+    document.getElementById('checkoutModal').style.display = 'none';
+    clearInterval(checkoutTimerInterval);
+}
+function startCheckoutTimer() {
+    let sec = 900;
+    const el = document.getElementById('checkoutTimer');
+    clearInterval(checkoutTimerInterval);
+    checkoutTimerInterval = setInterval(() => {
+        sec--;
+        if (sec < 0) {
+            el.innerText = 'EXPIRED';
+            clearInterval(checkoutTimerInterval);
+        } else {
+            const m = Math.floor(sec/60), s = sec % 60;
+            el.innerText = `${m}:${s.toString().padStart(2,'0')}`;
+        }
+    }, 1000);
+}
+function applyVoucher() {
+    const code = document.getElementById('voucherInput').value.trim().toUpperCase();
+    const voucherCodes = { 'WELCOME5':0.05, 'STYX10':0.1, 'BULK15':0.15 };
+    appliedDiscount = voucherCodes[code] || 0;
+    const discInfo = document.getElementById('discountInfo');
+    discInfo.innerText = appliedDiscount ? `Discount ${(appliedDiscount*100).toFixed(0)}% applied!` : 'Invalid code';
+    updateCheckoutTotal();
+}
+function updateCheckoutTotal() {
+    const total = currentCheckoutTotal * (1 - appliedDiscount);
+    document.getElementById('checkoutTotal').innerText = total.toFixed(3) + ' BTC';
+}
+function simulatePayment() {
+    document.getElementById('fakeConfirmations').style.display = 'block';
+    const confList = document.getElementById('confList');
+    confList.innerHTML = '';
+    let count = 0;
+    const tx = '0x' + Math.random().toString(16).substr(2,12);
+    const intv = setInterval(() => {
+        count++;
+        confList.innerHTML += `<div>✅ Confirmation ${count}/6 — ${tx}...</div>`;
+        if (count >= 6) {
+            clearInterval(intv);
+            alert('Payment simulated. Order placed.');
+            cart = [];
+            updateCartUI();
+            closeCheckout();
+        }
+    }, 1500);
+}
+
+// ==================== PROFILE / WITHDRAWAL SCAM ====================
+document.getElementById('withdrawBtn').addEventListener('click', function() {
+    document.getElementById('withdrawSection').style.display = 'block';
+    this.style.display = 'none';
+});
+document.getElementById('confirmDeposit').addEventListener('click', function() {
+    alert('Deposit simulated. Scam complete.');
+    document.getElementById('withdrawSection').innerHTML = '<p style="color:var(--red);">Deposit confirmed. Withdrawal will be processed within 24h.</p>';
+});
+// Order history
+(function() {
+    const orders = [
+        {product:"MDMA 3.5g", status:"Completed"},
+        {product:"Cocaine 1g", status:"Escrow"},
+        {product:"Glock 19", status:"Processing"}
+    ];
+    const container = document.getElementById('orderHistory');
+    container.innerHTML = orders.map(o => `<div style="display:flex; justify-content:space-between; border-bottom:1px solid #222; padding:6px 0;"><span>${o.product}</span><span>${o.status}</span></div>`).join('');
+})();
+
+// ==================== DISPUTES ====================
+(function() {
+    const disputes = [
+        {id:"#1245", vendor:"ColombiaExpress", buyer:"snowman", amount:"0.031 BTC", status:"Resolved"},
+        {id:"#1246", vendor:"BenzosRUs", buyer:"chillpill", amount:"0.018 BTC", status:"Under Review"}
+    ];
+    const tbody = document.getElementById('disputesTableBody');
+    tbody.innerHTML = disputes.map(d => `<tr><td>${d.id}</td><td>${d.vendor}</td><td>${d.buyer}</td><td>${d.amount}</td><td>${d.status}</td></tr>`).join('');
+})();
+
+// ==================== FORUM ====================
+const forumData = [
+    {title:"OPSEC for Newbies", replies:2400, author:"Admin", posts:[
+        {user:"Admin", txt:"Always use Tails and PGP. Never FE."},
+        {user:"Phantom", txt:"And don't forget about XMR for privacy."}
+    ]},
+    {title:"Best OSRS gold seller?", replies:340, author:"pker123", posts:[
+        {user:"GoldVault", txt:"We offer bulk discounts and instant delivery."}
+    ]},
+    {title:"OnlyFans blackmail — any tips?", replies:189, author:"lonelyheart", posts:[
+        {user:"David Mitchell", txt:"My playbook has a whole section on this. Psychology is key."}
+    ]}
+];
+function renderForum() {
+    const container = document.getElementById('forumThreads');
+    container.innerHTML = forumData.map(t => `
+        <div class="forum-thread" onclick="toggleThread(this)">
+            <strong>${t.title}</strong> — ${t.replies} replies <span style="float:right;">by ${t.author}</span>
+            <div class="thread-replies" style="display:none; margin-top:8px; padding-left:20px;">
+                ${t.posts.map(p => `<div class="review"><strong>${p.user}:</strong> ${p.txt}</div>`).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+function toggleThread(el) {
+    const replies = el.querySelector('.thread-replies');
+    if (replies) replies.style.display = replies.style.display === 'none' ? 'block' : 'none';
+}
+function postThread() {
+    const title = document.getElementById('newThreadTitle').value.trim();
+    if (!title) return;
+    forumData.push({title, replies:0, author:"Guest", posts:[]});
+    renderForum();
+    alert('Thread posted (simulated).');
+}
+
+// ==================== MESSAGES ====================
+function renderPMList() {
+    const list = document.getElementById('pmList');
+    list.innerHTML = `
+        <div class="pm" onclick="openPM('Admin','Welcome to Styx. Please read the OPSEC guide.')"><strong>Admin</strong> - Welcome...</div>
+        <div class="pm" onclick="openPM('GoldVault','Your OSRS gold delivery is ready. Please confirm trade.')"><strong>GoldVault</strong> - Delivery</div>
+        <div class="pm" onclick="openPM('Viktor Kane','Heard you were looking for bulk. Hit me up, I can do 10% off.')"><strong>Viktor Kane</strong> - Bulk deal</div>
+    `;
+}
+function openPM(user, initialMsg) {
+    pmConversation = { user, messages: [{from:user, text:initialMsg}] };
+    document.getElementById('pmUser').innerText = user;
+    renderPMMessages();
+    document.getElementById('pmView').style.display = 'block';
+}
+function renderPMMessages() {
+    const el = document.getElementById('pmMessages');
+    el.innerHTML = pmConversation.messages.map(m => `<p><strong>${m.from}:</strong> ${m.text}</p>`).join('');
+    el.scrollTop = el.scrollHeight;
+}
+function sendPM() {
+    const inp = document.getElementById('pmInput');
+    const txt = inp.value.trim();
+    if (!txt) return;
+    pmConversation.messages.push({from:'You', text:txt});
+    renderPMMessages();
+    inp.value = '';
+    setTimeout(() => {
+        pmConversation.messages.push({from:pmConversation.user, text:'Thank you for your message.'});
+        renderPMMessages();
+    }, 600);
+}
+
+// ==================== NARRATIVE GENERATOR ====================
+function generateScript() {
+    const type = document.getElementById('scamType').value;
+    const name = document.getElementById('targetName').value || '[Name]';
+    const amount = document.getElementById('targetAmount').value || '[Amount]';
+    let script = '';
+    switch(type) {
+        case 'Romance':
+            script = `Hi ${name},\nI know this is sudden but I feel a real connection... I need your help, just ${amount} for a plane ticket to meet you. Can you send it via Bitcoin?`;
+            break;
+        case 'OnlyFans Blackmail':
+            script = `We have access to your webcam. Pay ${amount} in BTC to the following address, or the video goes to all your social media contacts.`;
+            break;
+        case 'Investment':
+            script = `Dear ${name},\nI have an exclusive opportunity to multiply your money. Invest ${amount} and get 10x returns in 48 hours. Limited spots!`;
+            break;
+        case 'Fake Job Offer':
+            script = `Congratulations ${name}, you've been selected for a remote job. To process your documents, please send ${amount} as a refundable deposit.`;
+            break;
+        case 'OSRS Gold Trust Trade':
+            script = `Hey ${name}, I'll give you a great deal on 100M. Trade me your ${amount} and I'll double it — I'm quitting the game.`;
+            break;
+        case 'Ransomware Note':
+            script = `Your files are encrypted. Send ${amount} in XMR to the address below within 72 hours. Do not contact police.`;
+            break;
+    }
+    document.getElementById('scriptOutput').value = script;
+}
+
+// ==================== PERSONA BUILDER ====================
+function generatePersonaPrompt() {
+    const name = document.getElementById('personaName').value || 'CustomPersona';
+    const role = document.getElementById('personaRole').value;
+    const tone = document.getElementById('personaTone').value;
+    const instructions = document.getElementById('personaInstructions').value || '';
+    const prompt = `You are ${name}, a ${tone} ${role} on a darknet marketplace. ${instructions} Always speak in first person, use darknet slang, and maintain your ${tone} tone. Respond to users accordingly.`;
+    document.getElementById('personaPromptOutput').innerText = prompt;
+}
+
+// ==================== CHAT (PERSONA ROTATION) ====================
+const personas = {
+    Admin: { name:"Admin", responses:["I will look into this immediately. Please do not FE under any circumstances.","The PGP signature on that message is valid. You can trust it.","I've been running this market since 2018. We don't exit scam.","Your dispute will be reviewed within 12 hours. Patience."] },
+    Luna: { name:"Luna", responses:["Hi there! 😊 I'm here to help you with anything you need. Don't worry, we're all friends here!","Let me check that for you. It's probably just a small delay — the network has been a bit slow today.","You can trust me! If you have any doubts, just look at our trust score. 4.98! 🎉"] },
+    Phantom: { name:"Phantom", responses:["The vulnerability you're describing is a classic race condition in the multisig implementation. I'd patch it by...","Use XMR, not BTC, if you want actual privacy. BTC is a surveillance chain.","My 0‑days are not cheap, but they work. I include a full write‑up with every sale."] },
+    ViktorKane: { name:"Viktor Kane", responses:["NDD, stealth that could fool a K9. No FE ever.","Product tested, always on point.","You got a problem? Dispute it. I don't play games."] }
+};
+
+function toggleChat() {
+    const box = document.getElementById('chatBox');
+    box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    const keys = Object.keys(personas);
+    currentChatPersona = keys[Math.floor(Math.random() * keys.length)];
+    document.getElementById('chatPersona').innerText = currentChatPersona;
+    document.getElementById('chatMsgs').innerHTML = `<p><strong>${currentChatPersona}:</strong> ${personas[currentChatPersona].responses[0]}</p>`;
+}
+function sendChat() {
+    const inp = document.getElementById('chatInput');
+    const msg = inp.value.trim();
+    if (!msg) return;
+    const msgs = document.getElementById('chatMsgs');
+    msgs.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
+    inp.value = '';
+    setTimeout(() => {
+        const persona = personas[currentChatPersona];
+        const reply = persona.responses[Math.floor(Math.random() * persona.responses.length)];
+        msgs.innerHTML += `<p><strong>${currentChatPersona}:</strong> ${reply}</p>`;
+        msgs.scrollTop = msgs.scrollHeight;
+    }, 800);
+}
+
+// ==================== ADMIN PANEL ====================
+function checkAdminKey() {
+    const key = prompt("Enter admin key:");
+    if (key === "Sheba") {
+        document.getElementById('page-admin').style.display = 'block';
+        showPage('admin');
+        // populate reports
+        document.getElementById('adminReports').innerHTML = `
+            <div class="review"><strong>Report #1:</strong> Vendor dispute — under review.</div>
+            <div class="review"><strong>Report #2:</strong> Suspicious login from Germany.</div>
+        `;
+    } else {
+        alert('Access denied.');
+    }
+}
+// Add admin link in support page
+(function() {
+    const pgpSection = document.querySelector('#page-support .pgp-encryptor');
+    const adminLink = document.createElement('p');
+    adminLink.innerHTML = '<a href="#" onclick="checkAdminKey()" style="color:var(--red);">[Admin Access]</a>';
+    pgpSection.appendChild(adminLink);
+})();
+
+// ==================== PAGE NAVIGATION ====================
+function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    const navLink = document.querySelector(`nav a[href="#${page}"]`);
+    if (navLink) navLink.classList.add('active');
+    if (page === 'market') renderMarket(currentFilter, document.getElementById('searchInput').value);
+    if (page === 'cart') updateCartUI();
+    if (page === 'forum') renderForum();
+    if (page === 'messages') renderPMList();
+}
+
+// ==================== INIT ====================
+renderMarket();
+renderForum();
+renderPMList();
+setInterval(() => {
+    const el = document.getElementById('onlineCount');
+    let v = parseInt(el.innerText.replace(',','')) || 2145;
+    v += Math.floor(Math.random() * 20) - 10;
+    el.innerText = Math.max(1800, Math.min(2500, v)).toLocaleString();
+}, 7000);
+</script>
+</body>
+</html>
